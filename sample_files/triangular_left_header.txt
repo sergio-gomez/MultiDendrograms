@@ -1,0 +1,4 @@
+Alice 0
+Bob 1 0
+Carol 2 1 0
+Dave 4 3 2 0

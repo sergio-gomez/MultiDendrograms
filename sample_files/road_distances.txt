@@ -1,0 +1,5 @@
+Barcelona	0 	639 	606 	1181 	364
+Madrid 		639 	0 	474 	542 	355
+San_Sebastian	606	474 	0 	908 	597
+Sevilla		1181	542 	908 	0 	679
+Valencia	364 	355 	597 	679 	0

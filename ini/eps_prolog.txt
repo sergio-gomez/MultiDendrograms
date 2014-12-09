@@ -1,0 +1,292 @@
+%% BeginProlog
+
+% Begin definitions summary
+%   Variables
+%     n: Natural
+%     x*, y*, dx, dy, r, a: Float
+%     rr, gg, bb, ww: Float range 0.0..1.0
+%     ff: AnyFontName
+%     fn: FontNameAbreviation(Cour, Helv, Helvn, Tim, Sym)
+%     str: String_Without_Quotation_Marks
+%   Functions and their usage
+%     SetLineWidth: r slw
+%     SetDashPattern: x1 x2 ... xn n sdp
+%     SetRGBColor: rr gg bb c
+%     SetGray: ww g
+%     Stroke: s
+%     MoveTo: x y m
+%     LineTo: x y l
+%     RMoveTo: dx dy rm
+%     RLineTo: dx dy rl
+%     DupDup: x y dup2  ->  x y x y
+%     DupDupDup: x y z dup3  ->  x y z x y z
+%     VectorSubstract: x1 y1 x2 y2 vsub  ->  x2-x1 y2-y1
+%     Circle    : x y r dci
+%     = (filled): x y r fci
+%     = (opaque): x y r oci
+%     Square    : x y r dsq
+%     = (filled): x y r fsq
+%     = (opaque): x y r osq
+%     Triangle N: x y r dtn
+%     = (filled): x y r ftn
+%     = (opaque): x y r otn
+%     Triangle W: x y r dtw
+%     = (filled): x y r ftw
+%     = (opaque): x y r otw
+%     Triangle S: x y r dts
+%     = (filled): x y r fts
+%     = (opaque): x y r ots
+%     Triangle E: x y r dte
+%     = (filled): x y r fte
+%     = (opaque): x y r ote
+%     Diamond   : x y r ddi
+%     = (filled): x y r fdi
+%     = (opaque): x y r odi
+%     Plus      : x y r dpl
+%     = (filled): x y r fpl
+%     = (opaque): x y r opl
+%     Times     : x y r dxx
+%     = (filled): x y r fxx
+%     = (opaque): x y r oxx
+%     Splat     : x y r dsp
+%     = (filled): x y r fsp
+%     = (opaque): x y r osp
+%     Rectangle : x1 y1 x2 y2 drc
+%     = (filled): x1 y1 x2 y2 frc
+%     = (opaque): x1 y1 x2 y2 orc
+%     Line      : x1 y1 x2 y2 dli
+%     = (filled): x1 y1 x2 y2 fli
+%     = (opaque): x1 y1 x2 y2 oli
+%     ScaleSetFont   : fn r fss | ff r fss
+%     = (italic)     : fnem r fss
+%     = (bold)       : fnbf r fss
+%     = (bold-italic): fnbfem r fss
+%     Text:
+%     = BoundingBox        : x y (str) ssbb -> lx ly rx uy
+%     = LowercaseBottomTop : x y (str) ssbt -> by ty
+%     = Lower: Referred to BoundingBox
+%     =   (lower left)    : x y (str) ssll
+%     =   (lower middle)  : x y (str) sslm
+%     =   (lower right)   : x y (str) sslr
+%     = Middle: Referred to BoundingBox
+%     =   (middle left)   : x y (str) ssml
+%     =   (middle middle) : x y (str) ssmm
+%     =   (middle right)  : x y (str) ssmr
+%     = Upper: Referred to BoundingBox
+%     =   (upper left)    : x y (str) ssul
+%     =   (upper middle)  : x y (str) ssum
+%     =   (upper right)   : x y (str) ssur
+%     = Bottom: Referred to LowercaseBottomTop
+%     =   (bottom left)   : x y (str) ssbl
+%     =   (bottom middle) : x y (str) ssbm
+%     =   (bottom right)  : x y (str) ssbr
+%     = Center: Referred to LowercaseBottomTop
+%     =   (center left)   : x y (str) sscl
+%     =   (center middle) : x y (str) sscm
+%     =   (center right)  : x y (str) sscr
+%     = Top: Referred to LowercaseBottomTop
+%     =   (top left)      : x y (str) sstl
+%     =   (top middle)    : x y (str) sstm
+%     =   (top right)     : x y (str) sstr
+%     Text Rotated:
+%     = Lower: Referred to BoundingBox
+%     =   (lower left)    : x y a (str) ssall
+%     =   (lower middle)  : x y a (str) ssalm
+%     =   (lower right)   : x y a (str) ssalr
+%     = Middle: Referred to BoundingBox
+%     =   (middle left)   : x y a (str) ssaml
+%     =   (middle middle) : x y a (str) ssamm
+%     =   (middle right)  : x y a (str) ssamr
+%     = Upper: Referred to BoundingBox
+%     =   (upper left)    : x y a (str) ssaul
+%     =   (upper middle)  : x y a (str) ssaum
+%     =   (upper right)   : x y a (str) ssaur
+%     = Bottom: Referred to LowercaseBottomTop
+%     =   (bottom left)   : x y a (str) ssabl
+%     =   (bottom middle) : x y a (str) ssabm
+%     =   (bottom right)  : x y a (str) ssabr
+%     = Center: Referred to LowercaseBottomTop
+%     =   (center left)   : x y a (str) ssacl
+%     =   (center middle) : x y a (str) ssacm
+%     =   (center right)  : x y a (str) ssacr
+%     = Top: Referred to LowercaseBottomTop
+%     =   (top left)      : x y a (str) ssatl
+%     =   (top middle)    : x y a (str) ssatm
+%     =   (top right)     : x y a (str) ssatr
+% End definitions summary
+
+% Begin definitions
+% Basic
+/slw {setlinewidth} bind def
+/sdp  {array astore 0 setdash} bind def
+/c {setrgbcolor} bind def
+/g {setgray} bind def
+/s {stroke} bind def
+/m {moveto} bind def
+/l {lineto} bind def
+/rm {rmoveto} bind def
+/rl {rlineto} bind def
+/dup2 {dup 3 -1 roll dup 4 1 roll exch} bind def
+/dup3 {dup 4 2 roll dup 5 1 roll 3 1 roll dup 6 1 roll 3 1 roll} bind def
+/vsub {4 2 roll 3 -1 roll exch sub 3 1 roll sub exch} bind def
+% Fill
+/f { gsave fill grestore s} bind def
+% Opaque
+/o { gsave 1.0 1.0 1.0 c fill grestore s} bind def
+% Circle
+/ci { dup3 3 -1 roll add exch m 0 360 arc } bind def
+/dci { ci s } bind def
+/fci { ci f } bind def
+/oci { ci o } bind def
+% Square
+/sq { 3 1 roll m dup dup rm 2 mul dup neg 0 rl dup neg 0 exch rl 0 rl closepath } bind def
+/dsq { sq s } bind def
+/fsq { sq f } bind def
+/osq { sq o } bind def
+% Triangle N
+/tn { 3 1 roll m dup 0 exch rm dup neg dup 2 mul rl 2 mul 0 rl closepath } bind def
+/dtn { tn s } bind def
+/ftn { tn f } bind def
+/otn { tn o } bind def
+% Triangle W
+/tw { 3 1 roll m dup neg 0 rm dup dup 2 mul exch neg rl 2 mul 0 exch rl closepath } bind def
+/dtw { tw s } bind def
+/ftw { tw f } bind def
+/otw { tw o } bind def
+% Triangle S
+/ts { 3 1 roll m dup neg 0 exch rm dup dup 2 mul rl neg 2 mul 0 rl closepath } bind def
+/dts { ts s } bind def
+/fts { ts f } bind def
+/ots { ts o } bind def
+% Triangle E
+/te { 3 1 roll m dup 0 rm dup dup -2 mul exch rl -2 mul 0 exch rl closepath } bind def
+/dte { te s } bind def
+/fte { te f } bind def
+/ote { te o } bind def
+% Diamond
+/di { 3 1 roll m dup 0 exch rm dup neg dup rl dup dup neg rl dup rl closepath } bind def
+/ddi { di s } bind def
+/fdi { di f } bind def
+/odi { di o } bind def
+% Plus symbol
+/pl { 3 1 roll m dup 0 rm dup -2 mul 0 rl dup dup rm -2 mul 0 exch rl } bind def
+/dpl { pl s } bind def
+/fpl { pl f } bind def
+/opl { pl o } bind def
+% Times symbol
+/xx { 3 1 roll m 45 cos mul dup dup rm dup -2 mul dup rl 2 mul dup 0 rm dup neg exch rl } bind def
+/dxx { xx s } bind def
+/fxx { xx f } bind def
+/oxx { xx o } bind def
+% Splat symbol
+/sp { dup 4 2 roll dup2 6 -1 roll pl 3 -1 roll xx } bind def
+/dsp { sp s } bind def
+/fsp { sp f } bind def
+/osp { sp o } bind def
+% Rectangle
+/rc { dup2 m vsub dup neg 0 exch rl exch neg 0 rl 0 exch rl closepath } bind def
+/drc { rc s } bind def
+/frc { rc f } bind def
+/orc { rc o } bind def
+% Line
+/li { 4 2 roll m l } bind def
+/dli { li s } bind def
+/fli { li f } bind def
+/oli { li o } bind def
+% Fonts
+/fss { selectfont } bind def
+/Avant { /AvantGarde-Book } bind def
+/Avantem { /AvantGarde-BookOblique } bind def
+/Avantbf { /AvantGarde-Demi } bind def
+/Avantbfem { /AvantGarde-DemiOblique } bind def
+/Bookm { /Bookman-Light } bind def
+/Bookmem { /Bookman-LightItalic } bind def
+/Bookmbf { /Bookman-Demi } bind def
+/Bookmbfem { /Bookman-DemiItalic } bind def
+/Cour { /Courier } bind def
+/Courem { /Courier-Oblique } bind def
+/Courbf { /Courier-Bold } bind def
+/Courbfem { /Courier-BoldOblique } bind def
+/Helv { /Helvetica } bind def
+/Helvem { /Helvetica-Oblique } bind def
+/Helvbf { /Helvetica-Bold } bind def
+/Helvbfem { /Helvetica-BoldOblique } bind def
+/Helvn { /Helvetica-Narrow } bind def
+/Helvnem { /Helvetica-Narrow-Oblique } bind def
+/Helvnbf { /Helvetica-Narrow-Bold } bind def
+/Helvnbfem { /Helvetica-Narrow-BoldOblique } bind def
+/Cent { /NewCenturySchlbk-Roman } bind def
+/Centem { /NewCenturySchlbk-Italic } bind def
+/Centbf { /NewCenturySchlbk-Bold } bind def
+/Centbfem { /NewCenturySchlbk-BoldItalic } bind def
+/Palat { /Palatino-Roman } bind def
+/Palatem { /Palatino-Italic } bind def
+/Palatbf { /Palatino-Bold } bind def
+/Palatbfem { /Palatino-BoldItalic } bind def
+/Sym { /Symbol } bind def
+/Symem { /Symbol } bind def
+/Symbf { /Symbol } bind def
+/Symbfem { /Symbol } bind def
+/Tim { /Times-Roman } bind def
+/Timem { /Times-Italic } bind def
+/Timbf { /Times-Bold } bind def
+/Timbfem { /Times-BoldItalic } bind def
+/Zchanc { /ZapfChancery-MediumItalic } bind def
+/Zchancem { /ZapfChancery-MediumItalic } bind def
+/Zchancbf { /ZapfChancery-MediumItalic } bind def
+/Zchancbfem { /ZapfChancery-MediumItalic } bind def
+/Zding { /ZapfDingbats } bind def
+/Zdingem { /ZapfDingbats } bind def
+/Zdingbf { /ZapfDingbats } bind def
+/Zdingbfem { /ZapfDingbats } bind def
+% Text
+/ssbb {gsave 3 1 roll m false charpath pathbbox clippath grestore} bind def
+/ssbt {pop (a) ssbb exch pop 3 -1 roll pop} bind def
+/sslx {ssbb pop pop pop} bind def
+/ssrx {ssbb pop exch pop exch pop} bind def
+/ssmx {dup3 sslx 4 1 roll ssrx add 2 div} bind def
+/ssly {ssbb pop pop exch pop} bind def
+/ssuy {ssbb exch pop exch pop exch pop} bind def
+/ssmy {dup3 ssly 4 1 roll ssuy add 2 div} bind def
+/ssby {ssbt pop} bind def
+/ssty {ssbt exch pop} bind def
+/sscy {dup3 ssby 4 1 roll ssty add 2 div} bind def
+/ssll {dup3 dup3 sslx 4 1 roll ssly 5 -2 roll dup2 m vsub rm show} bind def
+/sslm {dup3 dup3 ssmx 4 1 roll ssly 5 -2 roll dup2 m vsub rm show} bind def
+/sslr {dup3 dup3 ssrx 4 1 roll ssly 5 -2 roll dup2 m vsub rm show} bind def
+/ssml {dup3 dup3 sslx 4 1 roll ssmy 5 -2 roll dup2 m vsub rm show} bind def
+/ssmm {dup3 dup3 ssmx 4 1 roll ssmy 5 -2 roll dup2 m vsub rm show} bind def
+/ssmr {dup3 dup3 ssrx 4 1 roll ssmy 5 -2 roll dup2 m vsub rm show} bind def
+/ssul {dup3 dup3 sslx 4 1 roll ssuy 5 -2 roll dup2 m vsub rm show} bind def
+/ssum {dup3 dup3 ssmx 4 1 roll ssuy 5 -2 roll dup2 m vsub rm show} bind def
+/ssur {dup3 dup3 ssrx 4 1 roll ssuy 5 -2 roll dup2 m vsub rm show} bind def
+/ssbl {dup3 dup3 sslx 4 1 roll ssby 5 -2 roll dup2 m vsub rm show} bind def
+/ssbm {dup3 dup3 ssmx 4 1 roll ssby 5 -2 roll dup2 m vsub rm show} bind def
+/ssbr {dup3 dup3 ssrx 4 1 roll ssby 5 -2 roll dup2 m vsub rm show} bind def
+/sscl {dup3 dup3 sslx 4 1 roll sscy 5 -2 roll dup2 m vsub rm show} bind def
+/sscm {dup3 dup3 ssmx 4 1 roll sscy 5 -2 roll dup2 m vsub rm show} bind def
+/sscr {dup3 dup3 ssrx 4 1 roll sscy 5 -2 roll dup2 m vsub rm show} bind def
+/sstl {dup3 dup3 sslx 4 1 roll ssty 5 -2 roll dup2 m vsub rm show} bind def
+/sstm {dup3 dup3 ssmx 4 1 roll ssty 5 -2 roll dup2 m vsub rm show} bind def
+/sstr {dup3 dup3 ssrx 4 1 roll ssty 5 -2 roll dup2 m vsub rm show} bind def
+/ssall {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 sslx 4 1 roll ssly 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssalm {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssmx 4 1 roll ssly 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssalr {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssrx 4 1 roll ssly 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssaml {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 sslx 4 1 roll ssmy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssamm {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssmx 4 1 roll ssmy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssamr {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssrx 4 1 roll ssmy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssaul {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 sslx 4 1 roll ssuy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssaum {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssmx 4 1 roll ssuy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssaur {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssrx 4 1 roll ssuy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssabl {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 sslx 4 1 roll ssby 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssabm {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssmx 4 1 roll ssby 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssabr {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssrx 4 1 roll ssby 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssacl {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 sslx 4 1 roll sscy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssacm {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssmx 4 1 roll sscy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssacr {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssrx 4 1 roll sscy 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssatl {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 sslx 4 1 roll ssty 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssatm {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssmx 4 1 roll ssty 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+/ssatr {gsave 4 2 roll translate 0 0 m 0 0 3 -1 roll dup3 dup3 ssrx 4 1 roll ssty 5 -2 roll vsub 4 -1 roll rotate rm show grestore} bind def
+% End definitions
+
+%%EndProlog
