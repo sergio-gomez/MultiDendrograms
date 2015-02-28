@@ -51,15 +51,15 @@ import multidendrograms.errors.MethodError;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "3.2.0";
+	public static final String VERSION = "3.2.1";
 	public static final String VERSION_SHORT = "3.2";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
 	public static final String AFFILIATION = "Universitat Rovira i Virgili, Tarragona (Spain)";
-	public static final String HOMEPAGE_URL = "http://deim.urv.cat/~sgomez/multidendrograms.php";
+	public static final String HOMEPAGE_URL = "http://deim.urv.cat/~sergio.gomez/multidendrograms.php";
 	public static final String LICENSE_URL = "http://www.gnu.org/licenses/lgpl.html";
-	public static final String MANUAL_URL = "http://deim.urv.cat/~sgomez/download.php?f=multidendrograms-" + VERSION_SHORT + "-manual.pdf";
-	public static final String LAST_VERSION_URL = "http://deim.urv.cat/~sgomez/download.php?f=multidendrograms-last.txt";
+	public static final String MANUAL_URL = "http://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-" + VERSION_SHORT + "-manual.pdf";
+	public static final String LAST_VERSION_URL = "http://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-last.txt";
 	public static final String LOGO_IMAGE = "img/logo.png";
 
 	private static final LogType LOG_XML = LogType.XML;

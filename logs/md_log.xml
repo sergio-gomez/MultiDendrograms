@@ -2,8 +2,8 @@
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
 <record>
-  <date>2014-04-19T23:40:56</date>
-  <millis>1397943656084</millis>
+  <date>2015-02-06T14:38:54</date>
+  <millis>1423229934754</millis>
   <sequence>0</sequence>
   <logger>Dendro</logger>
   <level>CONFIG</level>

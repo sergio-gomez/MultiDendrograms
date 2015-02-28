@@ -1,4 +1,4 @@
-MultiDendrograms 3.2.0
+MultiDendrograms 3.2.1
 
 Copyright (c) 2014 Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres
 This program comes with ABSOLUTELY NO WARRANTY.

@@ -13,7 +13,7 @@ L'arxiu carregat no és compatible amb aquesta aplicació
 Dades no simètriques / Dos valors diferents per a una mateixa ruta
 ERROR a la línia
 La tercera columna ha de contenir un valor numèric
-No s'han assignat totes les distàncies
+Manquen valors de dades, completant amb el valor per defecte a l'arxiu INI
 Arxiu incompatible
 El cluster cercat no es troba dins l'agrupació
 No s'ha pogut recuperar el cluster

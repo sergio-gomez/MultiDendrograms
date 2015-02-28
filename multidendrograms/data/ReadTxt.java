@@ -34,6 +34,7 @@ import javax.swing.JOptionPane;
 import multidendrograms.errors.IncompatibleFileError;
 import multidendrograms.initial.Language;
 import multidendrograms.initial.LogManager;
+import multidendrograms.initial.InitialProperties;
 
 /**
  * <p>
@@ -56,6 +57,7 @@ public class ReadTxt {
 	private int numElements = 0;
 	private String[] names = null;
 	private LinkedList<SimilarityStruct<String>> data;
+	private double missingValue = InitialProperties.getMissingValue();
 
 	public ReadTxt(final String filePath, boolean check) throws Exception {
 		fileName = filePath;
@@ -104,7 +106,7 @@ public class ReadTxt {
 				}
 			}
 		}
-		
+
 		if (LogManager.LOG.getLevel().equals(Level.FINER)) {
 			LogManager.LOG.finer("---------- DATA ----------");
 			for (final SimilarityStruct<?> s : data) {
@@ -124,15 +126,15 @@ public class ReadTxt {
 
 	private LinkedList<String[]> saveInMemory() throws IncompatibleFileError, IOException {
 		final LinkedList<String[]> lstData = new LinkedList<String[]>();
-		
+
 		final File f = new File(fileName);
 		if (!f.exists()) {
 			throw new IOException(Language.getLabel(106) + ": '" + fileName + "'");
 		}
-		
+
 		int numLine = 1;
 		try {
-			
+
 			final FileReader freader = new FileReader(f);
 			BufferedReader buff = new BufferedReader(freader);
 
@@ -167,7 +169,7 @@ public class ReadTxt {
 		int numCols = st.countTokens();
 		if (numCols < 1) {
 			throw new IncompatibleFileError(Language.getLabel(104) + " "
-					+ numLine + " " + Language.getLabel(105) + " '" 
+					+ numLine + " " + Language.getLabel(105) + " '"
 					+ f.getName() + "'");
 		}
 		String[] dataLine = new String[numCols];
@@ -176,7 +178,7 @@ public class ReadTxt {
 		}
 		return dataLine;
 	}
-	
+
 	private LinkedList<SimilarityStruct<String>> readList() throws Exception {
 		// Temporary list and hash table
 		LinkedList<SimilarityStruct<String>> lstTmp = new LinkedList<SimilarityStruct<String>>();
@@ -249,11 +251,18 @@ public class ReadTxt {
 			}
 		}
 
+		boolean first = true;
 		for (int i = 0; i < numElements - 1; i ++) {
 			for (int j = i + 1; j < numElements; j ++) {
-				// Unassigned distance error
+				// Unassigned distances
 				if (table[i][j] == ReadTxt.NULL) {
-					throw new IncompatibleFileError(Language.getLabel(15));
+					if (first) {
+						String msg = Language.getLabel(15) + ": " + missingValue;
+						LogManager.LOG.warning(msg);
+						first = false;
+					}
+					table[i][j] = missingValue;
+					lst.add(new SimilarityStruct<String>(names[i], names[j], missingValue));
 				}
 			}
 		}
@@ -265,7 +274,7 @@ public class ReadTxt {
 		LinkedList<SimilarityStruct<String>> lst = null;
 		boolean columnHeaders;
 		boolean lowerTriangular;
-		
+
 		Iterator<String[]> iter = dataList.iterator();
 		int numLines = dataList.size();
 		int numCols = Math.max(dataList.get(0).length, dataList.get(numLines-1).length);
@@ -312,8 +321,8 @@ public class ReadTxt {
 		lst = readTable(columnHeaders, lowerTriangular, numCols, numLine, iter);
 		return lst;
 	}
-	
-	private LinkedList<SimilarityStruct<String>> readTable(boolean columnHeaders, boolean lowerTriangular, int numCols, 
+
+	private LinkedList<SimilarityStruct<String>> readTable(boolean columnHeaders, boolean lowerTriangular, int numCols,
 			int numLine, Iterator<String[]> iter) throws IncompatibleFileError {
 		double[][] table = new double[numElements][numElements];
 		int row = 0;
@@ -342,7 +351,7 @@ public class ReadTxt {
 					try {
 						table[row][col-1] = Double.parseDouble(tmp[col]);
 						if (lowerTriangular) {
-							table[col-1][row] = table[row][col-1]; 
+							table[col-1][row] = table[row][col-1];
 						}
 					} catch (NumberFormatException e) {
 						throw new IncompatibleFileError(Language.getLabel(125));
@@ -351,7 +360,7 @@ public class ReadTxt {
 					try {
 						table[row][col] = Double.parseDouble(tmp[col]);
 						if (lowerTriangular) {
-							table[col][row] = table[row][col]; 
+							table[col][row] = table[row][col];
 						}
 					} catch (NumberFormatException e) {
 						throw new IncompatibleFileError(Language.getLabel(125));
@@ -361,7 +370,7 @@ public class ReadTxt {
 			numLine ++;
 			row ++;
 		}
-		
+
 		// Check symmetry
 		LinkedList<SimilarityStruct<String>> lst = new LinkedList<SimilarityStruct<String>>();
 		for (int i = 0; i < numElements - 1; i ++) {

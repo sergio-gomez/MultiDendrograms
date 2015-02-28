@@ -39,6 +39,8 @@ public class InitialProperties {
 
 	private static String sPath_language = "";
 
+	private static double missingValue = 0.0;
+
 	private static double margin = 15;
 
 	private static int width_frmPrincipal = 800;
@@ -184,6 +186,14 @@ public class InitialProperties {
 
 	public static void setFontMenuTitle(final Font fontMenuTitle) {
 		InitialProperties.fontMenuTitle = fontMenuTitle;
+	}
+
+	public static double getMissingValue() {
+		return InitialProperties.missingValue;
+	}
+
+	public static void setMissingValue(final double missingValue) {
+		InitialProperties.missingValue = missingValue;
 	}
 
 	public static double getMargin() {
@@ -388,6 +398,15 @@ public class InitialProperties {
 			InitialProperties.sPath_language = "";
 		}
 		;
+
+		try {
+			s_tmp = MainProperties.getProperty("missingValue");
+			if (s_tmp != null) {
+				InitialProperties.missingValue = Double.parseDouble(s_tmp);
+			}
+		} catch (final Exception e) {
+			InitialProperties.missingValue = 0.0;
+		}
 
 		try {
 			s_tmp = MainProperties.getProperty("height_frmPrincipal");

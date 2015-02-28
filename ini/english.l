@@ -13,7 +13,7 @@ The loaded file is not compatible with this application
 Asymmetric data / Two different values for the same data pair
 Error at line
 The third column must contain a numeric value
-Not all the distances have been assigned
+Missing data values, filling them with the default value in INI file
 Incompatible file
 The cluster is not in the group
 Unable to recover the cluster

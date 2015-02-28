@@ -13,7 +13,7 @@ El archivo cargado no es compatible con esta aplicación
 Datos no simétricos / Dos valores diferentes para una misma ruta
 Error en la linea
 La tercera columna debe contener un valor numérico
-No se han asignado todas las distancias
+Faltan valores de datos, completando con el valor por defecto en el archivo INI
 Archivo incompatible
 El cluster no se encuentra en la agrupación
 No se ha podido recuperar el cluster
