@@ -18,13 +18,16 @@
 
 package multidendrograms.dendrogram.figures;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 
+import multidendrograms.definitions.Coordinates;
+import multidendrograms.dendrogram.Scaling;
+import multidendrograms.dendrogram.eps.EpsUtils;
 import multidendrograms.initial.LogManager;
 import multidendrograms.types.DendrogramOrientation;
-import multidendrograms.utils.MathUtils;
-import multidendrograms.definitions.Coordinates;
+import multidendrograms.types.PlotType;
 
 /**
  * <p>
@@ -38,10 +41,16 @@ import multidendrograms.definitions.Coordinates;
  * @since JDK 6.0
  */
 public class Line extends Figure {
+
 	private double length;
 
-	public Line(final Coordinates<Double> pos, final double length, final int precision) {
-		super(pos.getX(), pos.getY(), precision);
+	public Line(final double x, final double y, final double length) {
+		super(x, y);
+		this.length = length;
+	}
+
+	public Line(final double x, final double y, final double length, final Color color) {
+		super(x, y, color);
 		this.length = length;
 	}
 
@@ -54,65 +63,48 @@ public class Line extends Figure {
 	}
 
 	@Override
-	public void draw(final Graphics2D g, final DendrogramOrientation or) {
-		double x1, y1, x2, y2;
-		double xx1, yy1, xx2, yy2;
-		double maxVal, minVal;
-		int prec = getPrecision();
+	public void draw(final PlotType plotType, final Graphics2D graphics2D) {
+		double worldX1 = getPosReal().getX();
+		double worldY1 = getPosReal().getY();
+		double worldX2 = worldX1;
+		double worldY2 = this.length;
+		Coordinates<Double> world1 = new Coordinates<Double>(worldX1, worldY1);
+		Coordinates<Double> world2 = new Coordinates<Double>(worldX2, worldY2);
+		Scaling scaling = getScaling();
+		DendrogramOrientation dendroOrientation = getDendrogramOrientation();
+		Coordinates<Double> screen1 = scaling.transform(world1, dendroOrientation);
+		Coordinates<Double> screen2 = scaling.transform(world2, dendroOrientation);
+		double screenX1 = screen1.getX();
+		double screenY1 = screen1.getY();
+		double screenX2 = screen2.getX();
+		double screenY2 = screen2.getY();
 
-		LogManager.LOG.finest("Orientation: " + or.toString());
-		LogManager.LOG.finest("Precision: " + prec);
-
-		// position adjusted to precision
-		xx1 = this.getPosReal().getX();
-		yy1 = MathUtils.round(this.getPosReal().getY(), prec);
-		xx2 = this.getPosReal().getX();
-		yy2 = MathUtils.round(this.getLength(), prec);
-		LogManager.LOG.finest("Coord. Real: x1=" + xx1 + "    y1=("
-				+ getPosReal().getY() + ") " + yy1 + "   x2= " + xx2
-				+ "    y2= (" + getLength() + ")" + yy2);
-
-		maxVal = this.getScaling().getMaxY();
-		minVal = this.getScaling().getMinY();
-		if (or == DendrogramOrientation.EAST) {
-			// inversion
-			x1 = yy1;
-			yy1 = (maxVal - xx1);
-			xx1 = x1;
-
-			x2 = yy2;
-			yy2 = (maxVal - xx2);
-			xx2 = x2;
-		} else if (or == DendrogramOrientation.WEST) {
-			// inversion
-			y1 = (maxVal - xx1);
-			xx1 = this.getScaling().getMinX()
-					+ (this.getScaling().getMaxX() - yy1);
-			yy1 = y1;
-
-			y2 = (maxVal - xx2);
-			xx2 = this.getScaling().getMinX()
-					+ (this.getScaling().getMaxX() - yy2);
-			yy2 = y2;
-		} else if (or == DendrogramOrientation.SOUTH) {
-			// translation
-			yy1 = minVal + (maxVal - yy1);
-			yy2 = minVal + (maxVal - yy2);
+		Color color = getColor();
+		if (plotType.equals(PlotType.PANEL)) {
+			graphics2D.setColor(color);
+			graphics2D.draw(new Line2D.Double(screenX1, screenY1, screenX2, screenY2));
+		} else {// (plotType.equals(PlotType.EPS))
+			EpsUtils.writeLine("gsave");
+			EpsUtils.writeLine(EpsUtils.setRGBColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f));
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH)) {
+				EpsUtils.writeLine(EpsUtils.dLine((float) (EpsUtils.xmin + screenX1), (float) (EpsUtils.ymax + screenY1 - 0.5), 
+						(float) (EpsUtils.xmin + screenX2), (float) (EpsUtils.ymax + screenY2 + 0.5)));
+			} else if (dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+				EpsUtils.writeLine(EpsUtils.dLine((float) (EpsUtils.xmin + screenX1), (float) (EpsUtils.ymax + screenY1 + 0.5), 
+						(float) (EpsUtils.xmin + screenX2), (float) (EpsUtils.ymax + screenY2 - 0.5)));
+			} else if (dendroOrientation.equals(DendrogramOrientation.EAST)) {
+				EpsUtils.writeLine(EpsUtils.dLine((float) (EpsUtils.xmin + screenX1 - 0.5), (float) (EpsUtils.ymax + screenY1), 
+						(float) (EpsUtils.xmin + screenX2 + 0.5), (float) (EpsUtils.ymax + screenY2)));
+			} else if (dendroOrientation.equals(DendrogramOrientation.WEST)) {
+				EpsUtils.writeLine(EpsUtils.dLine((float) (EpsUtils.xmin + screenX1 + 0.5), (float) (EpsUtils.ymax + screenY1), 
+						(float) (EpsUtils.xmin + screenX2 - 0.5), (float) (EpsUtils.ymax + screenY2)));
+			}
+			EpsUtils.writeLine("grestore");
 		}
 
-		x1 = this.getScaling().transformX(xx1);
-		y1 = this.getScaling().transformY(yy1);
-		x2 = this.getScaling().transformX(xx2);
-		y2 = this.getScaling().transformY(yy2);
-
-		g.setColor(this.getColor());
-		g.draw(new Line2D.Double(x1, y1, x2, y2));
-
-		LogManager.LOG.finer("draw Line2D: (" + x1 + ", " + y1 + ", " + x2 + ", "
-				+ y2 + ")");
+		LogManager.LOG.finest("Real coord.: x1 = " + worldX1 + "    y1 = " + worldY1 
+				+ "    x2 = " + worldX2 + "    y2 = " + worldY2);
+		LogManager.LOG.finer("draw Line2D: (" + screenX1 + ", " + screenY1 + ", " + screenX2 + ", " + screenY2 + ")");
 	}
 
-	@Override
-	public void draw(DendrogramOrientation or) {
-	}
 }

@@ -24,12 +24,16 @@ import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 
+import multidendrograms.definitions.Coordinates;
+import multidendrograms.definitions.SettingsInfo;
 import multidendrograms.dendrogram.Scaling;
+import multidendrograms.dendrogram.eps.EpsUtils;
 import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.types.LabelOrientation;
-import multidendrograms.types.SimilarityType;
+import multidendrograms.types.PlotType;
 
 /**
  * <p>
@@ -43,190 +47,149 @@ import multidendrograms.types.SimilarityType;
  * @since JDK 6.0
  */
 public class NodeLabel {
-	private Color color = Color.BLACK;
+
+	private LinkedList<Node> nodesList;
 	private Font font;
-	private Scaling scal;
-	private final SimilarityType simType;
-	LinkedList<Node> nodesList;
+	private Color color;
+	private LabelOrientation labelOrientation;
+	private DendrogramOrientation dendroOrientation;
+	private DendrogramOrientation adaptedOrientation;
+	private Scaling scalingDendro;
 
-	public NodeLabel(final LinkedList<Node> nodesList, final SimilarityType simType) {
+	public NodeLabel(final LinkedList<Node> nodesList, final SettingsInfo settingsInfo, final Scaling scalingDendro) {
 		this.nodesList = nodesList;
-		this.simType = simType;
+		this.font = settingsInfo.getNodeNameFont();
+		this.color = settingsInfo.getNodeNameColor();
+		this.labelOrientation = settingsInfo.getNodeNameOrientation();
+		this.dendroOrientation = settingsInfo.getDendrogramOrientation();
+		this.adaptedOrientation = settingsInfo.getDendrogramAdaptedOrientation();
+		this.scalingDendro = scalingDendro;
 	}
 
-	public LinkedList<Node> getNodesList() {
-		return this.nodesList;
-	}
-
-	public Scaling getScaling() {
-		return scal;
-	}
-
-	public void setScaling(final Scaling scal) {
-		this.scal = scal;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
-	public void setColor(final Color c) {
-		this.color = c;
-	}
-
-	public Font getFont() {
-		return font;
-	}
-
-	public void setFont(final Font f) {
-		this.font = f;
-	}
-
-	public SimilarityType getSimilarityType() {
-		return this.simType;
-	}
-
-	public void draw(final Graphics2D g, final DendrogramOrientation orDendo,
-			final LabelOrientation orNoms) {
-		double x, y;
-		int rotAngle = 0;
-		String txt;
-		final FontRenderContext renderContext = new FontRenderContext(null,
-				true, true);
-		final AffineTransform rot = new AffineTransform();
-		final Font ft = this.getFont();
-		Font fr;
-		TextLayout tl;
-
-		if (orNoms.equals(LabelOrientation.HORIZONTAL))
-			rotAngle = 0;
-		else if (orNoms.equals(LabelOrientation.OBLIQUE)) {
-			if (simType.equals(SimilarityType.WEIGHT)) {
-				if (orDendo.equals(DendrogramOrientation.NORTH)
-						|| orDendo.equals(DendrogramOrientation.WEST))
-					rotAngle = -45;
-				else
-					rotAngle = 45;
-			} else {
-				if (orDendo.equals(DendrogramOrientation.EAST)
-						|| orDendo.equals(DendrogramOrientation.SOUTH))
-					rotAngle = -45;
-				else
-					rotAngle = 45;
+	public void draw(final PlotType plotType, final Graphics2D graphics2D) {
+		// rotate font
+		double rotationAngle = 0.0;
+		if (labelOrientation.equals(LabelOrientation.HORIZONTAL)) {
+			rotationAngle = 0.0;
+		} else if (labelOrientation.equals(LabelOrientation.VERTICAL)) {
+			rotationAngle = +90.0;
+		} else if (labelOrientation.equals(LabelOrientation.OBLIQUE)) {
+			if (adaptedOrientation.equals(DendrogramOrientation.NORTH) || 
+					adaptedOrientation.equals(DendrogramOrientation.WEST)) {
+				rotationAngle = -45.0;
+			} else if (adaptedOrientation.equals(DendrogramOrientation.SOUTH) || 
+					adaptedOrientation.equals(DendrogramOrientation.EAST)) {
+				rotationAngle = +45.0;
 			}
-		} else if (orNoms.equals(LabelOrientation.VERTICAL))
-			rotAngle = -90;
-		else
-			rotAngle = 0;
-
-		rot.rotate(Math.toRadians(rotAngle));
-		fr = ft.deriveFont(rot);
-
-		final Color color_original = g.getColor();
-		g.setColor(this.getColor());
-
-		double maxy = 0.0, maxx = 0.0, bigy = 0.0;// , miny = 0.0;
-		for (final Node c : nodesList) {
-			x = c.getPosReal().getX();
-			y = c.getPosReal().getY();
-
-			txt = String.valueOf(c.getName());
-			tl = new TextLayout(txt, fr, renderContext);
-
-			if (Math.abs(tl.getBounds().getMaxY()) > Math.abs(maxy))
-				maxy = tl.getBounds().getMaxY();
-			if (Math.abs(tl.getBounds().getMaxX()) > Math.abs(maxx))
-				maxx = tl.getBounds().getMaxX();
-			if (Math.abs(tl.getBounds().getY()) > Math.abs(bigy))
-				bigy = tl.getBounds().getY();
+		}
+		AffineTransform rotation = new AffineTransform();
+		if (plotType.equals(PlotType.PANEL)) {
+			rotation.rotate(Math.toRadians(-rotationAngle));
+		} else if (plotType.equals(PlotType.EPS)) {
+			rotation.rotate(Math.toRadians(rotationAngle));
+		}
+		Font rotatedFont = font.deriveFont(rotation);
+		
+		// save settings
+		Color originalColor = null;
+		if (plotType.equals(PlotType.PANEL)) {
+			originalColor = graphics2D.getColor();
+			graphics2D.setColor(color);
+		} else if (plotType.equals(PlotType.EPS)) {
+			EpsUtils.writeLine("gsave");
+			EpsUtils.writeLine(EpsUtils.setRGBColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f));
+			String fontPSName = font.getPSName();
+			if (fontPSName.equals("Dialog.plain")) {
+				EpsUtils.writeLine(EpsUtils.scaleSetFont("/ArialMT", font.getSize()));
+			} else {
+				EpsUtils.writeLine(EpsUtils.scaleSetFont("/" + fontPSName, font.getSize()));
+			}
+		}
+		
+		FontRenderContext renderContext = null;
+		if (plotType.equals(PlotType.PANEL)) {
+			renderContext = new FontRenderContext(null, true, true);
+		} else if (plotType.equals(PlotType.EPS)) {
+			renderContext = new FontRenderContext(rotation, true, true);
+		}
+		for (Node node : nodesList) {
+			Coordinates<Double> screen = getNameCoordinates(node, rotatedFont, renderContext);
+			double screenX = screen.getX();
+			double screenY = screen.getY();
+			String nodeName = String.valueOf(node.getName());
+			if (plotType.equals(PlotType.PANEL)) {
+				TextLayout textLayout = new TextLayout(nodeName, rotatedFont, renderContext);
+				graphics2D.scale(1, -1);
+				textLayout.draw(graphics2D, (float) (screenX), (float) (-screenY));
+				graphics2D.scale(1, -1);
+			} else if (plotType.equals(PlotType.EPS)) {
+				EpsUtils.writeLine(EpsUtils.bottomLeftTextRotated((float) (EpsUtils.xmin + screenX), 
+						(float) (EpsUtils.ymax + screenY), (float) (rotationAngle), nodeName));
+			}
 		}
 
-		for (final Node c : nodesList) {
-			x = c.getPosReal().getX();
-			y = c.getPosReal().getY();
-
-			txt = String.valueOf(c.getName());
-			tl = new TextLayout(txt, fr, renderContext);
-
-			if ((orDendo == DendrogramOrientation.EAST) || (orDendo == DendrogramOrientation.WEST)) {
-				y = this.getScaling().getValuesHeight() - c.getPosReal().getX();
-				x = this.getScaling().transformX(0);
-				y = this.getScaling().transformY(y);
-			} else {
-				y = this.getScaling().transformY(0);
-				x = this.getScaling().transformX(x);
-			}
-
-			// correction of text after rotation
-			if (LabelOrientation.HORIZONTAL.equals(orNoms)) /* HORIZONTAL */
-			{
-				if (DendrogramOrientation.NORTH.equals(orDendo)
-						|| DendrogramOrientation.SOUTH.equals(orDendo))
-					x -= (tl.getBounds().getCenterX());
-				else // EAST and WEST
-				{
-					if (simType.equals(SimilarityType.WEIGHT)) {
-						if (DendrogramOrientation.WEST.equals(orDendo)) {
-							y -= tl.getBounds().getHeight() / 2;
-							x += Math.abs(maxx) - tl.getBounds().getMaxX();
-						} else
-							y += tl.getBounds().getCenterY();
-					}
-					if (simType.equals(SimilarityType.DISTANCE)) {
-						if (DendrogramOrientation.EAST.equals(orDendo)) {
-							y -= tl.getBounds().getHeight() / 2;
-							x += Math.abs(maxx) - tl.getBounds().getMaxX();
-						} else
-							y += tl.getBounds().getCenterY();
-					}
-				}
-			} else if (LabelOrientation.OBLIQUE.equals(orNoms)) /* OBLIQUE */
-			{
-				if (simType.equals(SimilarityType.WEIGHT)) {
-					if (DendrogramOrientation.SOUTH.equals(orDendo))
-						y += Math.abs(maxy) - tl.getBounds().getMinY();
-					else if (DendrogramOrientation.WEST.equals(orDendo)) {
-						x += Math.abs(maxx) - tl.getBounds().getMaxX();
-						y -= tl.getBounds().getHeight();
-					}
-				} else {
-					if (DendrogramOrientation.NORTH.equals(orDendo))
-						y += Math.abs(maxy) - tl.getBounds().getMinY();
-					else if (DendrogramOrientation.EAST.equals(orDendo)) {
-						x += Math.abs(maxx) - tl.getBounds().getMaxX();
-						y -= tl.getBounds().getHeight();
-					}
-				}
-			} else /* VERTICAL */
-			{
-				if (simType.equals(SimilarityType.WEIGHT)) {
-					if (DendrogramOrientation.SOUTH.equals(orDendo)) {
-						y += Math.abs(bigy) + tl.getBounds().getY();
-						x += tl.getBounds().getWidth() / 2;
-					} else if (DendrogramOrientation.NORTH.equals(orDendo))
-						x += tl.getBounds().getWidth() / 2;
-					else {
-						y -= tl.getBounds().getHeight() / 2;
-						x -= tl.getBounds().getMinX();
-					}
-				} else if (simType.equals(SimilarityType.DISTANCE)) {
-					if (DendrogramOrientation.NORTH.equals(orDendo)) {
-						y += Math.abs(bigy) + tl.getBounds().getY();
-						x += tl.getBounds().getWidth() / 2;
-					} else if (DendrogramOrientation.SOUTH.equals(orDendo))
-						x += tl.getBounds().getWidth() / 2;
-					else {
-						y -= tl.getBounds().getHeight() / 2;
-						x -= tl.getBounds().getMinX();
-					}
-				}
-
-			}
-			g.scale(1, -1);
-			tl.draw(g, (float) x, (float) -y);
-			g.scale(1, -1);
+		// restore settings
+		if (plotType.equals(PlotType.PANEL)) {
+			graphics2D.setColor(originalColor);
+		} else if (plotType.equals(PlotType.EPS)) {
+			EpsUtils.writeLine("grestore");
 		}
-
-		g.setColor(color_original);
 	}
+
+	private Coordinates<Double> getNameCoordinates(final Node node, final Font rotatedFont, final FontRenderContext renderContext) {
+		double bulletSpace = 2 * node.getRadius();
+		String nodeName = String.valueOf(node.getName());
+		TextLayout textLayout = new TextLayout(nodeName, rotatedFont, renderContext);
+		Rectangle2D rectangle = textLayout.getBounds();
+		double rectangleWidth = rectangle.getWidth();
+		double rectangleHeight = rectangle.getHeight();
+		Coordinates<Double> world = node.getPosReal();
+		Coordinates<Double> screen = this.scalingDendro.transform(world, dendroOrientation);
+		double screenX = screen.getX();
+		double screenY = screen.getY();
+		if (labelOrientation.equals(LabelOrientation.VERTICAL)) {
+			if (adaptedOrientation.equals(DendrogramOrientation.NORTH)) {
+				screenX += + rectangleWidth / 2;
+				screenY += - bulletSpace - rectangleHeight;
+			} else if (adaptedOrientation.equals(DendrogramOrientation.SOUTH)) {
+				screenX += + rectangleWidth / 2;
+				screenY += + bulletSpace;
+			} else if (adaptedOrientation.equals(DendrogramOrientation.EAST)) {
+				screenX += - bulletSpace;
+				screenY += - rectangleHeight / 2;
+			} else {// (adaptedOrientation.equals(DendrogramOrientation.WEST))
+				screenX += + bulletSpace + rectangleWidth;
+				screenY += - rectangleHeight / 2;
+			}
+		} else if (labelOrientation.equals(LabelOrientation.HORIZONTAL)) {
+			if (adaptedOrientation.equals(DendrogramOrientation.NORTH)) {
+				screenX += - rectangleWidth / 2;
+				screenY += - bulletSpace - rectangleHeight;
+			} else if (adaptedOrientation.equals(DendrogramOrientation.SOUTH)) {
+				screenX += - rectangleWidth / 2;
+				screenY += + bulletSpace;
+			} else if (adaptedOrientation.equals(DendrogramOrientation.EAST)) {
+				screenX += - bulletSpace - rectangleWidth;
+				screenY += - rectangleHeight / 2;
+			} else {// (adaptedOrientation.equals(DendrogramOrientation.WEST))
+				screenX += + bulletSpace;
+				screenY += - rectangleHeight / 2;
+			}
+		} else {// (labelOrientation.equals(LabelOrientation.OBLIQUE))
+			if (adaptedOrientation.equals(DendrogramOrientation.NORTH)) {
+				screenY += - bulletSpace;
+			} else if (adaptedOrientation.equals(DendrogramOrientation.SOUTH)) {
+				screenY += + bulletSpace;
+			} else if (adaptedOrientation.equals(DendrogramOrientation.EAST)) {
+				screenX += - rectangleWidth;
+				screenY += - rectangleHeight;
+			} else {// (adaptedOrientation.equals(DendrogramOrientation.WEST))
+				screenX += + bulletSpace;
+			}
+		}
+		screen.setX(screenX);
+		screen.setY(screenY);
+		return screen;
+	}
+
 }

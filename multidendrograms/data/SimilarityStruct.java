@@ -29,45 +29,45 @@ package multidendrograms.data;
  *
  * @since JDK 6.0
  */
-public class SimilarityStruct<elem> {
+public class SimilarityStruct<element> {
 
-	private elem c1;
-	private elem c2;
-	private double val;
+	private element c1;
+	private element c2;
+	private double value;
 
-	public SimilarityStruct(final elem c1, final elem c2, final double val) {
+	public SimilarityStruct(final element c1, final element c2, final double value) {
 		this.c1 = c1;
 		this.c2 = c2;
-		this.val = val;
+		this.value = value;
 	}
 
-	public elem getC1() {
-		return c1;
+	public element getC1() {
+		return this.c1;
 	}
 
-	public void setC1(final elem c1) {
+	public void setC1(final element c1) {
 		this.c1 = c1;
 	}
 
-	public elem getC2() {
-		return c2;
+	public element getC2() {
+		return this.c2;
 	}
 
-	public void setC2(final elem c2) {
+	public void setC2(final element c2) {
 		this.c2 = c2;
 	}
 
-	public double getVal() {
-		return val;
+	public double getValue() {
+		return this.value;
 	}
 
-	public void setVal(final double val) {
-		this.val = val;
+	public void setValue(final double value) {
+		this.value = value;
 	}
 
 	@Override
 	public String toString() {
-		return (c1.toString() + "\t" + c2.toString() + "\t" + val);
+		return (c1.toString() + "\t" + c2.toString() + "\t" + this.value);
 	}
 
 }

@@ -1,5 +1,5 @@
-for i in  */*/*.java */*/*/*.java */*/*/*/*.java */*.l */*.ini */*.mf ; do
+for i in  */*/*.java */*/*/*.java */*.l */*.ini */*.mf ; do
   echo $i
-  grep -i "main[ ]*(" $i
+  grep -i "openFrameCount" $i
   echo "--------"
 done

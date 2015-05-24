@@ -29,8 +29,11 @@ import multidendrograms.initial.LogManager;
 import multidendrograms.initial.Language;
 import multidendrograms.data.SimilarityStruct;
 import multidendrograms.definitions.Cluster;
+import multidendrograms.types.OriginType;
+import multidendrograms.types.SimilarityType;
 import multidendrograms.utils.DeviationMeasures;
 import multidendrograms.utils.MathUtils;
+import multidendrograms.utils.SmartAxis;
 
 /**
  * <p>
@@ -44,28 +47,36 @@ import multidendrograms.utils.MathUtils;
  * @since JDK 6.0
  */
 public class UltrametricMatrix {
-	private PrintWriter pw;
+
 	private LinkedList<SimilarityStruct<String>> originalData;
 	private Cluster root;
 	private int precision;
-	private String[] names;
-	private Hashtable<String, Integer> htNames;
+	private OriginType originType;
+	private double dendroBottomHeight;
 	private int size;
-	private double[][] ultraMatrix = null;
+	private Hashtable<String, Integer> htNames;
+	private String[] names;
 	private double[][] originalMatrix = null;
+	private double[][] ultraMatrix = null;
 
-	public UltrametricMatrix(LinkedList<SimilarityStruct<String>> originalData, Cluster root, int precision) {
+	public UltrametricMatrix(final LinkedList<SimilarityStruct<String>> originalData, final Cluster root,
+			final int precision, final SimilarityType simType, final OriginType originType) {
 		this.originalData = originalData;
 		this.root = root;
 		this.precision = precision;
-
+		this.originType = originType;
+		SmartAxis smartAxis = new SmartAxis(simType, precision, originType, root);
+		if (simType.equals(SimilarityType.DISTANCE)) {
+			this.dendroBottomHeight = smartAxis.smartMin();
+		} else {// (simType.equals(SimilarityType.SIMILARITY))
+			this.dendroBottomHeight = smartAxis.smartMax();
+		}
 		this.size = root.getNumLeaves();
-		this.ultraMatrix = new double[size][size];
-		this.originalMatrix = new double[size][size];
-
+		this.originalMatrix = new double[this.size][this.size];
+		this.ultraMatrix = new double[this.size][this.size];
 		sortNamesByLeaf();
-		calculateUltrametricMatrix(root);
 		calculateOriginalMatrix();
+		calculateUltrametricMatrix(root);
 	}
 
 	private void sortNamesByLeaf() {
@@ -75,7 +86,6 @@ public class UltrametricMatrix {
 		for (int i = 0; i < leavesList.size(); i ++) {
 			namesList.add((leavesList.get(i)).getName());
 		}
-
 		this.names = new String[this.size];
 		for (int i = 0; i < namesList.size(); i ++) {
 			this.htNames.put(namesList.get(i), i);
@@ -83,24 +93,54 @@ public class UltrametricMatrix {
 		}
 	}
 
-	private void calculateUltrametricMatrix(final Cluster c) {
-		if (c.getNumSubclusters() > 1) {
-			double height = MathUtils.round(c.getSummaryHeight(), this.precision);
-			List<Cluster> leaves = c.getLeaves();
-			for (int i = 0; i < leaves.size(); i ++) {
-				Cluster ci = leaves.get(i);
-				int posi = this.htNames.get(ci.getName());
-				this.ultraMatrix[posi][posi] = 0.0;
-				for (int j = i + 1; j < leaves.size(); j ++) {
-					Cluster cj = leaves.get(j);
-					int posj = this.htNames.get(cj.getName());
-					this.ultraMatrix[posi][posj] = height;
-					this.ultraMatrix[posj][posi] = height;
+	private void calculateOriginalMatrix() {
+		// Initialize diagonal elements
+		for (int i = 0; i < this.size; i ++) {
+			this.originalMatrix[i][i] = Double.NaN;
+		}
+		for (int n = 0; n < this.originalData.size(); n ++) {
+			SimilarityStruct<String> sim = this.originalData.get(n);
+			int i = this.htNames.get(sim.getC1());
+			int j = this.htNames.get(sim.getC2());
+			this.originalMatrix[i][j] = sim.getValue();
+			this.originalMatrix[j][i] = this.originalMatrix[i][j];
+		}
+		// Unassigned diagonal elements
+		for (int i = 0; i < this.size; i ++) {
+			if (Double.isNaN(this.originalMatrix[i][i]) || this.originType.equals(OriginType.UNIFORM_ORIGIN)) {
+				this.originalMatrix[i][i] = this.dendroBottomHeight;
+			}
+		}
+	}
+
+	private void calculateUltrametricMatrix(final Cluster cluster) {
+		double clusterBottomHeight = cluster.getRootBottomHeight();
+		int numSubclusters = cluster.getNumSubclusters();
+		if (numSubclusters == 1) {
+			double clusterHeight;
+			if (Double.isNaN(clusterBottomHeight) || this.originType.equals(OriginType.UNIFORM_ORIGIN)) {
+				clusterHeight = MathUtils.round(this.dendroBottomHeight, this.precision);
+			} else {
+				clusterHeight = MathUtils.round(clusterBottomHeight, this.precision);
+			}
+			int i = this.htNames.get(cluster.getName());
+			this.ultraMatrix[i][i] = clusterHeight;
+		} else {// (numSubclusters > 1)
+			double clusterHeight = MathUtils.round(clusterBottomHeight, this.precision);
+			List<Cluster> leaves = cluster.getLeaves();
+			for (int m = 0; m < leaves.size(); m ++) {
+				Cluster ci = leaves.get(m);
+				int i = this.htNames.get(ci.getName());
+				for (int n = m + 1; n < leaves.size(); n ++) {
+					Cluster cj = leaves.get(n);
+					int j = this.htNames.get(cj.getName());
+					this.ultraMatrix[i][j] = clusterHeight;
+					this.ultraMatrix[j][i] = clusterHeight;
 				}
 			}
-			for (int n = 0; n < c.getNumSubclusters(); n ++) {
+			for (int n = 0; n < numSubclusters; n ++) {
 				try {
-					calculateUltrametricMatrix(c.getSubcluster(n));
+					calculateUltrametricMatrix(cluster.getSubcluster(n));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -108,28 +148,27 @@ public class UltrametricMatrix {
 		}
 	}
 
-	private void calculateOriginalMatrix() {
-		int posi, posj;
-		SimilarityStruct<String> sim;
+    public double[][] getUltraMatrix() {
+        return ultraMatrix;
+    }
 
-		for (int s = 0; s < this.originalData.size(); s ++) {
-			sim = this.originalData.get(s);
-			posi = this.htNames.get(sim.getC1());
-			posj = this.htNames.get(sim.getC2());
-			this.originalMatrix[posi][posj] = sim.getVal();
-			this.originalMatrix[posj][posi] = this.originalMatrix[posi][posj];
-		}
-		for (int i = 0; i < this.size; i ++) {
-			this.originalMatrix[i][i] = 0.0;
-		}
-	}
-
-	public void saveAsTXT(String path, int precision) throws Exception {
+	public void saveAsTxt(String path, int precision) throws Exception {
 		try {
 			File f = new File(path);
 			FileWriter fw = new FileWriter(f);
-			pw = new PrintWriter(fw);
-			printUltrametricMatrix(precision);
+			PrintWriter pw = new PrintWriter(fw);
+			String str = "";
+			for (int i = 0; i < this.names.length; i ++) {
+				str += this.names[i] + "\t";
+			}
+			pw.println(str);
+			for (int i = 0; i < this.ultraMatrix.length; i ++) {
+				str = "";
+				for (int j = 0; j < this.ultraMatrix.length; j ++) {
+					str += MathUtils.format(this.ultraMatrix[i][j], precision) + "\t";
+				}
+				pw.println(str);
+			}
 			pw.close();
 		} catch (Exception e) {
 			String msg_err = Language.getLabel(81);
@@ -139,42 +178,26 @@ public class UltrametricMatrix {
 		}
 	}
 
-	private void printUltrametricMatrix(int prec) {
-		String str = "";
-
-		for (int i = 0; i < names.length; i++)
-			str += names[i] + "\t";
-		pw.println(str);
-
-		int n = ultraMatrix.length;
-		for (int i = 0; i < n; i++) {
-			str = "";
-			for (int j = 0; j < n; j++)
-				str += MathUtils.format(ultraMatrix[i][j], prec) + "\t";
-			pw.println(str);
-		}
-	}
-
 	public double getCopheneticCorrelation() {
-		return DeviationMeasures.getCopheneticCorrelation(originalMatrix, ultraMatrix);
+		return DeviationMeasures.getCopheneticCorrelation(this.originalMatrix, this.ultraMatrix);
 	}
 
 	public double getSquaredError() {
-		return DeviationMeasures.getSquaredError(originalMatrix, ultraMatrix);
+		return DeviationMeasures.getSquaredError(this.originalMatrix, this.ultraMatrix);
 	}
 
 	public double getAbsoluteError() {
-		return DeviationMeasures.getAbsoluteError(originalMatrix, ultraMatrix);
+		return DeviationMeasures.getAbsoluteError(this.originalMatrix, this.ultraMatrix);
 	}
 
-	public void showMatrix(double[][] matriu) {
-		String cad = "";
-		int n = matriu.length;
-		for (int i = 0; i < n; i++) {
-			cad = "";
-			for (int j = 0; j < n; j++)
-				cad += matriu[i][j] + "\t";
-			System.out.println(cad);
+	public void showMatrix(double[][] matrix) {
+		String str = "";
+		for (int i = 0; i < matrix.length; i ++) {
+			str = "";
+			for (int j = 0; j < matrix.length; j ++) {
+				str += matrix[i][j] + "\t";
+			}
+			System.out.println(str);
 		}
 	}
 }

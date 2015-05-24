@@ -22,10 +22,11 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
-
+import java.io.File;
 import javax.swing.JLabel;
+
+import multidendrograms.initial.InitialProperties;
 
 /**
  * <p>
@@ -44,7 +45,8 @@ public class FileLabel extends JLabel {
 
 	public FileLabel(String path, String text) {
 		super(text);
-		setForeground(Color.blue);
+		setFont(InitialProperties.getFontLabel());
+		setForeground(Color.BLUE);
 		try {
 			this.file = new File(path);
 			addMouseListener(new Clicked());

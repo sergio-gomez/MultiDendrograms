@@ -24,8 +24,10 @@ import java.io.PrintWriter;
 
 import multidendrograms.initial.LogManager;
 import multidendrograms.initial.Language;
+import multidendrograms.types.OriginType;
 import multidendrograms.types.SimilarityType;
 import multidendrograms.utils.MathUtils;
+import multidendrograms.utils.SmartAxis;
 import multidendrograms.definitions.Cluster;
 
 /**
@@ -44,81 +46,101 @@ public class ToNewick {
 	private final Cluster root;
 	private final int precision;
 	private final SimilarityType simType;
-	private final double heightBottom;
+	private final OriginType originType;
+	private final double dendroBottomHeight;
 	private PrintWriter printWriter;
 
-	public ToNewick(Cluster root, int precision, SimilarityType simType,
-			double heightBottom) {
+	public ToNewick(final Cluster root, final int precision, final SimilarityType simType,
+			final OriginType originType) {
 		this.root = root;
 		this.precision = precision;
 		this.simType = simType;
-		this.heightBottom = heightBottom;
+		this.originType = originType;
+		SmartAxis smartAxis = new SmartAxis(simType, precision, originType, root);
+		if (simType.equals(SimilarityType.DISTANCE)) {
+			this.dendroBottomHeight = smartAxis.smartMin();
+		} else {// (simType.equals(SimilarityType.SIMILARITY))
+			this.dendroBottomHeight = smartAxis.smartMax();
+		}
 	}
 
-	public void saveAsNewick(String sPath) throws Exception {
-		File file;
-		FileWriter fileWriter;
-		String errMsg;
-
-		file = new File(sPath);
+	public void saveAsNewick(String path) throws Exception {
 		try {
-			fileWriter = new FileWriter(file);
-			this.printWriter = new PrintWriter(fileWriter);
-			showCluster(this.root, this.root.getSummaryHeight());
-			this.printWriter.print(";");
-			this.printWriter.close();
+			File file = new File(path);
+			FileWriter fileWriter = new FileWriter(file);
+            saveAsNewick(new PrintWriter(fileWriter));
 		} catch (Exception e) {
-			errMsg = Language.getLabel(83);
+			String errMsg = Language.getLabel(83);
 			LogManager.LOG.throwing("ToNewick.java", "saveAsNewick()", e);
 			throw new Exception(errMsg);
 		}
 	}
 
-	private void showCluster(final Cluster cluster, final double heightParent)
-			throws Exception {
-		double length;
-		String slength;
+    public void saveAsNewick(PrintWriter printWriter) throws Exception {
+        try {
+            this.printWriter = new PrintWriter(printWriter);
+            printCluster(this.root, this.root.getRootBottomHeight());
+            this.printWriter.print(";");
+            this.printWriter.close();
+        } catch (Exception e) {
+            String errMsg = Language.getLabel(83);
+            LogManager.LOG.throwing("ToNewick.java", "saveAsNewick()", e);
+            throw new Exception(errMsg);
+        }
+    }
 
-		double heightCurrent = cluster.getSummaryHeight();
-		if (heightCurrent < 0.0) {
-			String name = cluster.getName();
-			name = name.replace(' ', '_');
-			name = name.replace('\'', '"');
-			name = name.replace(':', '|');
-			name = name.replace(';', '|');
-			name = name.replace(',', '|');
-			name = name.replace('(', '{');
-			name = name.replace(')', '}');
-			name = name.replace('[', '{');
-			name = name.replace(']', '}');
+	private void printCluster(final Cluster cluster, final double parentHeight)
+			throws Exception {
+		final int numSubclusters = cluster.getNumSubclusters();
+		final double clusterBottomHeight = cluster.getRootBottomHeight();
+		double clusterHeight;
+		if (numSubclusters == 1) {
+			String name = adaptName(cluster.getName());
 			this.printWriter.print(name);
-			if (this.simType.equals(SimilarityType.DISTANCE)) {
-				length = MathUtils.round(heightParent - this.heightBottom, this.precision);
+			if (Double.isNaN(clusterBottomHeight) || this.originType.equals(OriginType.UNIFORM_ORIGIN)) {
+				clusterHeight = this.dendroBottomHeight;
 			} else {
-				length = MathUtils.round(this.heightBottom - heightParent, this.precision);
+				clusterHeight = clusterBottomHeight;
 			}
-			if (length > 0) {
-				slength = MathUtils.format(length, this.precision);
-				this.printWriter.print(":" + slength);
-			}
-		} else if (cluster.getNumSubclusters() > 1) {
+		} else {// (numSubclusters > 1)
+			clusterHeight = clusterBottomHeight;
 			this.printWriter.print("(");
-			for (int n = 0; n < cluster.getNumSubclusters(); n ++) {
-				showCluster(cluster.getSubcluster(n), heightCurrent);
-				if (n < cluster.getNumSubclusters() - 1) {
+			for (int n = 0; n < numSubclusters; n ++) {
+				printCluster(cluster.getSubcluster(n), clusterHeight);
+				if (n < numSubclusters - 1) {
 					this.printWriter.print(",");
 				}
 			}
 			this.printWriter.print(")");
-			if (this.simType.equals(SimilarityType.DISTANCE)) {
-				length = MathUtils.round(heightParent - heightCurrent, this.precision);
-			} else {
-				length = MathUtils.round(heightCurrent - heightParent, this.precision);
-			}
-			if (length > 0) {
-				slength = MathUtils.format(length, this.precision);
-				this.printWriter.print(":" + slength);
-			}
+		}
+		printClusterLength(parentHeight, clusterHeight);
+	}
+
+	private String adaptName(final String originalName) {
+		String newName = new String(originalName);
+		newName = newName.replace(' ', '_');
+		newName = newName.replace('\'', '"');
+		newName = newName.replace(':', '|');
+		newName = newName.replace(';', '|');
+		newName = newName.replace(',', '|');
+		newName = newName.replace('(', '{');
+		newName = newName.replace(')', '}');
+		newName = newName.replace('[', '{');
+		newName = newName.replace(']', '}');
+		return newName;
+	}
+
+	private void printClusterLength(final double parentHeight,
+			final double clusterHeight) {
+		double length;
+		if (this.simType.equals(SimilarityType.DISTANCE)) {
+			length = MathUtils.round(parentHeight - clusterHeight, this.precision);
+		} else {
+			length = MathUtils.round(clusterHeight - parentHeight, this.precision);
+		}
+		if (length > 0.0) {
+			String sLength = MathUtils.format(length, this.precision);
+			this.printWriter.print(":" + sLength);
 		}
 	}
 

@@ -16,19 +16,32 @@
  * <http://www.gnu.org/licenses/>
  */
 
-package multidendrograms.types;
+package multidendrograms.utils;
+
+import java.awt.Font;
 
 /**
  * <p>
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Identification of the data type
+ * Modify fonts
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
  *
  * @since JDK 6.0
  */
-public enum SimilarityType {
-	DISTANCE, SIMILARITY;
-};
+public class FontUtils {
+
+	public static Font addStyle(Font font, final int style) {
+		return font.deriveFont(font.getStyle() | style);
+	}
+
+	public static Font incSize(Font font, final float inc) {
+		return font.deriveFont(font.getSize() + inc);
+	}
+
+	public static Font addStyleIncSize(Font font, final int style, final float inc) {
+		return font.deriveFont(font.getStyle() | style, font.getSize() + inc);
+	}
+}

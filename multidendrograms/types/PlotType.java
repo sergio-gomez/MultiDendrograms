@@ -16,27 +16,19 @@
  * <http://www.gnu.org/licenses/>
  */
 
-package multidendrograms.dendrogram;
-
-import multidendrograms.definitions.BoxContainer;
+package multidendrograms.types;
 
 /**
  * <p>
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Simplifies scaling of graphical area
+ * Type of plot
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
  *
  * @since JDK 6.0
  */
-public class ScalingBox extends Scaling {
-
-	public ScalingBox(BoxContainer box) {
-		super(box.getValMaxX(), box.getValMaxY(), box.getValMinX(), box
-				.getValMinY(), box.getWidth(), box.getHeight());
-		setTranslationX(box.getCornerX());
-		setTranslationY(box.getCornerY());
-	}
-}
+public enum PlotType {
+	PANEL, EPS;
+};

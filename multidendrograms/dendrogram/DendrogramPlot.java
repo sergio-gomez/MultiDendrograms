@@ -26,10 +26,13 @@ import multidendrograms.initial.Language;
 import multidendrograms.dendrogram.figures.Band;
 import multidendrograms.dendrogram.figures.Line;
 import multidendrograms.dendrogram.figures.Node;
+import multidendrograms.types.OriginType;
 import multidendrograms.types.SimilarityType;
+import multidendrograms.utils.MathUtils;
 import multidendrograms.definitions.Cluster;
 import multidendrograms.definitions.Config;
 import multidendrograms.definitions.Coordinates;
+import multidendrograms.definitions.SettingsInfo;
 
 /**
  * <p>
@@ -47,104 +50,93 @@ public class DendrogramPlot {
 	private static SimilarityType simType;
 	private final int precision;
 	private final double radius;
-	private final double axisMaxVal;
-	private double posNodes = 0.0;
+	private final boolean bandVisible;
+	private final OriginType originType;
+	private final double dendroBottomHeight;
 	private int next = 0;
 
 	private final LinkedList<Node> nodesList = new LinkedList<Node>();
 	private final LinkedList<Line> linesList = new LinkedList<Line>();
 	private final LinkedList<Band> bandsList = new LinkedList<Band>();
 
-	public DendrogramPlot(final Cluster tree, final Config cf) throws Exception {
-		this.radius = cf.getRadius();
-		this.precision = cf.getPrecision();
-		this.axisMaxVal = cf.getAxisMaxVal();
-		DendrogramPlot.simType = cf.getSimilarityType();
-		if (DendrogramPlot.simType.equals(SimilarityType.DISTANCE)) {
-			this.posNodes = 0.0;
-		} else {
-			this.posNodes = this.axisMaxVal;
-		}
-		branchNodeCoordinates(tree, cf.getConfigMenu().isBandVisible());
+	public DendrogramPlot(final Cluster tree, final Config cfg) throws Exception {
+		DendrogramPlot.simType = cfg.getSimilarityType();
+		this.precision = cfg.getPrecision();
+		this.radius = cfg.getRadius();
+		SettingsInfo settings = cfg.getConfigMenu();
+		this.bandVisible = settings.isBandVisible();
+		this.originType = settings.getOriginType();
+		this.dendroBottomHeight = DendrogramPlot.simType.equals(SimilarityType.DISTANCE) ?
+				cfg.getAxisMinValue() : cfg.getAxisMaxValue();
+		branchNodeCoordinates(tree);
 	}
 
-	private Coordinates<Double> leafNodeCoordinates(final Cluster c) {
-		double x;
-		final Coordinates<Double> pos = new Coordinates<Double>(0.0, 0.0);
-		this.next ++;
-		x = this.radius * ((3 * this.next) - 1);
-		pos.setX(x);
-		pos.setY(this.posNodes);
-		this.nodesList.add(new Node(pos, this.radius, this.precision, c.getName()));
-		return pos;
-	}
-
-	private Coordinates<Double> branchNodeCoordinates(final Cluster c, final boolean band) throws Exception {
-		Coordinates<Double> pos = new Coordinates<Double>(0.0, 0.0);
-
-		if ((c.getNumSubclusters() == 1) && (c.getNumLeaves() == 1)) {
-			pos = this.leafNodeCoordinates(c);
-		} else {
-			double min = Double.MAX_VALUE;
-			double max = Double.MIN_VALUE;
-			for (int n = 0; n < c.getNumSubclusters(); n ++) {
+	private Coordinates<Double> branchNodeCoordinates(final Cluster cluster) throws Exception {
+		Coordinates<Double> position = new Coordinates<Double>(0.0, 0.0);
+		double rootBottomHeight = cluster.getRootBottomHeight();
+		double rootTopHeight = cluster.getRootTopHeight();
+		int numSubclusters = cluster.getNumSubclusters();
+		if (numSubclusters == 1) {
+			this.next ++;
+			double x = this.radius * ((3 * this.next) - 1);
+			position.setX(x);
+			if (Double.isNaN(rootBottomHeight) || this.originType.equals(OriginType.UNIFORM_ORIGIN)) {
+				position.setY(this.dendroBottomHeight);
+			} else {
+				double y;
+				if (DendrogramPlot.simType.equals(SimilarityType.DISTANCE)) {
+					y = Math.max(rootBottomHeight, this.dendroBottomHeight);
+				} else {// (DendrogramPlot.simType.equals(SimilarityType.SIMILARITY))
+					y = Math.min(rootBottomHeight, this.dendroBottomHeight);
+				}
+				position.setY(y);
+			}
+			this.nodesList.add(new Node(position.getX(), position.getY(), this.radius, cluster.getName()));
+		} else {// (numSubclusters > 1)
+			double rootIncrHeight = this.bandVisible ? Math.abs(rootTopHeight - rootBottomHeight) : 0.0;
+			rootIncrHeight = MathUtils.round(rootIncrHeight, precision);
+			rootBottomHeight = MathUtils.round(rootBottomHeight, precision);
+			double xMin = Double.MAX_VALUE;
+			double xMax = Double.MIN_VALUE;
+			for (int n = 0; n < numSubclusters; n ++) {
 				try {
-					pos = this.branchNodeCoordinates(c.getSubcluster(n), band);
+					position = branchNodeCoordinates(cluster.getSubcluster(n));
 				} catch (Exception e) {
 					String errMsg = Language.getLabel(64) + "\n" + e.getMessage();
-					LogManager.LOG.throwing(errMsg, "Branca(final Cluster c)", e);
+					LogManager.LOG.throwing(errMsg, "Branch(final Cluster c)", e);
 					throw new Exception(errMsg);
 				}
+				double x = position.getX();
+				double y = MathUtils.round(position.getY(), precision);
+				xMin = Math.min(xMin, x);
+				xMax = Math.max(xMax, x);
 				// Store line
-				if (band) {
-					this.linesList.add(new Line(pos, c.getHeight(), this.precision));
-					LogManager.LOG.finer("new Line: (" + pos.getX() + ", " + pos.getY()
-							+ ", " + c.getHeight() + ", " + this.precision + ")");
-				} else {
-					this.linesList.add(new Line(pos, c.getSummaryHeight(), this.precision));
-					LogManager.LOG.finer("new Line: (" + pos.getX() + ", " + pos.getY()
-							+ ", " + c.getSummaryHeight() + ", " + this.precision + ")");
-				}
-				min = min > pos.getX() ? pos.getX() : min;
-				max = max < pos.getX() ? pos.getX() : max;
+				this.linesList.add(new Line(x, y, rootBottomHeight));
+				LogManager.LOG.finer("new Line: (" + x + ", " + y + ", " + rootBottomHeight + ", " + this.precision + ")");
 			}
-
+			position.setX((xMin + xMax) / 2.0);
+			if (this.bandVisible) {
+				position.setY(rootTopHeight);
+			} else {
+				position.setY(rootBottomHeight);
+			}
 			// Store band
-			if (band) {
-				this.bandsList.add(new Band(min, c.getHeight(), c.getAgglomeration(), (max - min), this.precision));
-				LogManager.LOG.finer("Band: (" + min + ", " + c.getHeight() + ", " + c.getAgglomeration() + ", " + (max - min));
-			} else {
-				this.bandsList.add(new Band(min, c.getSummaryHeight(), 0, (max - min), this.precision));
-				LogManager.LOG.finer("Band: (" + min + ", " + c.getSummaryHeight() + ", " + 0 + ", " + (max - min));
-			}
-			pos.setX((min + max) / 2);
-			if (DendrogramPlot.simType.equals(SimilarityType.DISTANCE)) {
-				if (band) {
-					pos.setY(c.getHeight() + c.getAgglomeration());
-				} else {
-					pos.setY(c.getSummaryHeight());
-				}
-			} else {
-				if (band) {
-					pos.setY(c.getHeight() - c.getAgglomeration());
-				} else {
-					pos.setY(c.getSummaryHeight());
-				}
-			}
+			this.bandsList.add(new Band(xMin, rootBottomHeight, rootIncrHeight, xMax - xMin));
+			LogManager.LOG.finer("Band: (" + xMin + ", " + rootBottomHeight + ", " + rootIncrHeight + ", " + (xMax - xMin));
 		}
-		return pos;
+		return position;
 	}
 
 	public LinkedList<Node> getNodesList() {
-		return nodesList;
+		return this.nodesList;
 	}
 
 	public LinkedList<Line> getLinesList() {
-		return linesList;
+		return this.linesList;
 	}
 
 	public LinkedList<Band> getBandsList() {
-		return bandsList;
+		return this.bandsList;
 	}
 
 }

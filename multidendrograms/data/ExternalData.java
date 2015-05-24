@@ -42,98 +42,87 @@ import multidendrograms.definitions.DistancesMatrix;
 public class ExternalData {
 
 	private final DataFile df;
-	private boolean check;
-	private Hashtable<Integer, String> names;
-	private DistancesMatrix distMatrix;
 	LinkedList<SimilarityStruct<String>> data;
 	private int numClusters = 0;
+	private DistancesMatrix distMatrix;
 	private int precision = 0;
+	private Hashtable<Integer, String> names;
 
-	public ExternalData(final DataFile df, boolean check) throws Exception {
+	public ExternalData(final DataFile df) throws Exception {
 		this.df = new DataFile(df);
-		this.check = check;
-		fillDistancesMatrix();
-	}
 
-	private void fillDistancesMatrix() throws Exception {
-		SimilarityStruct<String> pair;
-		Iterator<SimilarityStruct<String>> it;
-		final CountDecimals cp = new CountDecimals();
+		ReadTxt txt = new ReadTxt(df.getPathName());
+		this.data = txt.getData();
+		this.numClusters = txt.getNumElements();
 
-		DistancesMatrix dm;
-
-		readData();
-
-		LogManager.LOG.config("Creating a matrix for " + numClusters + " clusters");
-
-		Cluster.resetId();
-		dm = new DistancesMatrix(numClusters);
-		it = data.iterator();
+		LogManager.LOG.config("Creating a matrix for " + this.numClusters + " clusters");
 
 		final Hashtable<String, Cluster> ht = new Hashtable<String, Cluster>();
-		Cluster c1, c2;
-
+		final CountDecimals countDecimals = new CountDecimals();
+		this.distMatrix = new DistancesMatrix(this.numClusters);
+		Cluster.resetId();
+		Iterator<SimilarityStruct<String>> it = this.data.iterator();
 		while (it.hasNext()) {
-			pair = it.next();
+			SimilarityStruct<String> pair = it.next();
 
-			if (ht.containsKey(pair.getC1()))
-				c1 = ht.get(pair.getC1());
+			Cluster cluster1;
+			String key1 = pair.getC1();
+			if (ht.containsKey(key1))
+				cluster1 = ht.get(key1);
 			else {
-				c1 = new Cluster();
-				c1.setName(pair.getC1());
-				ht.put(pair.getC1(), c1);
+				cluster1 = new Cluster();
+				cluster1.setName(key1);
+				ht.put(key1, cluster1);
 			}
 
-			if (ht.containsKey(pair.getC2()))
-				c2 = ht.get(pair.getC2());
+			Cluster cluster2;
+			String key2 = pair.getC2();
+			if (ht.containsKey(key2))
+				cluster2 = ht.get(key2);
 			else {
-				c2 = new Cluster();
-				c2.setName(pair.getC2());
-				ht.put(pair.getC2(), c2);
+				cluster2 = new Cluster();
+				cluster2.setName(key2);
+				ht.put(key2, cluster2);
 			}
-			cp.inValue(pair.getVal());
-			dm.setDistance(c1, c2, pair.getVal());
+
+			double dist = pair.getValue();
+			this.distMatrix.setDistance(cluster1, cluster2, dist);
+			if (!Double.isNaN(dist)) {
+				countDecimals.inValue(dist);
+				if (key1.equals(key2)) {
+					cluster1.setRootHeights(dist);
+					cluster1.setNodesHeights(dist);
+				}
+			}
 		}
-		precision = cp.getPrecision();
+		this.precision = countDecimals.getPrecision();
 
-		distMatrix = dm;
-		names = new Hashtable<Integer, String>();
-		String s;
+		this.names = new Hashtable<Integer, String>();
 		Enumeration<String> e = ht.keys();
-		while (e.hasMoreElements())
-			s = e.nextElement();
-
-		e = ht.keys();
 		while (e.hasMoreElements()) {
-			s = e.nextElement();
-			names.put(ht.get(s).getId(), s);
+			String s = e.nextElement();
+			this.names.put(ht.get(s).getId(), s);
 		}
-	}
-
-	private void readData() throws Exception {
-		ReadTxt txt = new ReadTxt(df.getPathName(), check);
-		data = txt.getData();
-		numClusters = txt.getNumElements();
 	}
 
 	public DataFile getDataFile() {
-		return df;
+		return this.df;
 	}
 
 	public Hashtable<Integer, String> getNames() {
-		return names;
+		return this.names;
 	}
 
 	public DistancesMatrix getDistancesMatrix() {
-		return distMatrix;
+		return this.distMatrix;
 	}
 
 	public LinkedList<SimilarityStruct<String>> getData() {
-		return data;
+		return this.data;
 	}
 
 	public int getPrecision() {
-		return precision;
+		return this.precision;
 	}
 
 }

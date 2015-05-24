@@ -8,12 +8,12 @@ Invalid value in 'Labels every' field
 Error
 The file was not loaded
 Working data
-Ambiguous file. It will be taken as a parity type file
+Ambiguous file. It will be taken as a list-like file
 The loaded file is not compatible with this application
-Asymmetric data / Two different values for the same data pair
+Asymmetric data: two different values for the same data pair
 Error at line
 The third column must contain a numeric value
-Missing data values, filling them with the default value in INI file
+Missing data values, filling them with the default value in 'md.ini' file
 Incompatible file
 The cluster is not in the group
 Unable to recover the cluster
@@ -22,19 +22,19 @@ File
 Load
 View
 Settings
-Clustering algor.
-DENDROGRAM
+Clustering algorithm
+Dendrogram
 Tree orientation
-Distances
-Weights
-TREE
-NODES
+Distance
+Similarity
+Tree
+Nodes
 Show labels
 Nodes
-Labels orientat.
+Labels orientation
 Font
 Color
-AXIS
+Axis
 Show axis
 Color
 Show labels
@@ -50,7 +50,7 @@ Show bands
 Labels decimals
 Invalid value in 'Labels decimals' field
 Precision
-
+Info
 
 Bold
 Italic
@@ -63,7 +63,7 @@ Cancel
 Root
 
 Unable to process the dendrogram figure
-File header not found. Data by default will be loaded instead
+File header not found, default values will be loaded
 Property not found
 Unable to create the properties file
 
@@ -76,7 +76,7 @@ Unable to load the dendrogram properties
 Save as
 Unable to save the image
 Null image
-Unable to build the hierarchy tree
+Unable to build the hierarchical tree
 
 Save as
 Unable to create the file
@@ -99,7 +99,7 @@ Save dendrogram as PNG
 Save dendrogram as TXT
 Save dendrogram as EPS
 The number of rows is larger than the number of columns
-A number not equal to '0' has been found in the diagonal
+A number not equal to 0 has been found in the diagonal
 value discarded in line
 There is no data in the file
 The columns count is wrong at line
@@ -130,3 +130,4 @@ at line
 New
 available at
 Current version is
+Uniform origin

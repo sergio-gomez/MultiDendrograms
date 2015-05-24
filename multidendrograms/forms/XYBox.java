@@ -18,11 +18,17 @@
 
 package multidendrograms.forms;
 
+import java.util.Enumeration;
+
 import multidendrograms.types.DendrogramOrientation;
-import multidendrograms.types.SimilarityType;
+import multidendrograms.types.LabelOrientation;
+import multidendrograms.utils.TextBoxSize;
 import multidendrograms.definitions.BoxContainer;
 import multidendrograms.definitions.Config;
 import multidendrograms.definitions.Dimensions;
+import multidendrograms.definitions.SettingsInfo;
+import multidendrograms.dendrogram.Scaling;
+import multidendrograms.initial.InitialProperties;
 
 /**
  * <p>
@@ -37,297 +43,342 @@ import multidendrograms.definitions.Dimensions;
  */
 public class XYBox {
 
-	private final Dimensions<Double> nodeRadius;
-	private final Dimensions<Double> nodeNameSize;
-	private final Dimensions<Double> axisSize, axisLabelSize;
-	private final DendrogramOrientation dendroOrientation;
-	private final SimilarityType simType;
-	private final double radius, margin;
-	private final double worldWidth, worldHeight;
-	private double maxValShow, minValShow;
-	private final int numClusters;
-	private double usedWidth, usedHeight;
-	private double dendroWidth, dendroHeight;
-	private BoxContainer boxDendro, boxBullets, boxNames, boxAxis, boxAxisLabels;
+	private Scaling scalingDendro = null;
+	private Scaling scalingBullets = null;
+	private Scaling scalingAxis = null;
+	private Scaling scalingAxisLabels = null;
 
-	public XYBox(final Config cfg, final double margin, final double worldWidth,
-			final double worldHeight, final Dimensions<Double> dendrogramSize,
-			final Dimensions<Double> nodeRadius, final Dimensions<Double> nodeNameSize,
-			final Dimensions<Double> axisSize, final Dimensions<Double> axisLabelSize) {
-		this.margin = margin;
-		this.worldWidth = worldWidth;
-		this.worldHeight = worldHeight;
-		this.nodeRadius = nodeRadius;
-		this.nodeNameSize = nodeNameSize;
-		this.axisSize = axisSize;
-		this.axisLabelSize = axisLabelSize;
-		this.dendroOrientation = cfg.getDendrogramOrientation();
-		this.simType = cfg.getSimilarityType();
-		this.radius = cfg.getRadius();
-		this.numClusters = cfg.getDistancesMatrix().getRoot().getNumLeaves();
+	public XYBox(final Config cfg, final double worldWidth, final double worldHeight) {
+		final double margin = InitialProperties.getSizeDendroMargin();
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
+		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
+		final double radius = cfg.getRadius();
 
-		// free space in window
-		if (DendrogramOrientation.NORTH.equals(dendroOrientation) || DendrogramOrientation.SOUTH.equals(dendroOrientation)) {
-			usedWidth = axisSize.getWidth() + axisLabelSize.getWidth() + 2 * radius;
-			usedHeight = nodeNameSize.getHeight() + nodeRadius.getHeight() + 2 * radius;
+		Dimensions<Double> dimBullets = getDimensionsBullets(cfg);
+		Dimensions<Double> dimNodesNames = getDimensionsNodesNames(cfg);
+		Dimensions<Double> dimAxis = getDimensionsAxis(cfg);
+		Dimensions<Double> dimAxisLabels = getDimensionsAxisLabels(cfg);
+
+		double usedWidth;
+		double usedHeight;
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			usedWidth = dimAxis.getWidth() + dimAxisLabels.getWidth() + 2 * radius;
+			usedHeight = dimNodesNames.getHeight() + dimBullets.getHeight() + 2 * radius;
 		} else {
-			usedWidth = nodeNameSize.getWidth() + nodeRadius.getWidth() + 2 * radius;
-			usedHeight = axisSize.getHeight() + axisLabelSize.getHeight() + 2 * radius;
+			usedWidth = dimNodesNames.getWidth() + dimBullets.getWidth() + 2 * radius;
+			usedHeight = dimAxis.getHeight() + dimAxisLabels.getHeight() + 2 * radius;
 		}
-		this.maxValShow = cfg.getAxisMaxVal();
-		this.minValShow = cfg.getAxisMinVal();
-		this.calculateDendrogram();
+		DendrogramOrientation adaptedOrientation = settingsInfo.getDendrogramAdaptedOrientation();
+		double freeWidth;
+		double freeHeight;
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			freeWidth = worldWidth - (usedWidth + 2 * margin + dimNodesNames.getWidth());
+			freeHeight = worldHeight - (usedHeight + 2 * margin);
+		} else {
+			freeWidth = worldWidth - (usedWidth + 2 * margin);
+			freeHeight = worldHeight - (usedHeight + 2 * margin + dimNodesNames.getHeight());
+		}
+
+		BoxContainer boxDendro = getBoxDendrogram(cfg, adaptedOrientation, dimNodesNames, usedWidth, usedHeight, 
+				freeWidth, freeHeight);
+		BoxContainer boxBullets = getBoxBullets(cfg, adaptedOrientation, dimBullets, freeWidth, freeHeight, boxDendro);
+		BoxContainer boxAxis = getBoxAxis(cfg, dimAxis, dimAxisLabels, freeWidth, freeHeight, boxDendro);
+		BoxContainer boxAxisLabels = getBoxAxisLabels(cfg, dimAxis, dimAxisLabels, freeWidth, freeHeight, boxDendro);
+
+		// situation of boxes in the screen
+		boxDendro.increaseCornerY(-worldHeight);
+		boxBullets.increaseCornerY(-worldHeight);
+		boxAxis.increaseCornerY(-worldHeight);
+		boxAxisLabels.increaseCornerY(-worldHeight);
+
+		this.scalingDendro = new Scaling(boxDendro);
+		this.scalingBullets = new Scaling(boxBullets);
+		this.scalingAxis = new Scaling(boxAxis);
+		this.scalingAxisLabels = new Scaling(boxAxisLabels);
 	}
 
-	private void calculateDendrogram() {
-		double x, y;
-		DendrogramOrientation or;
-		boxDendro = new BoxContainer();
-
-		or = this.adaptOrientation();
-
-		if (DendrogramOrientation.NORTH.equals(or)
-				|| DendrogramOrientation.SOUTH.equals(or)) {
-			dendroWidth = worldWidth - (usedWidth + nodeNameSize.getWidth() + 2 * margin);
-			dendroHeight = worldHeight - (usedHeight + 2 * margin);
-		} else if (DendrogramOrientation.EAST.equals(or)
-				|| DendrogramOrientation.WEST.equals(or)) {
-			dendroWidth = worldWidth - (usedWidth + 2 * margin);
-			dendroHeight = worldHeight
-					- (usedHeight + 2 * margin + nodeNameSize.getHeight());
+	private Dimensions<Double> getDimensionsBullets(final Config cfg) {
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
+		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
+		final int numNodes = cfg.getDistancesMatrix().getRoot().getNumLeaves();
+		final double radius = cfg.getRadius();
+		
+		double nodesRadius = settingsInfo.getNodeRadius();
+		double width = 0.0;
+		double height = 0.0;
+		if (nodesRadius > 0) {
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+				width = boxNodesWidth(numNodes, radius);
+				height = 2 * nodesRadius;
+			} else {
+				width = 2 * nodesRadius;
+				height = boxNodesWidth(numNodes, radius);
+			}
 		}
+		Dimensions<Double> dim = new Dimensions<Double>(width, height);
+		return dim;
+	}
 
-		x = DendrogramOrientation.WEST.equals(or) ? margin : (usedWidth + margin);
-		y = DendrogramOrientation.NORTH.equals(or) ? (usedHeight + margin) : margin;
+	private Dimensions<Double> getDimensionsNodesNames(final Config cfg) {
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
+		
+		double width = 0.0;
+		double height = 0.0;
+		if (settingsInfo.isNodeNameVisible()) {
+			LabelOrientation nameOrientation = cfg.getNodeNameOrientation();
+			int alf;
+			if (nameOrientation.equals(LabelOrientation.HORIZONTAL)) {
+				alf = 0;
+			} else if (nameOrientation.equals(LabelOrientation.OBLIQUE)) {
+				alf = 45;
+			} else {// (nameOrientation.equals(LabelOrientation.VERTICAL))
+				alf = -90;
+			}
+			final TextBoxSize box = new TextBoxSize(settingsInfo.getNodeNameFont());
+			final Enumeration<String> names = cfg.getNames().elements();
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				Dimensions<Double> nameDim = box.getBox(alf, name);
+				width = Math.max(width, nameDim.getWidth());
+				height = Math.max(height, nameDim.getHeight());
+			}
+		}
+		Dimensions<Double> dim = new Dimensions<Double>(width, height);
+		return dim;
+	}
 
+	private Dimensions<Double> getDimensionsAxis(final Config cfg) {
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
+		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
+		final double radius = cfg.getRadius();
+		final double axisLength = cfg.getAxisMaxValue() - cfg.getAxisMinValue();
+		
+		double width = 0.0;
+		double height = 0.0;
+		if (settingsInfo.isAxisVisible()) {
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH) || 
+					dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+				width = 2 * radius;
+				height = axisLength;
+			} else {
+				width = axisLength;
+				height = 2 * radius;
+			}
+		}
+		Dimensions<Double> dim = new Dimensions<Double>(width, height);
+		return dim;
+	}
+
+	private Dimensions<Double> getDimensionsAxisLabels(final Config cfg) {
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
+		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
+		
+		Dimensions<Double> dim = new Dimensions<Double>(0.0, 0.0);
+		if (settingsInfo.isAxisLabelVisible()) {
+			final TextBoxSize box = new TextBoxSize(settingsInfo.getAxisLabelFont());
+			int intMax = (int) Math.round(cfg.getAxisMaxValue());
+			String strMax = Integer.toString(intMax);
+			int lengthMax = (strMax.trim()).length();
+			int axisDecimals = cfg.getAxisLabelDecimals();
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH) || 
+					dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+				if (cfg.isDistance()) {
+					dim = box.getBoxPositiveNumber(0, lengthMax, axisDecimals);
+				} else {
+					dim = box.getBoxNegativeNumber(0, lengthMax, axisDecimals);
+				}
+			} else {
+				if (cfg.isDistance()) {
+					dim = box.getBoxPositiveNumber(90, lengthMax, axisDecimals);
+				} else {
+					dim = box.getBoxNegativeNumber(90, lengthMax, axisDecimals);
+				}
+			}
+		}
+		return dim;
+	}
+
+	private BoxContainer getBoxDendrogram(final Config cfg, final DendrogramOrientation adaptedOrientation, 
+			final Dimensions<Double> dimNodesNames, final double usedWidth, final double usedHeight, 
+			final double freeWidth, final double freeHeight) {
+		final double margin = InitialProperties.getSizeDendroMargin();
+		final int numNodes = cfg.getDistancesMatrix().getRoot().getNumLeaves();
+		final double radius = cfg.getRadius();
+		final double axisMinValue = cfg.getAxisMinValue();
+		final double axisMaxValue = cfg.getAxisMaxValue();
+
+		BoxContainer boxDendro = new BoxContainer();
+		double x = adaptedOrientation.equals(DendrogramOrientation.WEST) ? margin : (usedWidth + margin);
+		double y = adaptedOrientation.equals(DendrogramOrientation.NORTH) ? (usedHeight + margin) : margin;
 		boxDendro.setCornerX(x);
-		boxDendro.setCornerY(y);
-		if (DendrogramOrientation.EAST.equals(or) || DendrogramOrientation.WEST.equals(or))
-			boxDendro.setCornerY(y + nodeNameSize.getHeight());
-		boxDendro.setWidth(dendroWidth);
-		boxDendro.setHeight(dendroHeight);
-		if (DendrogramOrientation.NORTH.equals(or)
-				|| DendrogramOrientation.SOUTH.equals(or)) {
-			boxDendro.setValMaxX(this.boxClustersWidth());
-			boxDendro.setValMinX(0d);
-			boxDendro.setValMaxY(maxValShow);
-			boxDendro.setValMinY(minValShow);
+		if (adaptedOrientation.equals(DendrogramOrientation.NORTH) || adaptedOrientation.equals(DendrogramOrientation.SOUTH)) {
+			boxDendro.setCornerY(y);
 		} else {
-			boxDendro.setValMaxY(this.boxClustersWidth());
-			boxDendro.setValMinY(0d);
-			boxDendro.setValMaxX(maxValShow);
-			boxDendro.setValMinX(minValShow);
+			boxDendro.setCornerY(y + dimNodesNames.getHeight());
 		}
-	}
-
-	public BoxContainer getBoxDendro() {
+		boxDendro.setWidth(freeWidth);
+		boxDendro.setHeight(freeHeight);
+		if (adaptedOrientation.equals(DendrogramOrientation.NORTH)	|| adaptedOrientation.equals(DendrogramOrientation.SOUTH)) {
+			boxDendro.setValMinX(0d);
+			boxDendro.setValMaxX(boxNodesWidth(numNodes, radius));
+			boxDendro.setValMinY(axisMinValue);
+			boxDendro.setValMaxY(axisMaxValue);
+		} else {
+			boxDendro.setValMinX(axisMinValue);
+			boxDendro.setValMaxX(axisMaxValue);
+			boxDendro.setValMinY(0d);
+			boxDendro.setValMaxY(boxNodesWidth(numNodes, radius));
+		}
 		return boxDendro;
 	}
 
-	public BoxContainer getBoxAxisLabels() {
+	private BoxContainer getBoxBullets(final Config cfg, final DendrogramOrientation adaptedOrientation, 
+			final Dimensions<Double> dimBullets, final double freeWidth, final double freeHeight, final BoxContainer boxDendro) {
+		final int numNodes = cfg.getDistancesMatrix().getRoot().getNumLeaves();
+		final double radius = cfg.getRadius();
+
 		double x, y;
-		double w, h;
-		DendrogramOrientation or;
-		boxAxisLabels = new BoxContainer();
-
-		or = this.adaptOrientation();
-
-		if (DendrogramOrientation.NORTH.equals(or)
-				|| DendrogramOrientation.SOUTH.equals(or)) {
-			x = margin;
-			y = boxDendro.getCornerY();
-			w = axisLabelSize.getWidth();
-			h = dendroHeight;
-		} else {
-			x = boxDendro.getCornerX();
-			y = boxDendro.getCornerY() + dendroHeight + axisSize.getHeight() + 2
-					* radius;
-			w = dendroWidth;
-			h = axisLabelSize.getHeight();
-		}
-
-		boxAxisLabels.setCornerX(x);
-		boxAxisLabels.setCornerY(y);
-		boxAxisLabels.setWidth(w);
-		boxAxisLabels.setHeight(h);
-
-		if (DendrogramOrientation.NORTH.equals(or)
-				|| DendrogramOrientation.SOUTH.equals(or)) {
-			boxAxisLabels.setValMaxX(axisLabelSize.getWidth());
-			boxAxisLabels.setValMinX(0d);
-			boxAxisLabels.setValMaxY(maxValShow);
-			boxAxisLabels.setValMinY(minValShow);
-		} else {
-			boxAxisLabels.setValMaxY(axisLabelSize.getHeight());
-			boxAxisLabels.setValMinY(0d);
-			boxAxisLabels.setValMaxX(maxValShow);
-			boxAxisLabels.setValMinX(minValShow);
-		}
-
-		return boxAxisLabels;
-	}
-
-	public BoxContainer getBoxAxis() {
-		double x, y;
-		double w, h;
-		DendrogramOrientation or;
-		boxAxis = new BoxContainer();
-
-		or = this.adaptOrientation();
-
-		if (DendrogramOrientation.NORTH.equals(or)
-				|| DendrogramOrientation.SOUTH.equals(or)) {
-			x = axisLabelSize.getWidth() + radius + margin;
-			y = boxDendro.getCornerY();
-			w = axisSize.getWidth();
-			h = dendroHeight;
-
-		} else {
-			x = boxDendro.getCornerX();
-			y = boxDendro.getCornerY() + dendroHeight + radius;
-			w = dendroWidth;
-			h = axisSize.getHeight();
-		}
-
-		boxAxis.setCornerX(x);
-		boxAxis.setCornerY(y);
-		boxAxis.setWidth(w);
-		boxAxis.setHeight(h);
-
-		if (DendrogramOrientation.NORTH.equals(or)
-				|| DendrogramOrientation.SOUTH.equals(or)) {
-			boxAxis.setValMaxX(2d);
-			boxAxis.setValMinX(0d);
-			boxAxis.setValMaxY(maxValShow);
-			boxAxis.setValMinY(minValShow);
-		} else {
-			boxAxis.setValMaxY(2d);
-			boxAxis.setValMinY(0d);
-			boxAxis.setValMaxX(maxValShow);
-			boxAxis.setValMinX(minValShow);
-		}
-
-		return boxAxis;
-	}
-
-	public BoxContainer getBoxNames() {
-		double x = 0, y = 0;
-		double w = 0, h = 0;
-		DendrogramOrientation or;
-		boxNames = new BoxContainer();
-
-		or = this.adaptOrientation();
-
-		if (DendrogramOrientation.NORTH.equals(or)) {
-			x = boxDendro.getCornerX();
-			y = margin;
-		} else if (DendrogramOrientation.SOUTH.equals(or)) {
-			x = boxDendro.getCornerX();
-			y = boxDendro.getCornerY() + dendroHeight + nodeRadius.getHeight() + 2
-					* radius;
-		} else if (DendrogramOrientation.WEST.equals(or)) {
-			x = boxDendro.getCornerX() + dendroWidth + nodeRadius.getWidth() + 2 * radius;
-			y = boxDendro.getCornerY();
-		} else if (DendrogramOrientation.EAST.equals(or)) {
-			x = margin;
-			y = boxDendro.getCornerY();
-		}
-
-		if (DendrogramOrientation.NORTH.equals(or) || DendrogramOrientation.SOUTH.equals(or)) {
-			w = dendroWidth;
-			h = nodeNameSize.getHeight();
-		} else {
-			w = nodeNameSize.getWidth();
-			h = dendroHeight;
-		}
-
-		boxNames.setCornerX(x);
-		boxNames.setCornerY(y);
-		boxNames.setWidth(w);
-		boxNames.setHeight(h);
-
-		if (DendrogramOrientation.NORTH.equals(or) || DendrogramOrientation.SOUTH.equals(or)) {
-			boxNames.setValMaxX(this.boxClustersWidth());
-			boxNames.setValMinX(0d);
-			boxNames.setValMaxY(nodeNameSize.getHeight());
-			boxNames.setValMinY(0d);
-		} else {
-			boxNames.setValMaxY(this.boxClustersWidth());
-			boxNames.setValMinY(0d);
-			boxNames.setValMaxX(nodeNameSize.getWidth());
-			boxNames.setValMinX(0d);
-		}
-		return boxNames;
-	}
-
-	public BoxContainer getBoxBullets() {
-		double x = 0, y = 0;
-		double w = 0, h = 0;
-		DendrogramOrientation or;
-		boxBullets = new BoxContainer();
-		or = this.adaptOrientation();
-
-		if (DendrogramOrientation.NORTH.equals(or)) {
+		if (adaptedOrientation.equals(DendrogramOrientation.NORTH)) {
 			x = boxDendro.getCornerX();
 			y = boxDendro.getCornerY() - radius + 1;
-		} else if (DendrogramOrientation.SOUTH.equals(or)) {
+		} else if (adaptedOrientation.equals(DendrogramOrientation.SOUTH)) {
 			x = boxDendro.getCornerX();
-			y = boxDendro.getCornerY() + dendroHeight - radius + 1;
-		} else if (DendrogramOrientation.WEST.equals(or)) {
-			x = boxDendro.getCornerX() + dendroWidth - radius + 1;
+			y = boxDendro.getCornerY() + freeHeight - radius + 1;
+		} else if (adaptedOrientation.equals(DendrogramOrientation.WEST)) {
+			x = boxDendro.getCornerX() + freeWidth - radius + 1;
 			y = boxDendro.getCornerY();
-		} else if (DendrogramOrientation.EAST.equals(or)) {
+		} else {// (adaptedOrientation.equals(DendrogramOrientation.EAST))
 			x = boxDendro.getCornerX() - radius + 1;
 			y = boxDendro.getCornerY();
 		}
-
-		if (DendrogramOrientation.NORTH.equals(or) || DendrogramOrientation.SOUTH.equals(or)) {
-			w = dendroWidth;
-			h = nodeRadius.getHeight();
+		double w, h;
+		if (adaptedOrientation.equals(DendrogramOrientation.NORTH) || adaptedOrientation.equals(DendrogramOrientation.SOUTH)) {
+			w = freeWidth;
+			h = dimBullets.getHeight();
 		} else {
-			w = nodeRadius.getWidth();
-			h = dendroHeight;
+			w = dimBullets.getWidth();
+			h = freeHeight;
 		}
-
+		
+		BoxContainer boxBullets = new BoxContainer();
 		boxBullets.setCornerX(x);
 		boxBullets.setCornerY(y);
 		boxBullets.setWidth(w);
 		boxBullets.setHeight(h);
-
-		if (DendrogramOrientation.NORTH.equals(or)
-				|| DendrogramOrientation.SOUTH.equals(or)) {
-			boxBullets.setValMaxX(this.boxClustersWidth());
+		if (adaptedOrientation.equals(DendrogramOrientation.NORTH)	|| adaptedOrientation.equals(DendrogramOrientation.SOUTH)) {
 			boxBullets.setValMinX(0d);
+			boxBullets.setValMaxX(boxNodesWidth(numNodes, radius));
+			boxBullets.setValMinY(0d);
 			boxBullets.setValMaxY(radius);
-			boxBullets.setValMinY(0d);
 		} else {
-			boxBullets.setValMaxY(this.boxClustersWidth());
-			boxBullets.setValMinY(0d);
-			boxBullets.setValMaxX(radius);
 			boxBullets.setValMinX(0d);
+			boxBullets.setValMaxX(radius);
+			boxBullets.setValMinY(0d);
+			boxBullets.setValMaxY(boxNodesWidth(numNodes, radius));
 		}
 		return boxBullets;
 	}
 
-	private DendrogramOrientation adaptOrientation() {
-		DendrogramOrientation relativeOr;
-		if (SimilarityType.WEIGHT.equals(simType)) {
-			if (DendrogramOrientation.NORTH.equals(dendroOrientation))
-				relativeOr = DendrogramOrientation.SOUTH;
-			else if (DendrogramOrientation.SOUTH.equals(dendroOrientation))
-				relativeOr = DendrogramOrientation.NORTH;
-			else if (DendrogramOrientation.WEST.equals(dendroOrientation))
-				relativeOr = DendrogramOrientation.EAST;
-			else
-				relativeOr = DendrogramOrientation.WEST;
-		} else
-			relativeOr = dendroOrientation;
+	private BoxContainer getBoxAxis(final Config cfg, final Dimensions<Double> dimAxis, final Dimensions<Double> dimAxisLabels, 
+			final double freeWidth, final double freeHeight, final BoxContainer boxDendro) {
+		final double margin = InitialProperties.getSizeDendroMargin();
+		final double radius = cfg.getRadius();
+		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
+		final double axisMinValue = cfg.getAxisMinValue();
+		final double axisMaxValue = cfg.getAxisMaxValue();
 
-		return relativeOr;
+		double x, y;
+		double w, h;
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			x = dimAxisLabels.getWidth() + radius + margin;
+			y = boxDendro.getCornerY();
+			w = dimAxis.getWidth();
+			h = freeHeight;
+		} else {
+			x = boxDendro.getCornerX();
+			y = boxDendro.getCornerY() + freeHeight + radius;
+			w = freeWidth;
+			h = dimAxis.getHeight();
+		}
+		
+		BoxContainer boxAxis = new BoxContainer();
+		boxAxis.setCornerX(x);
+		boxAxis.setCornerY(y);
+		boxAxis.setWidth(w);
+		boxAxis.setHeight(h);
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			boxAxis.setValMinX(0d);
+			boxAxis.setValMaxX(2d);
+			boxAxis.setValMinY(axisMinValue);
+			boxAxis.setValMaxY(axisMaxValue);
+		} else {
+			boxAxis.setValMinX(axisMinValue);
+			boxAxis.setValMaxX(axisMaxValue);
+			boxAxis.setValMinY(0d);
+			boxAxis.setValMaxY(2d);
+		}
+		return boxAxis;
 	}
 
-	private double boxClustersWidth() {
-		return ((2 * radius * numClusters) + ((numClusters - 1) * radius));
+	private BoxContainer getBoxAxisLabels(final Config cfg, final Dimensions<Double> dimAxis, 
+			final Dimensions<Double> dimAxisLabels, final double freeWidth, final double freeHeight, final BoxContainer boxDendro) {
+		final double margin = InitialProperties.getSizeDendroMargin();
+		final double radius = cfg.getRadius();
+		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
+		final double axisMinValue = cfg.getAxisMinValue();
+		final double axisMaxValue = cfg.getAxisMaxValue();
+
+		double x, y;
+		double w, h;
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			x = margin;
+			y = boxDendro.getCornerY();
+			w = dimAxisLabels.getWidth();
+			h = freeHeight;
+		} else {
+			x = boxDendro.getCornerX();
+			y = boxDendro.getCornerY() + freeHeight + dimAxis.getHeight() + 2 * radius;
+			w = freeWidth;
+			h = dimAxisLabels.getHeight();
+		}
+		
+		BoxContainer boxAxisLabels = new BoxContainer();
+		boxAxisLabels.setCornerX(x);
+		boxAxisLabels.setCornerY(y);
+		boxAxisLabels.setWidth(w);
+		boxAxisLabels.setHeight(h);
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			boxAxisLabels.setValMinX(0d);
+			boxAxisLabels.setValMaxX(dimAxisLabels.getWidth());
+			boxAxisLabels.setValMinY(axisMinValue);
+			boxAxisLabels.setValMaxY(axisMaxValue);
+		} else {
+			boxAxisLabels.setValMinX(axisMinValue);
+			boxAxisLabels.setValMaxX(axisMaxValue);
+			boxAxisLabels.setValMinY(0d);
+			boxAxisLabels.setValMaxY(dimAxisLabels.getHeight());
+		}
+		return boxAxisLabels;
+	}
+
+	private double boxNodesWidth(final int numNodes, final double radius) {
+		return ((2 * radius * numNodes) + ((numNodes - 1) * radius));
+	}
+
+	public Scaling getScalingDendrogram() {
+		return this.scalingDendro;
+	}
+
+	public Scaling getScalingBullets() {
+		return this.scalingBullets;
+	}
+
+	public Scaling getScalingAxis() {
+		return this.scalingAxis;
+	}
+
+	public Scaling getScalingAxisLabels() {
+		return this.scalingAxisLabels;
 	}
 
 }

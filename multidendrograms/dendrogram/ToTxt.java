@@ -25,7 +25,6 @@ import java.io.PrintWriter;
 import multidendrograms.definitions.Cluster;
 import multidendrograms.initial.Language;
 import multidendrograms.initial.LogManager;
-import multidendrograms.types.SimilarityType;
 import multidendrograms.utils.MathUtils;
 
 /**
@@ -42,13 +41,11 @@ import multidendrograms.utils.MathUtils;
 public class ToTxt {
 	private final Cluster root;
 	private final int precision;
-	private final SimilarityType simType;
 	private PrintWriter printWriter;
 
-	public ToTxt(Cluster root, int precision, SimilarityType simType) {
+	public ToTxt(Cluster root, int precision) {
 		this.root = root;
 		this.precision = precision;
-		this.simType = simType;
 	}
 
 	public void saveAsTxt(String sPath) throws Exception {
@@ -65,36 +62,29 @@ public class ToTxt {
 		}
 	}
 
-	private void showCluster(final Cluster clus, final int level)
+	private void showCluster(final Cluster cluster, final int level)
 			throws Exception {
-		double pmin, pmax, tmp;
-		String spmin, spmax;
 		String str = getIndentation(level);
-		if (clus.getHeight() < 0.0) {
-			str += "*  " + clus.getName();
+		if (cluster.getNumSubclusters() == 1) {
+			str += "*  " + cluster.getName();
 		} else {
-			pmin = clus.getHeight();
-			if (simType.equals(SimilarityType.DISTANCE)) {
-				pmax = pmin + clus.getAgglomeration();
-			} else {
-				pmax = pmin - clus.getAgglomeration();
-			}
+			double pmin = cluster.getRootBottomHeight();
+			double pmax = cluster.getRootTopHeight();
 			if (pmin > pmax) {
-				tmp = pmin;
+				double tmp = pmin;
 				pmin = pmax;
 				pmax = tmp;
 			}
 			pmin = MathUtils.round(pmin, precision);
 			pmax = MathUtils.round(pmax, precision);
-			spmin = MathUtils.format(pmin, precision);
-			spmax = MathUtils.format(pmax, precision);
-			str += "+ " + clus.getNumSubclusters() + "  [" + spmin + ", " + spmax + "]  " + clus.getNumLeaves();
+			String spmin = MathUtils.format(pmin, precision);
+			String spmax = MathUtils.format(pmax, precision);
+			str += "+ " + cluster.getNumSubclusters() + "  [" + spmin + ", " + spmax + "]  " + cluster.getNumLeaves();
 		}
-		// write
 		printWriter.println(str);
-		if (clus.getNumSubclusters() > 1) {
-			for (int n = 0; n < clus.getNumSubclusters(); n ++) {
-				showCluster(clus.getSubcluster(n), level + 1);
+		if (cluster.getNumSubclusters() > 1) {
+			for (int n = 0; n < cluster.getNumSubclusters(); n ++) {
+				showCluster(cluster.getSubcluster(n), level + 1);
 			}
 		}
 	}

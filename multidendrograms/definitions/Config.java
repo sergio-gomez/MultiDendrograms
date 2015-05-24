@@ -19,13 +19,10 @@
 package multidendrograms.definitions;
 
 import java.util.Hashtable;
+
 import javax.swing.JInternalFrame;
 
-import multidendrograms.initial.LogManager;
-
 import multidendrograms.data.DataFile;
-import multidendrograms.data.ExternalData;
-
 import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.types.MethodName;
 import multidendrograms.types.LabelOrientation;
@@ -44,136 +41,103 @@ import multidendrograms.types.SimilarityType;
  */
 public class Config {
 
-	private DistancesMatrix dm = null;
+	private DistancesMatrix distMatrix = null;
 	private Hashtable<Integer, String> names;
 	private final SettingsInfo settings;
 	private JInternalFrame dendroFrame;
 	private DataFile dataFile;
-	private double radius = 5.0;
-	private double maxValOrigin = 0;
+	private final double radius = 5.0;
 
 	public Config(final SettingsInfo settings) {
 		this.settings = settings;
 	}
 
-	public void setDendrogramFrame(final JInternalFrame dendro) {
-		this.dendroFrame = dendro;
+	public void setDendrogramFrame(final JInternalFrame dendroFrame) {
+		this.dendroFrame = dendroFrame;
 	}
 
 	public JInternalFrame getDendrogramFrame() {
-		return dendroFrame;
+		return this.dendroFrame;
 	}
 
 	public SettingsInfo getConfigMenu() {
 		return this.settings;
 	}
 
-	public void setDataFile(final DataFile df) {
-		this.dataFile = new DataFile(df);
+	public void setDataFile(final DataFile dataFile) {
+		this.dataFile = new DataFile(dataFile);
 	}
 
 	public DataFile getDataFile() {
-		return dataFile;
+		return this.dataFile;
 	}
 
 	public SimilarityType getSimilarityType() {
-		return settings.getSimilarityType();
+		return this.settings.getSimilarityType();
 	}
 
 	public boolean isDistance() {
-		return settings.getSimilarityType().equals(SimilarityType.DISTANCE);
+		return this.settings.getSimilarityType().equals(SimilarityType.DISTANCE);
 	}
 
 	public MethodName getMethod() {
-		return settings.getMethod();
+		return this.settings.getMethod();
 	}
 
 	public int getPrecision() {
-		return settings.getPrecision();
+		return this.settings.getPrecision();
 	}
 
-	public void setDistancesMatrix(final DistancesMatrix dm) {
-		this.dm = dm;
-		if ((dm != null) && (!isDistance()) && (maxValOrigin == 0)) {
-			maxValOrigin = dm.maxValue();
-		}
+	public void setDistancesMatrix(final DistancesMatrix distMatrix) {
+		this.distMatrix = distMatrix;
 	}
 
 	public DistancesMatrix getDistancesMatrix() {
-		return dm;
+		return this.distMatrix;
 	}
 
-	public DistancesMatrix readDistancesMatrix() {
-		DistancesMatrix dm = null;
-		ExternalData ed;
-
-		try {
-			ed = new ExternalData(dataFile, false);
-			dm = ed.getDistancesMatrix();
-		} catch (Exception e) {
-			LogManager.LOG.throwing("Config", "getMatriuDistancies", e);
-		}
-		return dm;
+	public Cluster getRoot() {
+		return this.distMatrix.getRoot();
 	}
 
 	public DendrogramOrientation getDendrogramOrientation() {
-		return settings.getDendrogramOrientation();
+		return this.settings.getDendrogramOrientation();
 	}
 
-	public void setOrientacioDendo(DendrogramOrientation or) {
-		settings.setDendrogramOrientation(or);
+	public void setDendrogramOrientation(final DendrogramOrientation orientation) {
+		this.settings.setDendrogramOrientation(orientation);
 	}
 
 	public LabelOrientation getNodeNameOrientation() {
-		return settings.getNodeNameOrientation();
+		return this.settings.getNodeNameOrientation();
 	}
 
 	public double getRadius() {
-		return radius;
+		return this.radius;
 	}
 
-	public void setRadius(final double radius) {
-		this.radius = radius;
+	public double getAxisMinValue() {
+		return this.settings.getAxisMinValue();
 	}
 
-	public double getAxisMaxVal() {
-		return settings.getAxisMaxVal();
-	}
-
-	public double getAxisMinVal() {
-		return settings.getAxisMinVal();
-	}
-
-	public double getTop() {
-		if ((dm != null) && (this.isDistance())) {
-			return dm.getRoot().getTop();
-		} else {
-			return maxValOrigin;
-		}
-	}
-
-	public double getBase() {
-		if (!this.isDistance()) {
-			return dm.getRoot().getBase();
-		} else {
-			return maxValOrigin;
-		}
+	public double getAxisMaxValue() {
+		return this.settings.getAxisMaxValue();
 	}
 
 	public double getAxisIncrement() {
-		return settings.getAxisIncrement();
+		return this.settings.getAxisIncrement();
 	}
 
 	public int getAxisTicks() {
-		return settings.getAxisTicks();
+		return this.settings.getAxisTicks();
 	}
 
 	public int getAxisLabelDecimals() {
-		return settings.getAxisLabelDecimals();
+		return this.settings.getAxisLabelDecimals();
 	}
 
 	public Hashtable<Integer, String> getNames() {
-		return names;
+		return this.names;
 	}
 
 	public void setNames(final Hashtable<Integer, String> names) {

@@ -39,35 +39,60 @@ import multidendrograms.types.SimilarityType;
  */
 public class Clipping {
 
-	private final double maxVal, minVal;
-	private final int precision;
 	private final SimilarityType simType;
+	private final double minValue, maxValue;
 
-	public Clipping(final double maxVal, final double minVal,
-			final SimilarityType simType, final int precision) {
-		this.maxVal = maxVal;
-		this.minVal = minVal;
+	public Clipping(final SimilarityType simType, final double minValue, final double maxValue) {
 		this.simType = simType;
-		this.precision = precision;
+		this.minValue = minValue;
+		this.maxValue = maxValue;
+	}
+
+	public LinkedList<Line> clipLines(final LinkedList<Line> lines) {
+		final LinkedList<Line> clippedLines = new LinkedList<Line>();
+		final Iterator<Line> iter = lines.iterator();
+		while (iter.hasNext()) {
+			final Line line = iter.next();
+			double minY = line.getPosReal().getY();
+			double maxY = line.getLength();
+			if (minY > maxY) {
+				double tmp = minY;
+				minY = maxY;
+				maxY = tmp;
+				line.getPosReal().setY(minY);
+				line.setLength(maxY);
+			}
+			if ((this.minValue < maxY) && (minY < this.maxValue)) {
+				if (minY < this.minValue) {
+					line.getPosReal().setY(this.minValue);
+				}
+				if (this.maxValue < maxY) {
+					line.setLength(this.maxValue);
+				}
+				clippedLines.add(line);
+			} else if ((minY <= this.minValue) && (this.maxValue <= maxY)) {
+				line.getPosReal().setY(this.minValue);
+				line.setLength(this.maxValue);
+				clippedLines.add(line);
+			}
+		}
+		return clippedLines;
 	}
 
 	public LinkedList<Band> clipBands(final LinkedList<Band> bandsList) {
 		double posYinf, posYsup;
 		double x, y, height, width;
-		Color c;
+		Color color;
 
 		final LinkedList<Band> clippedBands = new LinkedList<Band>();
 		final Iterator<Band> it = bandsList.iterator();
-
 		while (it.hasNext()) {
 			final Band rect = it.next();
-
 			x = rect.getPosReal().getX();
 			y = rect.getPosReal().getY();
 			height = rect.getHeight();
 			width = rect.getWidth();
-			c = rect.getColor();
-
+			color = rect.getColor();
 			if (simType.equals(SimilarityType.DISTANCE)) {
 				posYinf = y;
 				posYsup = y + height;
@@ -75,62 +100,23 @@ public class Clipping {
 				posYinf = y - height;
 				posYsup = y;
 			}
-
-			if ((posYinf <= maxVal) && (posYsup >= minVal)) {
-				if (posYinf < minVal) {
-					posYinf = minVal;
+			if ((posYinf <= maxValue) && (posYsup >= minValue)) {
+				if (posYinf < minValue) {
+					posYinf = minValue;
 				}
-
-				if (posYsup > maxVal) {
-					posYsup = maxVal;
+				if (posYsup > maxValue) {
+					posYsup = maxValue;
 				}
 				y = posYinf;
 				height = (posYsup - posYinf);
-				clippedBands.add(new Band(x, y, height, width, precision, c));
-
-			} else if ((posYinf <= minVal) && (posYsup >= maxVal)) {
-				y = minVal;
-				height = (maxVal - minVal);
-				clippedBands.add(new Band(x, y, height, width, precision, c));
+				clippedBands.add(new Band(x, y, height, width, color));
+			} else if ((posYinf <= minValue) && (posYsup >= maxValue)) {
+				y = minValue;
+				height = (maxValue - minValue);
+				clippedBands.add(new Band(x, y, height, width, color));
 			}
-
 		}
-
 		return clippedBands;
 	}
 
-	public LinkedList<Line> clipLines(final LinkedList<Line> linesList) {
-		double posYinf, posYsup, tmp;
-
-		final LinkedList<Line> clippedLines = new LinkedList<Line>();
-		final Iterator<Line> it = linesList.iterator();
-		while (it.hasNext()) {
-			final Line lin = it.next();
-			posYinf = lin.getPosReal().getY();
-			posYsup = lin.getLength();
-			if (posYinf > posYsup) {
-				tmp = posYinf;
-				posYinf = posYsup;
-				posYsup = tmp;
-				lin.setLength(posYsup);
-				lin.getPosReal().setY(posYinf);
-			}
-
-			if ((posYinf < maxVal) && (posYsup > minVal)) {
-				if (posYinf < minVal) {
-					lin.getPosReal().setY(minVal);
-				}
-				if (posYsup > maxVal) {
-					lin.setLength(maxVal);
-				}
-				clippedLines.add(lin);
-			} else if ((posYinf <= minVal) && (posYsup >= maxVal)) {
-				lin.getPosReal().setY(minVal);
-				lin.setLength(maxVal);
-				clippedLines.add(lin);
-			}
-		}
-
-		return clippedLines;
-	}
 }

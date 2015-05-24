@@ -31,29 +31,25 @@ package multidendrograms.data;
  */
 public class CountDecimals {
 
-	private long max = 0;
+	private int maxNumDecimals = 0;
 
-	public int inValue(final Double numd) {
-		long prec;
-		String tmp1, tmp2;
-
-		prec = Math.round(numd);
-		if (prec == numd) {
-			prec = 0;
-		} else {
-			tmp1 = String.valueOf(prec);
-			tmp2 = String.valueOf(numd);
-			prec = tmp2.length() - tmp1.length() - 1;
+	public int inValue(final double value) {
+		double absValue = Math.abs(value);
+		long rndValue = Math.round(absValue);
+		if (rndValue != absValue) {
+			String sRndValue = String.valueOf(rndValue);
+			String sAbsValue = String.valueOf(absValue);
+			int numDecimals = sAbsValue.length() - sRndValue.length() - 1;
+			this.maxNumDecimals = Math.max(this.maxNumDecimals, numDecimals);
 		}
-		max = Math.max(prec, max);
-		return (int) max;
+		return this.maxNumDecimals;
 	}
 
 	public void restart() {
-		max = 0;
+		this.maxNumDecimals = 0;
 	}
 
 	public int getPrecision() {
-		return (int) max;
+		return this.maxNumDecimals;
 	}
 }

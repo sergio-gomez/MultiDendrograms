@@ -49,10 +49,11 @@ import multidendrograms.forms.scrollabledesktop.JScrollableDesktopPane;
 import multidendrograms.forms.children.DeviationMeasuresBox;
 import multidendrograms.forms.children.DendrogramPanel;
 import multidendrograms.types.MethodName;
+import multidendrograms.types.OriginType;
 import multidendrograms.types.SimilarityType;
-import multidendrograms.utils.MathUtils;
 import multidendrograms.definitions.Cluster;
 import multidendrograms.definitions.Config;
+import multidendrograms.definitions.SettingsInfo;
 import multidendrograms.methods.Method;
 
 /**
@@ -73,7 +74,7 @@ public class PrincipalDesk extends JFrame {
 	private static final int xOffset = 8, yOffset = 8;
 	private static final int xDelta = 14, yDelta = 14;
 	private static final int xRep = 100, yRep = 20;
-	private static final int minFrmWidth = 665, minFrmHeight = 660;
+	private static final int minFrmWidth = 700, minFrmHeight = 680;
 
 	private final JPanel panControl, panInfoExit;
 
@@ -83,15 +84,14 @@ public class PrincipalDesk extends JFrame {
 
 	private final SettingsPanel panSettings;
 
-	private Config cfg;
 	private DendrogramFrame currentDendrogramFrame;
 
 	public PrincipalDesk(final String title) {
 		super(title);
 		LogManager.LOG.info("Creating PrincipalDesk");
 
-		final int frmWidth = InitialProperties.getWidth_frmPrincipal();
-		final int frmHeight = InitialProperties.getHeight_frmPrincipal();
+		final int frmWidth = InitialProperties.getWidthMainWindow();
+		final int frmHeight = InitialProperties.getHeightMainWindow();
 
 		panDesk = new JScrollableDesktopPane();
 		panDesk.setBorder(BorderFactory.createTitledBorder(""));
@@ -116,8 +116,6 @@ public class PrincipalDesk extends JFrame {
 		JFrame.setDefaultLookAndFeelDecorated(true);
 		this.setMinimumSize(new Dimension(minFrmWidth, minFrmHeight));
 		this.setSize(frmWidth, frmHeight);
-//		java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-//		this.setBounds(25, 50, screenSize.width - 50, screenSize.height - 75);
 
 		this.setVisible(true);
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -129,30 +127,24 @@ public class PrincipalDesk extends JFrame {
 			});
 	}
 
-	public Config getConfig() {
-		cfg = new Config(SettingsPanel.getSettingsInfo());
-		cfg.setDistancesMatrix(panLoadUpdate.getDistancesMatrix());
-		if (cfg.getAxisMaxVal() == 0) {
-			cfg.getConfigMenu().setAxisMaxVal(cfg.getTop());
-		}
-		return cfg;
-	}
-
 	public DendrogramFrame createDendrogramFrame(boolean isUpdate, MethodName method) {
 		int x, y, width, height, ofc;
 		DendrogramFrame dendroFrame;
 
-		ofc = DendrogramFrame.openFrameCount;
 		if (isUpdate) {
 			x = currentDendrogramFrame.getX();
 			y = currentDendrogramFrame.getY();
 			width = currentDendrogramFrame.getWidth();
 			height = currentDendrogramFrame.getHeight();
 		} else {
+  		if (panDesk.getNumInternalFrames() == 0) {
+    		DendrogramFrame.openFrameCount = 1;
+  		}
+			ofc = DendrogramFrame.openFrameCount;
 			x = xOffset + xDelta * ((ofc - 1) / xRep) + xDelta * ((ofc - 1) % xRep);
 			y = yOffset + yDelta * ((ofc - 1) % yRep);
-			width = InitialProperties.getWidth_frmDesk();
-			height = InitialProperties.getHeight_frmDesk();
+			width = InitialProperties.getWidthDendroWindow();
+			height = InitialProperties.getHeightDendroWindow();
 		}
 		dendroFrame = new DendrogramFrame(method, isUpdate);
 		dendroFrame.setSize(width, height);
@@ -229,57 +221,47 @@ public class PrincipalDesk extends JFrame {
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
 			sPath = fd.getDirectory() + fd.getFile();
-			ToTxt saveTXT = new ToTxt(root, cfg.getPrecision(), cfg.getSimilarityType());
+			ToTxt saveTXT = new ToTxt(root, cfg.getPrecision());
 			saveTXT.saveAsTxt(sPath);
 		}
 	}
 
 	public void saveNewick(Cluster root, Config cfg) throws Exception {
-		String sPath;
-		String sNameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String sInfix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
-		FileDialog fd;
-		double heightBottom, heightMin, heightMax, extraSpace;
-		ToNewick toNewick;
-		int precision = cfg.getPrecision();
-
-		fd = new FileDialog(this, Language.getLabel(80) + " Newick", FileDialog.SAVE);
-		fd.setFile(sNameNoExt + sInfix + "-newick.txt");
+		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " Newick", FileDialog.SAVE);
+		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
+		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
+		fd.setFile(nameNoExt + infix + "-newick.txt");
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
-			sPath = fd.getDirectory() + fd.getFile();
-			if (cfg.getSimilarityType().equals(SimilarityType.DISTANCE)) {
-				heightBottom = 0.0;
-			} else {
-				heightMin = cfg.getBase();
-				heightMax = cfg.getTop();
-				extraSpace = (heightMax - heightMin) * (0.05 * MathUtils.round((heightMax - heightMin),	precision));
-				extraSpace = MathUtils.round(extraSpace, precision);
-				heightBottom = heightMax + extraSpace;
-			}
-			toNewick = new ToNewick(root, precision, cfg.getSimilarityType(), heightBottom);
-			toNewick.saveAsNewick(sPath);
+			String path = fd.getDirectory() + fd.getFile();
+			int precision = cfg.getPrecision();
+			SimilarityType simType = cfg.getSimilarityType();
+			SettingsInfo settings = cfg.getConfigMenu();
+			OriginType originType = settings.getOriginType();
+			ToNewick toNewick = new ToNewick(root, precision, simType, originType);
+			toNewick.saveAsNewick(path);
 		}
 	}
 
-	public void saveUltrametricTXT(Config cfg) throws Exception {
-		String sPath;
+	public void saveUltrametricTxt(Config cfg) throws Exception {
 		String sNameNoExt = LoadUpdatePanel.getFileNameNoExt();
 		String sInfix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
 		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " TXT", FileDialog.SAVE);
 		fd.setFile(sNameNoExt + sInfix + "-ultrametric.txt");
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
-			sPath = fd.getDirectory() + fd.getFile();
-			UltrametricMatrix ultraMatrix = currentDendrogramFrame.getDendrogramParameters().getUltrametricMatrix();
-			ultraMatrix.saveAsTXT(sPath, cfg.getPrecision());
+			String sPath = fd.getDirectory() + fd.getFile();
+			DendrogramParameters dendroParams = this.currentDendrogramFrame.getDendrogramParameters();
+			UltrametricMatrix ultraMatrix = dendroParams.getUltrametricMatrix();
+			ultraMatrix.saveAsTxt(sPath, cfg.getPrecision());
 		}
 	}
 
 	public void showUltrametricErrors(Config cfg) {
-		UltrametricMatrix ultraMatrix = currentDendrogramFrame.getDendrogramParameters().getUltrametricMatrix();
-		DeviationMeasuresBox box = new DeviationMeasuresBox(this, ultraMatrix, cfg);
-		box.setVisible(true);
+		DendrogramParameters dendroParams = this.currentDendrogramFrame.getDendrogramParameters();
+		UltrametricMatrix ultraMatrix = dendroParams.getUltrametricMatrix();
+		DeviationMeasuresBox devMeasuresBox = new DeviationMeasuresBox(this, ultraMatrix, cfg);
+		devMeasuresBox.setVisible(true);
 	}
 
 	public SettingsPanel getPanMenu() {

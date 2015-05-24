@@ -36,6 +36,8 @@ import javax.swing.LayoutStyle;
 import multidendrograms.initial.Language;
 import multidendrograms.initial.Main;
 import multidendrograms.utils.URLLabel;
+import multidendrograms.utils.FontUtils;
+import multidendrograms.definitions.Formats;
 
 /**
  * <p>
@@ -51,37 +53,32 @@ import multidendrograms.utils.URLLabel;
 public class AboutBox extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
-	private final String title = "Info";
+	private final String title = Language.getLabel(52);
+	private final String logo = Main.LOGO_IMAGE;
 	private final String appTitle = Main.PROGRAM;
+	private final String affiliation = Main.AFFILIATION;
 	private final String version = Main.VERSION;
 	private final String authors = Main.AUTHORS;
 	private final String advisors = Main.ADVISORS;
-	private final String affiliation = Main.AFFILIATION;
 	private final String homepage = Main.HOMEPAGE_URL;
-	private final String licenseURL = Main.LICENSE_URL;
 	private final String manualURL = Main.MANUAL_URL;
-	private final String logo = Main.LOGO_IMAGE;
+	private final String licenseURL = Main.LICENSE_URL;
 
-	private final JButton closeButton = new JButton();
-	private final JLabel appTitleLabel = new JLabel();
-	private final JLabel appVersionLabel = new JLabel();
-	private final JLabel appAuthorsLabel = new JLabel();
-	private final URLLabel appHomepageLabel = new URLLabel(homepage, homepage);
-	private final JLabel urvLabel = new JLabel();
-	private final JLabel imageLabel = new JLabel();
-	private final JLabel advisorsLabel = new JLabel();
-	private final JLabel versionLabel = new JLabel();
-	private final JLabel authorsLabel = new JLabel();
-	private final JLabel appAdvisorsLabel = new JLabel();
+	private JButton closeButton;
+	private JLabel imageLabel;
+	private JLabel appTitleLabel;
+	private JLabel urvLabel;
+	private JLabel versionLabel;
+	private JLabel appVersionLabel;
+	private JLabel authorsLabel;
+	private JLabel appAuthorsLabel;
+	private JLabel advisorsLabel;
+	private JLabel appAdvisorsLabel;
+	private JLabel homepageLabel;
+	private URLLabel appHomepageLabel;
+	private URLLabel manualLabel;
+	private URLLabel licenseLabel;
 	private final JLabel jLabel5 = new JLabel();
-	private final JLabel homepageLabel = new JLabel();
-	private final URLLabel manualLabel = new URLLabel(manualURL,
-			Language.getLabel(124));
-	private final URLLabel licenseLabel = new URLLabel(licenseURL,
-			Language.getLabel(121));
-
-	private final Font font1 = new Font("Arial", Font.BOLD, 12);
-	private final Font font2 = new Font("Arial", Font.PLAIN, 12);
 
 	public AboutBox(Frame parent) {
 		super(parent);
@@ -101,59 +98,51 @@ public class AboutBox extends JDialog implements ActionListener {
 		setName("aboutBox");
 		setResizable(false);
 
-		closeButton.addActionListener(this);
-		closeButton.setText(Language.getLabel(60));
+		closeButton = Formats.getFormattedButton(Language.getLabel(60));
 		closeButton.setName("closeButton");
+		closeButton.addActionListener(this);
 
-		appTitleLabel.setFont(appTitleLabel.getFont().deriveFont(
-				appTitleLabel.getFont().getStyle() | java.awt.Font.BOLD,
-				appTitleLabel.getFont().getSize() + 4));
-		appTitleLabel.setText(appTitle);
-		appTitleLabel.setName("appTitleLabel");
-
-		appVersionLabel.setFont(font2);
-		appVersionLabel.setText(version);
-		appVersionLabel.setName("appVersionLabel");
-
-		appAuthorsLabel.setFont(font2);
-		appAuthorsLabel.setText(authors);
-		appAuthorsLabel.setName("appAuthorsLabel");
-
-		appAdvisorsLabel.setFont(font2);
-		appAdvisorsLabel.setText(advisors);
-		appAdvisorsLabel.setName("appAdvisorsLabel");
-
-		appHomepageLabel.setFont(font2);
-		appHomepageLabel.setName("appHomepageLabel");
-		appHomepageLabel.setCursor(Cursor
-				.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-		urvLabel.setFont(font2);
-		urvLabel.setText(affiliation);
-		urvLabel.setName("urvLabel");
-
+		imageLabel = new JLabel();
 		imageLabel.setIcon(new ImageIcon(logo));
 		imageLabel.setName("imageLabel");
 
-		advisorsLabel.setFont(font1);
-		advisorsLabel.setText(Language.getLabel(120));
-		advisorsLabel.setName("advisorsLabel");
+		appTitleLabel = Formats.getFormattedBoldLabel(appTitle);
+		appTitleLabel.setFont(FontUtils.addStyleIncSize(appTitleLabel.getFont(), Font.BOLD, 4));
+		appTitleLabel.setName("appTitleLabel");
 
-		versionLabel.setFont(font1);
-		versionLabel.setText(Language.getLabel(118));
+		urvLabel = Formats.getFormattedLabel(affiliation);
+		urvLabel.setName("urvLabel");
+
+		versionLabel = Formats.getFormattedBoldLabel(Language.getLabel(118));
 		versionLabel.setName("versionLabel");
 
-		authorsLabel.setFont(font1);
-		authorsLabel.setText(Language.getLabel(119));
+		appVersionLabel = Formats.getFormattedLabel(version);
+		appVersionLabel.setName("appVersionLabel");
+
+		authorsLabel = Formats.getFormattedBoldLabel(Language.getLabel(119));
 		authorsLabel.setName("authorsLabel");
 
-		homepageLabel.setFont(font1);
-		homepageLabel.setText(Language.getLabel(122));
+		appAuthorsLabel = Formats.getFormattedLabel(authors);
+		appAuthorsLabel.setName("appAuthorsLabel");
+
+		advisorsLabel = Formats.getFormattedBoldLabel(Language.getLabel(120));
+		advisorsLabel.setName("advisorsLabel");
+
+		appAdvisorsLabel = Formats.getFormattedLabel(advisors);
+		appAdvisorsLabel.setName("appAdvisorsLabel");
+
+		homepageLabel = Formats.getFormattedBoldLabel(Language.getLabel(122));
 		homepageLabel.setName("homepageLabel");
 
+		appHomepageLabel = new URLLabel(homepage, homepage);
+		appHomepageLabel.setName("appHomepageLabel");
+		appHomepageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+		manualLabel = new URLLabel(manualURL, Language.getLabel(124));
 		manualLabel.setName("manualLabel");
 		manualLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+		licenseLabel = new URLLabel(licenseURL, Language.getLabel(121));
 		licenseLabel.setName("licenseLabel");
 		licenseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 

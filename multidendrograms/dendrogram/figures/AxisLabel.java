@@ -24,250 +24,172 @@ import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import multidendrograms.definitions.SettingsInfo;
 import multidendrograms.dendrogram.Scaling;
+import multidendrograms.dendrogram.eps.EpsUtils;
 import multidendrograms.types.DendrogramOrientation;
+import multidendrograms.types.PlotType;
 import multidendrograms.types.SimilarityType;
-import multidendrograms.utils.MathUtils;
 
 /**
  * <p>
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Name of distance label figure
+ * Axis label figure
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
  *
  * @since JDK 6.0
  */
 public class AxisLabel {
-	private final double minVal;
-	private double maxVal, width;
-	private final double dist, ticks;
-	private Color color = Color.BLACK;
+
+	private Color color;
+	private SimilarityType simType;
+	private DendrogramOrientation dendroOrientation;
+	private double minValue;
+	private double maxValue;
+	private double increment;
+	private int ticksGroup;
+	private int numLabels;
+	private FontRenderContext renderContext;
+	private NumberFormat numberFormat;
+	private Scaling scaling;
+	private double x0;
+	private double yMin;
+	private double yMax;
+	private double rotationAngle;
 	private Font font;
-	private Scaling scal;
-	private final int precision;
+	private double labelsMaxWidth;
 
-	public AxisLabel(final double minVal, final double maxVal,
-			final double width, final double dist, final double ticks,
-			final int prec) {
-		this.dist = dist;
-		this.ticks = ticks;
-		this.minVal = minVal;
-		this.maxVal = maxVal;
-		this.width = width;
-		this.precision = prec;
+	public AxisLabel(final SettingsInfo settingsInfo, final Scaling scaling) {
+		this.color = settingsInfo.getAxisLabelColor();
+		this.simType = settingsInfo.getSimilarityType();
+		this.dendroOrientation = settingsInfo.getDendrogramOrientation();
+		this.minValue = settingsInfo.getAxisMinValue();
+		this.maxValue = settingsInfo.getAxisMaxValue();
+		this.increment = settingsInfo.getAxisIncrement();
+		this.ticksGroup = settingsInfo.getAxisTicks();
+		int numTicks = settingsInfo.getAxisNumberOfTicks();
+		this.numLabels = 1 + (numTicks - 1) / ticksGroup;
+		this.renderContext = new FontRenderContext(null, true, true);
+		int labelsDecimals = settingsInfo.getAxisLabelDecimals();
+		this.numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
+		this.numberFormat.setMinimumFractionDigits(labelsDecimals);
+		this.numberFormat.setMaximumFractionDigits(labelsDecimals);
+		this.numberFormat.setGroupingUsed(false);
+		this.scaling = scaling;
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			this.x0 = scaling.transformX(0);
+			this.yMin = scaling.transformY(minValue);
+			this.yMax = scaling.transformY(maxValue);
+			this.rotationAngle = 0.0;
+		} else {// (dendroOrientation.equals(DendrogramOrientation.EAST) || dendroOrientation.equals(DendrogramOrientation.WEST))
+			this.x0 = scaling.transformY(0);
+			this.yMin = scaling.transformX(minValue);
+			this.yMax = scaling.transformX(maxValue);
+			this.rotationAngle = 90.0;
+		}
+		AffineTransform rotation = new AffineTransform();
+		rotation.rotate(Math.toRadians(-rotationAngle));
+		Font axisFont = settingsInfo.getAxisLabelFont();
+		this.font = axisFont.deriveFont(rotation);
+		setLabelsMaximumWidth();
 	}
 
-	public Scaling getScaling() {
-		return scal;
+	private void setLabelsMaximumWidth() {
+		labelsMaxWidth = 0.0;
+		double height;
+		if (simType.equals(SimilarityType.DISTANCE)) {
+			height = minValue;
+		} else {
+			height = maxValue;
+		}
+		for (int n = 0; n < numLabels; n ++) {
+			String heightLabel = String.valueOf(numberFormat.format(height));
+			TextLayout textLayout = new TextLayout(heightLabel, font, renderContext);
+			Rectangle2D rectangle = textLayout.getBounds();
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+				labelsMaxWidth = Math.max(labelsMaxWidth, rectangle.getWidth());
+			} else {// (dendroOrientation.equals(DendrogramOrientation.EAST) || dendroOrientation.equals(DendrogramOrientation.WEST))
+				labelsMaxWidth = Math.max(labelsMaxWidth, rectangle.getHeight());
+			}
+			if (simType.equals(SimilarityType.DISTANCE)) {
+				height += (ticksGroup * increment);
+			} else {
+				height -= (ticksGroup * increment);
+			}
+		}
 	}
 
-	public void setScaling(final Scaling scal) {
-		this.scal = scal;
-	}
-
-	public double getMaxVal() {
-		return maxVal;
-	}
-
-	public void setMaxVal(final double maxVal) {
-		this.maxVal = maxVal;
-	}
-
-	public double getWidth() {
-		return width;
-	}
-
-	public void setWidth(final double width) {
-		this.width = width;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
-	public void setColor(final Color c) {
-		this.color = c;
-	}
-
-	public Font getFont() {
-		return font;
-	}
-
-	public void setFont(final Font f) {
-		this.font = f;
-	}
-
-	public void draw(final Graphics2D g, final DendrogramOrientation or,
-			final SimilarityType simType) {
-		double y, x, inc, max, min;
-		float posX, posY;
-
-		final Color color_original = g.getColor();
-		final Font font_original = g.getFont();
-		final Font ft = this.getFont();
-		final Font fr;
-		final AffineTransform rot = new AffineTransform();
-		final FontRenderContext renderContext = new FontRenderContext(null,
-				true, true);
-		TextLayout tl;
-		String txt;
-
-		g.setColor(this.getColor());
-
-		inc = this.getScaling().scaleY(minVal + dist);
-		inc -= this.getScaling().scaleY(minVal);
-
-		if (inc > 0) { // always inc > 0
-
-			NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
-			nf.setMinimumFractionDigits(precision);
-			nf.setMaximumFractionDigits(precision);
-			nf.setGroupingUsed(false);
-
-			if (or.equals(DendrogramOrientation.WEST) || or.equals(DendrogramOrientation.EAST)) {
-				rot.rotate(Math.toRadians(-90));
-				fr = ft.deriveFont(rot);
-				y = this.getScaling().transformY(0);
-				min = x = this.getScaling().transformX(minVal);
-				max = x = this.getScaling().transformX(maxVal);
-
-				double h, num;
-				h = ticks * dist;
-
-				if (simType.equals(SimilarityType.DISTANCE)) {
-					h = 0;
-					while ((minVal + h) <= maxVal) {
-						num = minVal + h;
-						x = this.getScaling().transformX(num);
-						if (or.equals(DendrogramOrientation.WEST)) {
-							x = min + (max - x);
-						}
-
-						txt = String.valueOf(nf.format(num));
-						tl = new TextLayout(txt, fr, renderContext);
-
-						posX = (float) (x + (tl.getBounds().getWidth() / 2));
-						posY = (float) y;
-						g.scale(1, -1);
-						tl.draw(g, posX, -posY);
-						g.scale(1, -1);
-						h += (ticks * dist);
-					}
-				} else {
-					h = 0;
-					while ((maxVal - h) >= minVal) {
-						num = maxVal - h;
-						x = this.getScaling().transformX(num);
-						if (or.equals(DendrogramOrientation.WEST)) {
-							x = min + (max - x);
-						}
-
-						txt = String.valueOf(nf.format(num));
-						tl = new TextLayout(txt, fr, renderContext);
-
-						posX = (float) (x + (tl.getBounds().getWidth() / 2));
-						posY = (float) y;
-						g.scale(1, -1);
-						tl.draw(g, posX, -posY);
-						g.scale(1, -1);
-						h += (ticks * dist);
-					}
-				}
-
-			} else if (or.equals(DendrogramOrientation.NORTH)
-					|| or.equals(DendrogramOrientation.SOUTH)) {
-				min = y = this.getScaling().transformY(minVal);
-				max = y = this.getScaling().transformY(maxVal);
-				x = this.getScaling().transformX(0);
-				double h, num;
-				h = ticks * dist;
-				h = minVal;
-
-				if (simType.equals(SimilarityType.DISTANCE)) {
-
-					double maxx = 0.0;
-					while (h <= maxVal) {
-						num = h;
-						y = this.getScaling().transformY(num);
-						if (or.equals(DendrogramOrientation.SOUTH)) {
-							y = min + (max - y);
-						}
-
-						txt = String.valueOf(nf.format(num));
-						tl = new TextLayout(txt, ft, renderContext);
-						if (Math.abs(tl.getBounds().getMaxX()) > Math.abs(maxx))
-							maxx = tl.getBounds().getMaxX();
-						h += (ticks * dist);
-					}
-
-					h = minVal;
-					while (h <= maxVal) {
-						num = h;
-						y = this.getScaling().transformY(num);
-						if (or.equals(DendrogramOrientation.SOUTH)) {
-							y = min + (max - y);
-						}
-
-						txt = String.valueOf(nf.format(num));
-						tl = new TextLayout(txt, ft, renderContext);
-
-						posX = (float) (x + (maxx - tl.getBounds().getMaxX()));
-						posY = (float) (y - tl.getBounds().getHeight() / 2);
-
-						g.scale(1, -1);
-						tl.draw(g, posX, -posY);
-						g.scale(1, -1);
-						h += (ticks * dist);
-					}
-				} else {
-
-					h = 0;
-					double maxx = 0.0;
-					while (MathUtils.round((maxVal - h), 10) >= minVal) {
-						num = h;
-						y = this.getScaling().transformY(num);
-						if (or.equals(DendrogramOrientation.SOUTH)) {
-							y = min + (max - y);
-						}
-
-						txt = String.valueOf(nf.format(num));
-						tl = new TextLayout(txt, ft, renderContext);
-						if (Math.abs(tl.getBounds().getMaxX()) > Math.abs(maxx))
-							maxx = tl.getBounds().getMaxX();
-						h += (ticks * dist);
-					}
-
-					h = 0;
-					while (MathUtils.round((maxVal - h), 10) >= minVal) {
-						num = maxVal - h;
-						y = this.getScaling().transformY(num);
-						if (or.equals(DendrogramOrientation.SOUTH)) {
-							y = min + (max - y);
-						}
-
-						txt = String.valueOf(nf.format(num));
-						tl = new TextLayout(txt, ft, renderContext);
-
-						posX = (float) (x + (maxx - tl.getBounds().getMaxX()));
-						posY = (int) (y - tl.getBounds().getHeight() / 2);
-
-						g.scale(1, -1);
-						tl.draw(g, posX, -posY);
-						g.scale(1, -1);
-						h += (ticks * dist);
-					}
-				}
+	public void draw(final PlotType plotType, final Graphics2D graphics2D) {
+		Color originalColor = null;
+		Font originalFont = null;
+		if (plotType.equals(PlotType.PANEL)) {
+			originalColor = graphics2D.getColor();
+			graphics2D.setColor(color);
+			originalFont = graphics2D.getFont();
+		} else {// (plotType.equals(PlotType.EPS))
+			EpsUtils.writeLine("gsave");
+			EpsUtils.writeLine(EpsUtils.setRGBColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f));
+			String fontPSName = font.getPSName();
+			if (fontPSName.equals("Dialog.plain")) {
+				EpsUtils.writeLine(EpsUtils.scaleSetFont("/ArialMT", font.getSize()));
+			} else {
+				EpsUtils.writeLine(EpsUtils.scaleSetFont("/" + fontPSName, font.getSize()));
 			}
 		}
 
-		g.setColor(color_original);
-		g.setFont(font_original);
+		double height;
+		if (simType.equals(SimilarityType.DISTANCE)) {
+			height = minValue;
+		} else {
+			height = maxValue;
+		}
+		for (int n = 0; n < numLabels; n ++) {
+			String heightLabel = String.valueOf(numberFormat.format(height));
+			TextLayout textLayout = new TextLayout(heightLabel, font, renderContext);
+			Rectangle2D rectangle = textLayout.getBounds();
+			float screenX;
+			float screenY;
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH)) {
+				screenX = (float) (x0 + (labelsMaxWidth - rectangle.getWidth()));
+				screenY = (float) (scaling.transformY(height) - (rectangle.getHeight() / 2.0));
+			} else if (dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+				screenX = (float) (x0 + (labelsMaxWidth - rectangle.getWidth()));
+				screenY = (float) (yMin + (yMax - scaling.transformY(height)) - (rectangle.getHeight() / 2.0));
+			} else if (dendroOrientation.equals(DendrogramOrientation.EAST)) {
+				screenX = (float) (scaling.transformX(height) + (rectangle.getWidth() / 2.0));
+				screenY = (float) (x0 + (labelsMaxWidth - rectangle.getHeight()));
+			} else {// (dendroOrientation.equals(DendrogramOrientation.WEST))
+				screenX = (float) (yMin + (yMax - scaling.transformX(height)) + (rectangle.getWidth() / 2.0));
+				screenY = (float) (x0 + (labelsMaxWidth - rectangle.getHeight()));
+			}
+			if (plotType.equals(PlotType.PANEL)) {
+				graphics2D.scale(1, -1);
+				textLayout.draw(graphics2D, screenX, -screenY);
+				graphics2D.scale(1, -1);
+			} else {// (plotType.equals(PlotType.EPS))
+				EpsUtils.writeLine(EpsUtils.bottomLeftTextRotated((EpsUtils.xmin + screenX), (EpsUtils.ymax + screenY), 
+						(float) (rotationAngle), heightLabel));
+			}
+			if (simType.equals(SimilarityType.DISTANCE)) {
+				height += (ticksGroup * increment);
+			} else {
+				height -= (ticksGroup * increment);
+			}
+		}
+		
+		if (plotType.equals(PlotType.PANEL)) {
+			graphics2D.setColor(originalColor);
+			graphics2D.setFont(originalFont);
+		} else {// (plotType.equals(PlotType.EPS))
+			EpsUtils.writeLine("grestore");
+		}
 	}
 
 }

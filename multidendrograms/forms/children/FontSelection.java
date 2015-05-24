@@ -30,7 +30,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -40,6 +39,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import multidendrograms.initial.Language;
+import multidendrograms.initial.InitialProperties;
+import multidendrograms.definitions.Formats;
+import multidendrograms.utils.FontUtils;
 
 /**
  * <p>
@@ -57,37 +59,35 @@ public class FontSelection extends JDialog implements ActionListener {
 	private Font font;
 	private final Font initFont;
 	private JComboBox cbSizes, cbFonts;
-	private JCheckBox chkBold, chkItalic, chkPlain;
+	private JCheckBox chkBold, chkItalic;
 	private final JButton btnAccept, btnCancel;
-	private JLabel lbl;
+	private JLabel lblSelectedFont;
 
 	private void initialize() {
 		final String[] sizes = { "6", "7", "8", "9", "10", "11", "12", "14", "16", "18", "20"};
 		cbSizes = new JComboBox(sizes);
 		cbSizes.setEditable(true);
 		cbSizes.setSelectedItem(String.valueOf(font.getSize()));
+		cbSizes.setFont(FontUtils.addStyle(InitialProperties.getFontLabel(), Font.BOLD));
 
 		final String[] fonts = FontSelection.getSystemFonts();
 		cbFonts = new JComboBox(fonts);
 		cbFonts.setSelectedItem(font.getName());
+		cbFonts.setFont(FontUtils.addStyle(InitialProperties.getFontLabel(), Font.BOLD));
 
-		chkBold = new JCheckBox(Language.getLabel(54));
+		chkBold = Formats.getFormattedCheckBox(Language.getLabel(54)); // Bold
 		chkBold.setSelected(font.isBold());
 
-		chkItalic = new JCheckBox(Language.getLabel(55));
+		chkItalic = Formats.getFormattedCheckBox(Language.getLabel(55)); // Italics
 		chkItalic.setSelected(font.isItalic());
 
-		chkPlain = new JCheckBox(Language.getLabel(56));
-		chkPlain.setSelected(font.isPlain());
-
-		lbl = new JLabel(Language.getLabel(57));
-		lbl.setAlignmentX(SwingConstants.CENTER);
-		lbl.setFont(font);
+		lblSelectedFont = new JLabel(Language.getLabel(57)); // Selected font
+		lblSelectedFont.setAlignmentX(SwingConstants.CENTER);
+		lblSelectedFont.setFont(font);
 	}
 
 	private static String[] getSystemFonts() {
-		final GraphicsEnvironment env = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
+		final GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		return env.getAvailableFontFamilyNames();
 	}
 
@@ -102,8 +102,8 @@ public class FontSelection extends JDialog implements ActionListener {
 
 		final Container container = this.getContentPane();
 		this.setLayout(new GridBagLayout());
-		((JPanel) container).setBorder(BorderFactory
-				.createTitledBorder(Language.getLabel(59)));
+		((JPanel) container).setBorder(Formats.getFormattedTitledBorder(Language.getLabel(59)));
+
 		final GridBagConstraints c = new GridBagConstraints();
 
 		c.weightx = 1.0;
@@ -115,7 +115,7 @@ public class FontSelection extends JDialog implements ActionListener {
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor = GridBagConstraints.CENTER;
 		c.insets = new Insets(5, 5, 5, 5);
-		this.add(lbl, c);
+		this.add(lblSelectedFont, c);
 
 		c.gridx = 0;
 		c.gridy = 2;
@@ -145,19 +145,12 @@ public class FontSelection extends JDialog implements ActionListener {
 		chkItalic.addActionListener(this);
 		container.add(chkItalic, c);
 
-		c.gridx = 2;
-		c.gridy = 3;
-		c.gridheight = 1;
-		c.gridwidth = GridBagConstraints.REMAINDER;
-		chkPlain.addActionListener(this);
-		container.add(chkPlain, c);
-
 		c.gridx = 0;
 		c.gridy = 4;
 		c.gridheight = 1;
 		c.gridwidth = GridBagConstraints.RELATIVE;
 
-		btnAccept = new JButton(Language.getLabel(60)); // ACCEPT
+		btnAccept = Formats.getFormattedBoldButton(Language.getLabel(60)); // ACCEPT
 		btnAccept.addActionListener(this);
 		container.add(btnAccept, c);
 
@@ -168,11 +161,8 @@ public class FontSelection extends JDialog implements ActionListener {
 		c.gridheight = GridBagConstraints.REMAINDER;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 
-		btnCancel = new JButton(Language.getLabel(61)); // CANCEL
+		btnCancel = Formats.getFormattedBoldButton(Language.getLabel(61)); // CANCEL
 		btnCancel.addActionListener(this);
-
-		c.weightx = 1.0;
-		c.weighty = 0;
 		container.add(btnCancel, c);
 
 		this.pack();
@@ -193,7 +183,7 @@ public class FontSelection extends JDialog implements ActionListener {
 			this.dispose();
 		} else {
 			this.font = this.giveFont();
-			this.lbl.setFont(font);
+			this.lblSelectedFont.setFont(font);
 
 		}
 	}

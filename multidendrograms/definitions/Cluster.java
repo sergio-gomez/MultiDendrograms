@@ -40,12 +40,15 @@ public class Cluster {
 
 	// Variables that define the cluster characteristics
 	private Integer id;
-	private String name = "";
-	private double height = -1.0;
-	private double agglomeration = 0.0;
-	private double summaryHeight = -1.0;
-	private double top = 0.0;
-	private double base = 0.0;
+	private String name;
+	private double rootBottomHeight = Double.NaN;
+	private double rootTopHeight = Double.NaN;
+
+	// Global minimum and maximum heights
+	private double nodesMinHeight = Double.NaN;
+	private double nodesMaxHeight = Double.NaN;
+	private double bandsMinHeight = Double.NaN;
+	private double bandsMaxHeight = Double.NaN;
 
 	// To know if it is a supercluster
 	private boolean supercluster = true;
@@ -77,79 +80,86 @@ public class Cluster {
 		return this.name;
 	}
 
-	public void setHeight(final double ht) {
-		this.height = ht;
-		checkValues();
+	public void setRootHeights(final double height) {
+		this.rootBottomHeight = height;
+		this.rootTopHeight = height;
 	}
 
-	public double getHeight() {
-		return this.height;
+	public double getRootBottomHeight() {
+		return this.rootBottomHeight;
 	}
 
-	public void setAgglomeration(final double agglom) {
-		this.agglomeration = agglom;
-		checkValues();
+	public void setRootTopHeight(final double rootTopHeight) {
+		this.rootTopHeight = rootTopHeight;
+		this.bandsMinHeight = Math.min(this.bandsMinHeight, rootTopHeight);
+		this.bandsMaxHeight = Math.max(this.bandsMaxHeight, rootTopHeight);
 	}
 
-	private void checkValues() {
-		this.base = this.height;
-		if ((this.height + this.agglomeration) > this.top) {
-			this.top = (this.height + this.agglomeration);
-		}
-		if ((this.height - this.agglomeration) < this.base) {
-			this.base = (this.height - this.agglomeration);
-		}
+	public double getRootTopHeight() {
+		return this.rootTopHeight;
 	}
 
-	public double getAgglomeration() {
-		return this.agglomeration;
-	}
-	
-	public void setSummaryHeight(double value) {
-		this.summaryHeight = value;
-	}
-	
-	public double getSummaryHeight() {
-		return this.summaryHeight;
-	}
-	
-	public Double getTop() {
-		return this.top;
+	public void setNodesHeights(final double height) {
+		this.nodesMinHeight = height;
+		this.nodesMaxHeight = height;
 	}
 
-	public void setBase(double base) {
-		this.base = base;
+	public void setBandsHeights(final double height) {
+		this.bandsMinHeight = height;
+		this.bandsMaxHeight = height;
 	}
 
-	public double getBase() {
-		return this.base;
+	public double getNodesMinHeight() {
+		return this.nodesMinHeight;
 	}
 
-	public void setSupercluster(final boolean b) {
-		this.supercluster = b;
+	public double getNodesMaxHeight() {
+		return this.nodesMaxHeight;
+	}
+
+	public double getBandsMinHeight() {
+		return this.bandsMinHeight;
+	}
+
+	public double getBandsMaxHeight() {
+		return this.bandsMaxHeight;
+	}
+
+	public void setSupercluster(final boolean supercluster) {
+		this.supercluster = supercluster;
 	}
 
 	public boolean isSupercluster() {
 		return this.supercluster;
 	}
 
-	public void addCluster(final Cluster c) throws Exception {
+	public void addSubcluster(final Cluster subc) throws Exception {
 		try {
-			if (c.getNumSubclusters() == 1) {
-				this.leavesList.add(c);
+			this.subclustersList.addLast(subc);
+			if (subc.getNumSubclusters() == 1) {
+				this.leavesList.add(subc);
 			} else {
-				this.leavesList.addAll(c.getLeaves());
+				this.leavesList.addAll(subc.getLeaves());
 			}
-			this.subclustersList.addLast(c);
 		} catch (Exception e) {
 			throw new Exception(e.getMessage() + "\n" + Language.getLabel(74));
 		}
 		try {
-			if (c.getTop() > this.top) {
-				this.top = c.getTop();
+			if (Double.isNaN(this.nodesMinHeight)) {
+				this.nodesMinHeight = subc.nodesMinHeight;
+			} else if (!Double.isNaN(subc.nodesMinHeight)) {
+				this.nodesMinHeight = Math.min(this.nodesMinHeight, subc.nodesMinHeight);
 			}
-			if (c.getBase() < this.base) {
-				this.base = c.getBase();
+			if (Double.isNaN(this.nodesMaxHeight)) {
+				this.nodesMaxHeight = subc.nodesMaxHeight;
+			} else if (!Double.isNaN(subc.nodesMaxHeight)) {
+				this.nodesMaxHeight = Math.max(this.nodesMaxHeight, subc.nodesMaxHeight);
+			}
+			if (!Double.isNaN(subc.bandsMinHeight)) {
+				this.bandsMinHeight = Math.min(this.bandsMinHeight, subc.bandsMinHeight);
+			}
+			if (!Double.isNaN(subc.bandsMaxHeight)) {
+				this.bandsMaxHeight = Math.max(this.bandsMaxHeight, subc.bandsMaxHeight);
 			}
 		} catch (Exception e) {
 			throw new Exception(e.getMessage() + "\n" + Language.getLabel(75));
@@ -164,13 +174,13 @@ public class Cluster {
 		}
 	}
 
-	public Cluster getSubcluster(final int pos) throws Exception {
+	public Cluster getSubcluster(final int position) throws Exception {
 		Cluster c;
-		if (this.subclustersList.isEmpty() && (pos == 0)) {
+		if (this.subclustersList.isEmpty() && (position == 0)) {
 			c = this;
-		} else if (pos < this.subclustersList.size()) {
+		} else if (position < this.subclustersList.size()) {
 			try {
-				c = this.subclustersList.get(pos);
+				c = this.subclustersList.get(position);
 			} catch (Exception e) {
 				throw new Exception(Language.getLabel(18));
 			}
@@ -184,7 +194,7 @@ public class Cluster {
 	public LinkedList<Cluster> getLeaves() {
 		return this.leavesList;
 	}
-	
+
 	public int getNumLeaves() {
 		if (this.leavesList.size() == 0) {
 			return 1;

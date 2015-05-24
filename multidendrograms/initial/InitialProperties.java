@@ -21,15 +21,13 @@ package multidendrograms.initial;
 import java.awt.Color;
 import java.awt.Font;
 
-import multidendrograms.initial.Main;
-
 /**
  * <p>
  * <b>MultiDendrograms</b>
  * </p>
  *
  * It defines all the parameters of the application and it initializes them
- * with the values in the file dendo.ini, or with default values if the file is missing
+ * with the values in the file md.ini, or with default values if the file is missing
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
  *
@@ -37,156 +35,92 @@ import multidendrograms.initial.Main;
  */
 public class InitialProperties {
 
-	private static String sPath_language = "";
+	// Language
+	private static String language = "ini/lang_english.l";
 
+	// Data
 	private static double missingValue = 0.0;
 
-	private static double margin = 15;
+	// Windows
+	private static int widthMainWindow = 800;
+	private static int heightMainWindow = 690;
+	private static int widthDendroWindow = 400;
+	private static int heightDendroWindow = 400;
 
-	private static int width_frmPrincipal = 800;
+	// Dendrograms
+	private static Font fontDendroNames = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorDendroNames = Color.BLACK;
+	private static Font fontDendroLabels = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorDendroLabels = Color.BLACK;
+	private static Color colorDendroAxis = Color.BLACK;;
+	private static Color colorDendroBand = Color.LIGHT_GRAY;
+	private static double sizeDendroMargin = 15.0;
 
-	private static int height_frmPrincipal = 690;
+	// Settings
+	private static boolean showBands = true;
+	private static boolean showNodeLabels = true;
+	private static boolean uniformOrigin = true;
+	private static boolean showAxis = true;
+	private static boolean showAxisLabels = true;
 
-	private static double radius = 5;
+	// Label
+	private static Font fontLabel = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorLabel = Color.BLACK;
 
-	private static double factorAxis = 10.0;
+	// Title label
+	private static Font fontTitle = new Font("Arial", Font.BOLD, 10);
+	private static Color colorTitle = Color.BLACK;
+	private static Color colorTitleBackground = Color.GRAY;
 
-	private static int factorTicks = 10;
+	// TextField
+	private static Font fontTextField = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorTextField = Color.BLACK;
+	private static Color colorTextFieldBackground = Color.LIGHT_GRAY;
 
-	private static int width_frmDesk = 400;
+	// MenuItem
+	private static Font fontMenuItem = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorMenuItem = Color.BLACK;
 
-	private static int height_frmDesk = 400;
+	// Button
+	private static Font fontButton = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorButton = Color.BLACK;
 
-	private static String titleWin = Main.PROGRAM;
+	// ComboBox
+	private static Font fontComboBox = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorComboBox = Color.BLACK;
+	private static Color colorComboBoxBackground = Color.LIGHT_GRAY;
 
-	private static String titleDesk = Main.PROGRAM;
+	// CheckBox
+	private static Font fontCheckBox = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorCheckBox = Color.BLACK;
 
-	private static Color color_title_font = Color.BLACK;
-	private static Color color_title_background = Color.GRAY;
-	private static Font fontMenuTitle = new Font("Arial", Font.BOLD, 10);
+	// RadioButton
+	private static Font fontRadioButton = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorRadioButton = Color.BLACK;
 
-	private static Color color_jtxt_background = Color.LIGHT_GRAY;
-	private static Color color_jtxt_font = Color.BLACK;
-	private static Font fontMenuTXT = new Font("Arial", Font.BOLD, 10);
+	// Tree
+	private static Font fontTreeLeaf = new Font("Arial", Font.BOLD, 10);
+	private static Color colorTreeLeaf = Color.BLACK;
+	private static Font fontTreeNum = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorTreeNum = Color.BLACK;
+	private static Font fontTreeBand = new Font("Arial", Font.PLAIN, 10);
+	private static Color colorTreeBand = Color.BLACK;
 
-	private static Color color_jarea_background = Color.LIGHT_GRAY;
-	private static Color color_jarea_font = Color.BLACK;
-	private static Font fontMenuAREA = new Font("Arial", Font.BOLD, 10);
-
-	private static Color color_cb_background = Color.LIGHT_GRAY;
-	private static Color color_cb_font = Color.BLACK;
-	private static Font fontMenuCB = new Font("Arial", Font.BOLD, 10);
-
-	private static Color color_label_font = Color.BLACK;
-	private static Font fontMenuLabel = new Font("Arial", Font.BOLD, 10);
-
-	private static Color color_chk_font = Color.BLACK;
-
-	private static Font fontMenuCHK = new Font("Arial", Font.BOLD, 10);
-
-	private static Color colorBand = Color.LIGHT_GRAY;
-
-	private static Color color_opt_font = Color.BLACK;
-	private static Font fontMenuOPT = new Font("Arial", Font.BOLD, 10);
-
-	private static Font fontNames = new Font("Arial", Font.PLAIN, 10);
-
-	private static Font fontAxis = new Font("Arial", Font.PLAIN, 10);
-
-	private static Color colorNames = Color.BLACK;
-
-	private static Color colorAxis = Color.BLACK;;
-
-	private static Color colorLabels = Color.BLACK;
 
 	public InitialProperties() {
-		LogManager.LOG.info("Creat nou objecte");
+		LogManager.LOG.info("Initializing InitialProperties");
+		setProperties();
 	}
 
-	public static Color getColorBand() {
-		return InitialProperties.colorBand;
+
+	public static String getLanguage() {
+		return InitialProperties.language;
 	}
 
-	public static void setColorBand(final Color color) {
-		InitialProperties.colorBand = color;
+	public static void setLanguage(final String language) {
+		InitialProperties.language = language;
 	}
 
-	public static int getHeight_frmPrincipal() {
-		return InitialProperties.height_frmPrincipal;
-	}
-
-	public static double getRadius() {
-		return InitialProperties.radius;
-	}
-
-	public void setRadius(final double radius) {
-		InitialProperties.radius = radius;
-	}
-
-	public static double getFactorAxis() {
-		return factorAxis;
-	}
-
-	public static void setFactorAxis(double factorAxis) {
-		InitialProperties.factorAxis = factorAxis;
-	}
-
-	public static int getFactorTicks() {
-		return factorTicks;
-	}
-
-	public static void setFactorTicks(int factorTicks) {
-		InitialProperties.factorTicks = factorTicks;
-	}
-
-	public static String getTitleWin() {
-		return InitialProperties.titleWin;
-	}
-
-	public void setTitleWin(final String title) {
-		InitialProperties.titleWin = title;
-	}
-
-	public static String getTitleDesk() {
-		return InitialProperties.titleDesk;
-	}
-
-	public static void setTitleDesk(final String titleDesk) {
-		InitialProperties.titleDesk = titleDesk;
-	}
-
-	public void setWidth_frmDesk(final int width_frmArrel) {
-		InitialProperties.width_frmDesk = width_frmArrel;
-	}
-
-	public static int getWidth_frmPrincipal() {
-		return InitialProperties.width_frmPrincipal;
-	}
-
-	public static Color getColor_title_background() {
-		return InitialProperties.color_title_background;
-	}
-
-	public static void setColor_title_background(
-			final Color color_title_background) {
-		InitialProperties.color_title_background = color_title_background;
-	}
-
-	public static Color getColor_title_font() {
-		return InitialProperties.color_title_font;
-	}
-
-	public static void setColor_title_font(final Color color_title_font) {
-		InitialProperties.color_title_font = color_title_font;
-	}
-
-	public static Font getFontMenuTitle() {
-		return InitialProperties.fontMenuTitle;
-	}
-
-	public static void setFontMenuTitle(final Font fontMenuTitle) {
-		InitialProperties.fontMenuTitle = fontMenuTitle;
-	}
 
 	public static double getMissingValue() {
 		return InitialProperties.missingValue;
@@ -196,386 +130,447 @@ public class InitialProperties {
 		InitialProperties.missingValue = missingValue;
 	}
 
-	public static double getMargin() {
-		return InitialProperties.margin;
+
+	public static int getHeightMainWindow() {
+		return InitialProperties.heightMainWindow;
 	}
 
-	public static void setMargin(final double margin) {
-		InitialProperties.margin = margin;
+	public static int getWidthMainWindow() {
+		return InitialProperties.widthMainWindow;
 	}
 
-	public static String getSPath_language() {
-		return InitialProperties.sPath_language;
+	public static int getHeightDendroWindow() {
+		return InitialProperties.heightDendroWindow;
 	}
 
-	public static void setSPath_language(final String path_language) {
-		InitialProperties.sPath_language = path_language;
+	public static int getWidthDendroWindow() {
+		return InitialProperties.widthDendroWindow;
 	}
 
-	public static Color getColorAxis() {
-		return InitialProperties.colorAxis;
+
+	public static Font getFontDendroNames() {
+		return InitialProperties.fontDendroNames;
 	}
 
-	public static void setColorAxis(final Color colorAxis) {
-		InitialProperties.colorAxis = colorAxis;
+	public static void setFontDendroNames(final Font fontDendroNames) {
+		InitialProperties.fontDendroNames = fontDendroNames;
 	}
 
-	public static Color getColorLabels() {
-		return InitialProperties.colorLabels;
+	public static Color getColorDendroNames() {
+		return InitialProperties.colorDendroNames;
 	}
 
-	public static void setColorLabels(final Color colorLabels) {
-		InitialProperties.colorLabels = colorLabels;
+	public static void setColorDendroNames(final Color colorDendroNames) {
+		InitialProperties.colorDendroNames = colorDendroNames;
 	}
 
-	public static Color getColorNames() {
-		return InitialProperties.colorNames;
+	public static Font getFontDendroLabels() {
+		return InitialProperties.fontDendroLabels;
 	}
 
-	public static void setColorNames(final Color colorNames) {
-		InitialProperties.colorNames = colorNames;
+	public static void setFontDendroLabels(final Font fontDendroLabels) {
+		InitialProperties.fontDendroLabels = fontDendroLabels;
 	}
 
-	public static Font getFontAxis() {
-		return InitialProperties.fontAxis;
+	public static Color getColorDendroLabels() {
+		return InitialProperties.colorDendroLabels;
 	}
 
-	public static void setFontAxis(final Font fontAxis) {
-		InitialProperties.fontAxis = fontAxis;
+	public static void setColorDendroLabels(final Color colorDendroLabels) {
+		InitialProperties.colorDendroLabels = colorDendroLabels;
 	}
 
-	public static Font getFontNames() {
-		return InitialProperties.fontNames;
+	public static Color getColorDendroAxis() {
+		return InitialProperties.colorDendroAxis;
 	}
 
-	public static void setFontNames(final Font fontNames) {
-		InitialProperties.fontNames = fontNames;
+	public static void setColorDendroAxis(final Color colorDendroAxis) {
+		InitialProperties.colorDendroAxis = colorDendroAxis;
 	}
 
-	public static Color getColor_jarea_background() {
-		return InitialProperties.color_jarea_background;
+	public static Color getColorDendroBand() {
+		return InitialProperties.colorDendroBand;
 	}
 
-	public static void setColor_jarea_background(
-			final Color color_jarea_background) {
-		InitialProperties.color_jarea_background = color_jarea_background;
+	public static void setColorDendroBand(final Color colorDendroBand) {
+		InitialProperties.colorDendroBand = colorDendroBand;
 	}
 
-	public static Color getColor_jarea_font() {
-		return InitialProperties.color_jarea_font;
+	public static double getSizeDendroMargin() {
+		return InitialProperties.sizeDendroMargin;
 	}
 
-	public static void setColor_jarea_font(final Color color_jarea_font) {
-		InitialProperties.color_jarea_font = color_jarea_font;
+	public static boolean getShowBands() {
+		return InitialProperties.showBands;
 	}
 
-	public static Font getFontMenuAREA() {
-		return InitialProperties.fontMenuAREA;
+	public static boolean getShowNodeLabels() {
+		return InitialProperties.showNodeLabels;
 	}
 
-	public static void setFontMenuAREA(final Font fontMenuAREA) {
-		InitialProperties.fontMenuAREA = fontMenuAREA;
+	public static boolean getUniformOrigin() {
+		return InitialProperties.uniformOrigin;
 	}
 
-	public static Color getColor_jtxt_background() {
-		return InitialProperties.color_jtxt_background;
+	public static boolean getShowAxis() {
+		return InitialProperties.showAxis;
 	}
 
-	public static void setColor_jtxt_background(
-			final Color color_jtxt_background) {
-		InitialProperties.color_jtxt_background = color_jtxt_background;
+	public static boolean getShowAxisLabels() {
+		return InitialProperties.showAxisLabels;
 	}
 
-	public static Color getColor_jtxt_font() {
-		return InitialProperties.color_jtxt_font;
+	public static Font getFontLabel() {
+		return InitialProperties.fontLabel;
 	}
 
-	public static void setColor_jtxt_font(final Color color_jtxt_font) {
-		InitialProperties.color_jtxt_font = color_jtxt_font;
+	public static void setFontLabel(final Font fontLabel) {
+		InitialProperties.fontLabel = fontLabel;
 	}
 
-	public static Font getFontMenuTXT() {
-		return InitialProperties.fontMenuTXT;
+	public static Color getColorLabel() {
+		return InitialProperties.colorLabel;
 	}
 
-	public static void setFontMenuTXT(final Font fontMenuTXT) {
-		InitialProperties.fontMenuTXT = fontMenuTXT;
+	public static void setColorLabel(final Color colorLabel) {
+		InitialProperties.colorLabel = colorLabel;
 	}
 
-	public static Color getColor_opt_font() {
-		return InitialProperties.color_opt_font;
+
+	public static Font getFontTitle() {
+		return InitialProperties.fontTitle;
 	}
 
-	public static void setColor_opt_font(final Color color_opt_font) {
-		InitialProperties.color_opt_font = color_opt_font;
+	public static void setFontTitle(final Font fontTitle) {
+		InitialProperties.fontTitle = fontTitle;
 	}
 
-	public static Font getFontMenuOPT() {
-		return InitialProperties.fontMenuOPT;
+	public static Color getColorTitle() {
+		return InitialProperties.colorTitle;
 	}
 
-	public static void setFontMenuOPT(final Font fontMenuOPT) {
-		InitialProperties.fontMenuOPT = fontMenuOPT;
+	public static void setColorTitle(final Color colorTitle) {
+		InitialProperties.colorTitle = colorTitle;
 	}
 
-	public static Color getColor_cb_background() {
-		return InitialProperties.color_cb_background;
+	public static Color getColorTitleBackground() {
+		return InitialProperties.colorTitleBackground;
 	}
 
-	public static void setColor_cb_background(final Color color_cb_background) {
-		InitialProperties.color_cb_background = color_cb_background;
+	public static void setColorTitleBackground(
+			final Color colorTitleBackground) {
+		InitialProperties.colorTitleBackground = colorTitleBackground;
 	}
 
-	public static Color getColor_cb_font() {
-		return InitialProperties.color_cb_font;
+
+	public static Font getFontTextField() {
+		return InitialProperties.fontTextField;
 	}
 
-	public static void setColor_cb_font(final Color color_cb_font) {
-		InitialProperties.color_cb_font = color_cb_font;
+	public static void setFontTextField(final Font fontTextField) {
+		InitialProperties.fontTextField = fontTextField;
 	}
 
-	public static Font getFontMenuCB() {
-		return InitialProperties.fontMenuCB;
+	public static Color getColorTextField() {
+		return InitialProperties.colorTextField;
 	}
 
-	public static void setFontMenuCB(final Font fontMenuCB) {
-		InitialProperties.fontMenuCB = fontMenuCB;
+	public static void setColorTextField(final Color colorTextField) {
+		InitialProperties.colorTextField = colorTextField;
 	}
 
-	public static Color getColor_chk_font() {
-		return InitialProperties.color_chk_font;
+	public static Color getColorTextFieldBackground() {
+		return InitialProperties.colorTextFieldBackground;
 	}
 
-	public static void setColor_chk_font(final Color color_chk_font) {
-		InitialProperties.color_chk_font = color_chk_font;
+	public static void setColorTextFieldBackground(
+			final Color colorTextFieldBackground) {
+		InitialProperties.colorTextFieldBackground = colorTextFieldBackground;
 	}
 
-	public static Font getFontMenuCHK() {
-		return InitialProperties.fontMenuCHK;
+
+	public static Font getFontMenuItem() {
+		return InitialProperties.fontMenuItem;
 	}
 
-	public static void setFontMenuCHK(final Font fontMenuCHK) {
-		InitialProperties.fontMenuCHK = fontMenuCHK;
+	public static void setFontMenuItem(final Font fontMenuItem) {
+		InitialProperties.fontMenuItem = fontMenuItem;
 	}
 
-	public static Color getColor_label_font() {
-		return InitialProperties.color_label_font;
+	public static Color getColorMenuItem() {
+		return InitialProperties.colorMenuItem;
 	}
 
-	public static void setColor_label_font(final Color color_label_font) {
-		InitialProperties.color_label_font = color_label_font;
+	public static void setColorMenuItem(final Color colorMenuItem) {
+		InitialProperties.colorMenuItem = colorMenuItem;
 	}
 
-	public static Font getFontMenuLabel() {
-		return InitialProperties.fontMenuLabel;
+
+	public static Font getFontButton() {
+		return InitialProperties.fontButton;
 	}
 
-	public static void setFontMenuLabel(final Font fontMenuLabel) {
-		InitialProperties.fontMenuLabel = fontMenuLabel;
+	public static void setFontButton(final Font fontButton) {
+		InitialProperties.fontButton = fontButton;
 	}
 
-	public static int getWidth_frmDesk() {
-		return InitialProperties.width_frmDesk;
+	public static Color getColorButton() {
+		return InitialProperties.colorButton;
 	}
 
-	public static int getHeight_frmDesk() {
-		return InitialProperties.height_frmDesk;
+	public static void setColorButton(final Color colorButton) {
+		InitialProperties.colorButton = colorButton;
 	}
 
-	public void setParametres(final MainProperties ap) {
-		String s_tmp;
-		Font f;
-		Color c;
+
+	public static Font getFontComboBox() {
+		return InitialProperties.fontComboBox;
+	}
+
+	public static void setFontComboBox(final Font fontComboBox) {
+		InitialProperties.fontComboBox = fontComboBox;
+	}
+
+	public static Color getColorComboBox() {
+		return InitialProperties.colorComboBox;
+	}
+
+	public static void setColorComboBox(final Color colorComboBox) {
+		InitialProperties.colorComboBox = colorComboBox;
+	}
+
+	public static Color getColorComboBoxBackground() {
+		return InitialProperties.colorComboBoxBackground;
+	}
+
+	public static void setColorComboBoxBackground(final Color colorComboBoxBackground) {
+		InitialProperties.colorComboBoxBackground = colorComboBoxBackground;
+	}
+
+
+	public static Font getFontCheckBox() {
+		return InitialProperties.fontCheckBox;
+	}
+
+	public static void setFontCheckBox(final Font fontCheckBox) {
+		InitialProperties.fontCheckBox = fontCheckBox;
+	}
+
+	public static Color getColorCheckBox() {
+		return InitialProperties.colorCheckBox;
+	}
+
+	public static void setColorCheckBox(final Color colorCheckBox) {
+		InitialProperties.colorCheckBox = colorCheckBox;
+	}
+
+
+	public static Font getFontRadioButton() {
+		return InitialProperties.fontRadioButton;
+	}
+
+	public static void setFontRadioButton(final Font fontRadioButton) {
+		InitialProperties.fontRadioButton = fontRadioButton;
+	}
+
+	public static Color getColorRadioButton() {
+		return InitialProperties.colorRadioButton;
+	}
+
+	public static void setColorRadioButton(final Color colorRadioButton) {
+		InitialProperties.colorRadioButton = colorRadioButton;
+	}
+
+
+	public static Font getFontTreeLeaf() {
+		return InitialProperties.fontTreeLeaf;
+	}
+
+	public static void setFontTreeLeaf(final Font fontTreeLeaf) {
+		InitialProperties.fontTreeLeaf = fontTreeLeaf;
+	}
+
+	public static Color getColorTreeLeaf() {
+		return InitialProperties.colorTreeLeaf;
+	}
+
+	public static void setColorTreeLeaf(final Color colorTreeLeaf) {
+		InitialProperties.colorTreeLeaf = colorTreeLeaf;
+	}
+
+	public static Font getFontTreeNum() {
+		return InitialProperties.fontTreeNum;
+	}
+
+	public static void setFontTreeNum(final Font fontTreeNum) {
+		InitialProperties.fontTreeNum = fontTreeNum;
+	}
+
+	public static Color getColorTreeNum() {
+		return InitialProperties.colorTreeNum;
+	}
+
+	public static void setColorTreeNum(final Color colorTreeNum) {
+		InitialProperties.colorTreeNum = colorTreeNum;
+	}
+
+	public static Font getFontTreeBand() {
+		return InitialProperties.fontTreeBand;
+	}
+
+	public static void setFontTreeBand(final Font fontTreeBand) {
+		InitialProperties.fontTreeBand = fontTreeBand;
+	}
+
+	public static Color getColorTreeBand() {
+		return InitialProperties.colorTreeBand;
+	}
+
+	public static void setColorTreeBand(final Color colorTreeBand) {
+		InitialProperties.colorTreeBand = colorTreeBand;
+	}
+
+
+	public void setProperties() {
+		// Language
+		InitialProperties.language = this.getString("language", InitialProperties.language);
+
+		// Data
+		InitialProperties.missingValue = this.getDouble("missingValue", InitialProperties.missingValue);
+
+		// Windows
+		InitialProperties.heightMainWindow = this.getInteger("heightMainWindow", InitialProperties.heightMainWindow);
+		InitialProperties.widthMainWindow = this.getInteger("widthMainWindow", InitialProperties.widthMainWindow);
+		InitialProperties.heightDendroWindow = this.getInteger("heightDendroWindow", InitialProperties.heightDendroWindow);
+		InitialProperties.widthDendroWindow = this.getInteger("widthDendroWindow", InitialProperties.widthDendroWindow);
+
+		// Dendrograms
+		InitialProperties.fontDendroNames = this.getFont("fontDendroNames", InitialProperties.fontDendroNames);
+		InitialProperties.colorDendroNames = this.getColor("colorDendroNames", InitialProperties.colorDendroNames);
+		InitialProperties.fontDendroLabels = this.getFont("fontDendroLabels", InitialProperties.fontDendroLabels);
+		InitialProperties.colorDendroLabels = this.getColor("colorDendroLabels", InitialProperties.colorDendroLabels);
+		InitialProperties.colorDendroAxis = this.getColor("colorDendroAxis", InitialProperties.colorDendroAxis);
+		InitialProperties.colorDendroBand = this.getColor("colorDendroBand", InitialProperties.colorDendroBand);
+		InitialProperties.sizeDendroMargin = this.getDouble("sizeDendroMargin", InitialProperties.sizeDendroMargin);
+
+		// Settings
+		InitialProperties.showBands = this.getBoolean("showBands", InitialProperties.showBands);
+		InitialProperties.showNodeLabels = this.getBoolean("showNodeLabels", InitialProperties.showNodeLabels);
+		InitialProperties.uniformOrigin = this.getBoolean("uniformOrigin", InitialProperties.uniformOrigin);
+		InitialProperties.showAxis = this.getBoolean("showAxis", InitialProperties.showAxis);
+		InitialProperties.showAxisLabels = this.getBoolean("showAxisLabels", InitialProperties.showAxisLabels);
+
+		// Label
+		InitialProperties.fontLabel = this.getFont("fontLabel", InitialProperties.fontLabel);
+		InitialProperties.colorLabel = this.getColor("colorLabel", InitialProperties.colorLabel);
+
+		// Title label
+		InitialProperties.fontTitle = this.getFont("fontTitle", InitialProperties.fontTitle);
+		InitialProperties.colorTitle = this.getColor("colorTitle", InitialProperties.colorTitle);
+		InitialProperties.colorTitleBackground = this.getColor("colorTitleBackground", InitialProperties.colorTitleBackground);
+
+		// TextField
+		InitialProperties.fontTextField = this.getFont("fontTextField", InitialProperties.fontTextField);
+		InitialProperties.colorTextField = this.getColor("colorTextField", InitialProperties.colorTextField);
+		InitialProperties.colorTextFieldBackground = this.getColor("colorTextFieldBackground", InitialProperties.colorTextFieldBackground);
+
+		// MenuItem
+		InitialProperties.fontMenuItem = this.getFont("fontMenuItem", InitialProperties.fontMenuItem);
+		InitialProperties.colorMenuItem = this.getColor("colorMenuItem", InitialProperties.colorMenuItem);
+
+		// Button
+		InitialProperties.fontButton = this.getFont("fontButton", InitialProperties.fontButton);
+		InitialProperties.colorButton = this.getColor("colorButton", InitialProperties.colorButton);
+
+		// ComboBox
+		InitialProperties.fontComboBox = this.getFont("fontComboBox", InitialProperties.fontComboBox);
+		InitialProperties.colorComboBox = this.getColor("colorComboBox", InitialProperties.colorComboBox);
+		InitialProperties.colorComboBoxBackground = this.getColor("colorComboBoxBackground", InitialProperties.colorComboBoxBackground);
+
+		// CheckBox
+		InitialProperties.fontCheckBox = this.getFont("fontCheckBox", InitialProperties.fontCheckBox);
+		InitialProperties.colorCheckBox = this.getColor("colorCheckBox", InitialProperties.colorCheckBox);
+
+		// RadioButton
+		InitialProperties.fontRadioButton = this.getFont("fontRadioButton", InitialProperties.fontRadioButton);
+		InitialProperties.colorRadioButton = this.getColor("colorRadioButton", InitialProperties.colorRadioButton);
+
+		// Tree
+		InitialProperties.fontTreeLeaf = this.getFont("fontTreeLeaf", InitialProperties.fontTreeLeaf);
+		InitialProperties.colorTreeLeaf = this.getColor("colorTreeLeaf", InitialProperties.colorTreeLeaf);
+		InitialProperties.fontTreeNum = this.getFont("fontTreeNum", InitialProperties.fontTreeNum);
+		InitialProperties.colorTreeNum = this.getColor("colorTreeNum", InitialProperties.colorTreeNum);
+		InitialProperties.fontTreeBand = this.getFont("fontTreeBand", InitialProperties.fontTreeBand);
+		InitialProperties.colorTreeBand = this.getColor("colorTreeBand", InitialProperties.colorTreeBand);
+	}
+
+	private String getString(final String label, String defaultString) {
+		String s = defaultString;
 
 		try {
-			s_tmp = MainProperties.getProperty("language");
-			if (s_tmp != null) {
-				LogManager.LOG.config("Loading language: " + s_tmp);
-				InitialProperties.sPath_language = s_tmp;
-			}
+			s = MainProperties.getProperty(label);
 		} catch (final Exception e) {
-			LogManager.LOG.warning("Language property not found");
-			InitialProperties.sPath_language = "";
+			s = defaultString;
+			LogManager.LOG.warning("Unable to assign string from label '" + label + "', using the default value");
 		}
-		;
-
-		try {
-			s_tmp = MainProperties.getProperty("missingValue");
-			if (s_tmp != null) {
-				InitialProperties.missingValue = Double.parseDouble(s_tmp);
-			}
-		} catch (final Exception e) {
-			InitialProperties.missingValue = 0.0;
-		}
-
-		try {
-			s_tmp = MainProperties.getProperty("height_frmPrincipal");
-			if (s_tmp != null) {
-				InitialProperties.height_frmPrincipal = Integer
-						.parseInt(s_tmp);
-			}
-		} catch (final Exception e) {
-			InitialProperties.height_frmPrincipal = 690;
-		}
-
-		try {
-			s_tmp = MainProperties.getProperty("width_frmPrincipal");
-			if (s_tmp != null) {
-				InitialProperties.width_frmPrincipal = Integer
-						.parseInt(s_tmp);
-			}
-		} catch (final Exception e) {
-			InitialProperties.width_frmPrincipal = 800;
-		}
-
-		try {
-			s_tmp = MainProperties.getProperty("radius");
-			if (s_tmp != null) {
-				InitialProperties.radius = Double.parseDouble(s_tmp);
-			}
-		} catch (final Exception e) {
-			InitialProperties.radius = 5.0;
-		}
-		;
-
-		try {
-			s_tmp = MainProperties.getProperty("height_frmDesk");
-			if (s_tmp != null) {
-				InitialProperties.height_frmDesk = Integer.parseInt(s_tmp);
-			}
-		} catch (final Exception e) {
-			InitialProperties.height_frmDesk = 400;
-		}
-		;
-
-		try {
-			s_tmp = MainProperties.getProperty("width_frmDesk");
-			if (s_tmp != null) {
-				InitialProperties.width_frmDesk = Integer.parseInt(s_tmp);
-			}
-		} catch (final Exception e) {
-			InitialProperties.width_frmDesk = 400;
-		}
-		;
-
-		c = this.getColor("colorBand");
-		if (c != null) {
-			InitialProperties.colorBand = c;
-		}
-
-		f = this.getFont("fontNames");
-		if (f != null) {
-			InitialProperties.fontNames = f;
-		}
-		f = this.getFont("fontAxis");
-		if (f != null) {
-			InitialProperties.fontAxis = f;
-		}
-
-		c = this.getColor("colorNames");
-		if (c != null) {
-			InitialProperties.colorNames = c;
-		}
-		c = this.getColor("colorAxis");
-		if (c != null) {
-			InitialProperties.colorAxis = c;
-		}
-		c = this.getColor("colorLabels");
-		if (c != null) {
-			InitialProperties.colorLabels = c;
-		}
-
-		c = this.getColor("color_title_font");
-		if (c != null) {
-			InitialProperties.color_title_font = c;
-		}
-		c = this.getColor("color_title_background");
-		if (c != null) {
-			InitialProperties.color_title_background = c;
-		}
-
-		f = this.getFont("fontMenuTitle");
-		if (f != null) {
-			InitialProperties.fontMenuTitle = f;
-		}
-
-		c = this.getColor("color_jtxt_font");
-		if (c != null) {
-			InitialProperties.color_jtxt_font = c;
-		}
-		c = this.getColor("color_jtxt_background");
-		if (c != null) {
-			InitialProperties.color_jtxt_background = c;
-		}
-
-		f = this.getFont("fontMenuTXT");
-		if (f != null) {
-			InitialProperties.fontMenuTXT = f;
-		}
-
-		c = this.getColor("color_label_font");
-		if (c != null) {
-			InitialProperties.color_label_font = c;
-		}
-
-		f = this.getFont("fontMenuLabel");
-		if (f != null) {
-			InitialProperties.fontMenuLabel = f;
-		}
-
-		c = this.getColor("color_chk_font");
-		if (c != null) {
-			InitialProperties.color_chk_font = c;
-		}
-
-		f = this.getFont("fontMenuCHK");
-		if (f != null) {
-			InitialProperties.fontMenuCHK = f;
-		}
-
-		c = this.getColor("color_opt_font");
-		if (c != null) {
-			InitialProperties.color_opt_font = c;
-		}
-
-		f = this.getFont("fontMenuOPT");
-		if (f != null) {
-			InitialProperties.fontMenuOPT = f;
-		}
-
-		c = this.getColor("color_cb_font");
-		if (c != null) {
-			InitialProperties.color_cb_font = c;
-		}
-		c = this.getColor("color_cb_background");
-		if (c != null) {
-			InitialProperties.color_cb_background = c;
-		}
-
-		f = this.getFont("fontMenuCB");
-		if (f != null) {
-			InitialProperties.fontMenuCB = f;
-		}
-		c = this.getColor("color_jarea_font");
-		if (c != null) {
-			InitialProperties.color_jarea_font = c;
-		}
-		c = this.getColor("color_jarea_background");
-		if (c != null) {
-			InitialProperties.color_jarea_background = c;
-		}
-
-		f = this.getFont("fontMenuAREA");
-		if (f != null) {
-			InitialProperties.fontMenuAREA = f;
-		}
+		return s;
 	}
 
-	private Font getFont(final String label) {
+	private int getInteger(final String label, int defaultInteger) {
+		String s_int;
+		int i = defaultInteger;
+
+		try {
+			s_int = MainProperties.getProperty(label);
+			if (s_int != null) {
+				i = Integer.parseInt(s_int);
+			}
+		} catch (final Exception e) {
+			i = defaultInteger;
+			LogManager.LOG.warning("Unable to assign integer from label '" + label + "', using the default value");
+		}
+		return i;
+	}
+
+	private double getDouble(final String label, double defaultDouble) {
+		String s_double;
+		double d = defaultDouble;
+
+		try {
+			s_double = MainProperties.getProperty(label);
+			if (s_double != null) {
+				d = Double.parseDouble(s_double);
+			}
+		} catch (final Exception e) {
+			d = defaultDouble;
+			LogManager.LOG.warning("Unable to assign double from label '" + label + "', using the default value");
+		}
+		return d;
+	}
+
+	private boolean getBoolean(final String label, boolean defaultBoolean) {
+		String s_bool;
+		boolean b = defaultBoolean;
+		int val;
+
+		try {
+			s_bool = MainProperties.getProperty(label);
+			if (s_bool != null) {
+				val = Integer.parseInt(s_bool);
+				b = (val == 0) ? false : true;
+			}
+		} catch (final Exception e) {
+			b = defaultBoolean;
+			LogManager.LOG.warning("Unable to assign booean from label '" + label + "', using the default value");
+		}
+		return b;
+	}
+
+	private Font getFont(final String label, Font defaultFont) {
 		String lbl1, lbl2, lbl3;
 		String s_size, s_name, s_style;
 		int i_size, i_style;
-		Font f = null;
+		Font f = defaultFont;
 
 		lbl1 = label + "_size";
 		lbl2 = label + "_name";
@@ -590,17 +585,17 @@ public class InitialProperties {
 				f = new Font(s_name, i_style, i_size);
 			}
 		} catch (final Exception e) {
-			f = null;
-			LogManager.LOG.warning("No font assigned to label " + label);
+			f = defaultFont;
+			LogManager.LOG.warning("Unable to assign font from label '" + label + "', using the default font");
 		}
 		return f;
 	}
 
-	private Color getColor(final String label) {
+	private Color getColor(final String label, Color defaultColor) {
 		String lbl1, lbl2, lbl3;
 		String s_r, s_g, s_b;
 		int i_r, i_g, i_b;
-		Color c = null;
+		Color c = defaultColor;
 
 		lbl1 = label + "_R";
 		lbl2 = label + "_G";
@@ -608,8 +603,8 @@ public class InitialProperties {
 
 		try {
 			s_r = MainProperties.getProperty(lbl1);
-			s_b = MainProperties.getProperty(lbl2);
-			s_g = MainProperties.getProperty(lbl3);
+			s_g = MainProperties.getProperty(lbl2);
+			s_b = MainProperties.getProperty(lbl3);
 
 			if ((s_r != null) && (s_g != null) && (s_b != null)) {
 				i_r = Integer.parseInt(s_r);
@@ -619,8 +614,8 @@ public class InitialProperties {
 				c = new Color(i_r, i_g, i_b);
 			}
 		} catch (final Exception e) {
-			c = null;
-			LogManager.LOG.warning("No color assigned to label " + label);
+			c = defaultColor;
+			LogManager.LOG.warning("Unable to assign color from label '" + label + "', using the default color");
 		}
 		;
 		return c;

@@ -23,6 +23,7 @@ import java.awt.Graphics2D;
 
 import multidendrograms.dendrogram.Scaling;
 import multidendrograms.types.DendrogramOrientation;
+import multidendrograms.types.PlotType;
 import multidendrograms.definitions.Coordinates;
 
 /**
@@ -38,51 +39,48 @@ import multidendrograms.definitions.Coordinates;
  */
 public abstract class Figure {
 
+	private DendrogramOrientation dendroOrientation;
+	private Coordinates<Double> coordinates;
 	private Color color = Color.BLACK;
-	private Coordinates<Double> coords;
-	private Scaling scale;
-	private final int precision;
+	private Scaling scaling;
 
-	public Figure(final double x, final double y, final int precision) {
-		this.coords = new Coordinates<Double>(x, y);
-		this.precision = precision;
+	public Figure(final double x, final double y) {
+		this.coordinates = new Coordinates<Double>(x, y);
 	}
 
-	public Figure(final double x, final double y, final int p, final Color c) {
-		this.coords = new Coordinates<Double>(x, y);
-		this.color = c;
-		this.precision = p;
+	public Figure(final double x, final double y, final Color color) {
+		this.coordinates = new Coordinates<Double>(x, y);
+		this.color = color;
+	}
+
+	public DendrogramOrientation getDendrogramOrientation() {
+		return this.dendroOrientation;
+	}
+
+	public void setDendrogramOrientation(final DendrogramOrientation dendroOrientation) {
+		this.dendroOrientation = dendroOrientation;
 	}
 
 	public Coordinates<Double> getPosReal() {
-		return this.coords;
-	}
-
-	public void setPosReal(final Coordinates<Double> pos) {
-		this.coords = pos;
+		return this.coordinates;
 	}
 
 	public Color getColor() {
 		return this.color;
 	}
 
-	public void setColor(final Color c) {
-		this.color = c;
+	public void setColor(final Color color) {
+		this.color = color;
 	}
 
 	public Scaling getScaling() {
-		return this.scale;
+		return this.scaling;
 	}
 
-	public void setScaling(final Scaling s) {
-		this.scale = s;
+	public void setScaling(final Scaling scaling) {
+		this.scaling = scaling;
 	}
 
-	public int getPrecision() {
-		return this.precision;
-	}
+	public abstract void draw(final PlotType plotType, final Graphics2D graphics2D);
 
-	public abstract void draw(DendrogramOrientation or);
-
-	public abstract void draw(Graphics2D g, DendrogramOrientation or);
 }

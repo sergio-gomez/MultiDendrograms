@@ -20,7 +20,6 @@ package multidendrograms.forms.children;
 
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,7 +33,7 @@ import javax.swing.LayoutStyle;
 import multidendrograms.initial.Language;
 import multidendrograms.initial.Main;
 import multidendrograms.utils.URLLabel;
-
+import multidendrograms.definitions.Formats;
 
 /**
  * <p>
@@ -56,8 +55,6 @@ public class UpgradeBox extends JDialog implements ActionListener {
 	private JLabel verLabel;
 	private JButton okButton;
 
-	private final Font font = new Font("Arial", Font.PLAIN, 12);
-
 	public UpgradeBox(final String version, final String versionWeb) {
 		super();
 		this.version = version;
@@ -78,24 +75,20 @@ public class UpgradeBox extends JDialog implements ActionListener {
 		setResizable(false);
 		setModal(true);
 
-		verWebLabel = new JLabel();
-		homeLabel = new URLLabel(Main.HOMEPAGE_URL, Language.getLabel(122).toLowerCase());
 		verLabel = new JLabel();
 		okButton = new JButton();
 
-		verWebLabel.setFont(font);
-		verWebLabel.setText(Language.getLabel(129) + " " + Main.PROGRAM + " " + versionWeb
-				+ " " + Language.getLabel(130) + " ");
+		verWebLabel = Formats.getFormattedLabel(Language.getLabel(129) + " " + Main.PROGRAM
+				+ " " + versionWeb + " " + Language.getLabel(130) + " ");
 		verWebLabel.setName("verWebLabel");
 
-		homeLabel.setFont(font);
+		homeLabel = new URLLabel(Main.HOMEPAGE_URL, Language.getLabel(122).toLowerCase());
 		homeLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-		verLabel.setFont(font);
-		verLabel.setText(Language.getLabel(131) + " " + Main.PROGRAM + " " + version);
+		verLabel = Formats.getFormattedLabel(Language.getLabel(131) + " " + Main.PROGRAM + " " + version);
 		verLabel.setName("verLabel");
 
-		okButton.setText(Language.getLabel(60));
+		okButton = Formats.getFormattedButton(Language.getLabel(60));
 		okButton.setName("okButton");
 		okButton.addActionListener(this);
 

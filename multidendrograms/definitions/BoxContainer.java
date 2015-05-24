@@ -23,7 +23,7 @@ package multidendrograms.definitions;
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Defines an area on the screen, position, measures and accepted values range
+ * Defines an area on the screen: position, size and range of accepted values
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
  *
@@ -78,6 +78,10 @@ public class BoxContainer {
 
 	public void setCornerY(final double cornerY) {
 		this.cornerY = cornerY;
+	}
+
+	public void increaseCornerY(final double value) {
+		this.cornerY = this.cornerY + value;
 	}
 
 	public double getWidth() {

@@ -22,9 +22,11 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
+import multidendrograms.dendrogram.Scaling;
+import multidendrograms.dendrogram.eps.EpsUtils;
 import multidendrograms.initial.LogManager;
 import multidendrograms.types.DendrogramOrientation;
-import multidendrograms.utils.MathUtils;
+import multidendrograms.types.PlotType;
 
 /**
  * <p>
@@ -42,16 +44,15 @@ public class Band extends Figure {
 	private double height, width;
 	private boolean filled;
 
-	public Band(final double x, final double y, final double height, final double width, final int precision) {
-		super(x, y, precision, Color.GRAY);
+	public Band(final double x, final double y, final double height, final double width) {
+		super(x, y, Color.GRAY);
 		this.height = height;
 		this.width = width;
 		this.filled = true;
-
 	}
 
-	public Band(final double x, final double y, final double height, final double width, final int precision, final Color c) {
-		super(x, y, precision, c);
+	public Band(final double x, final double y, final double height, final double width, final Color color) {
+		super(x, y, color);
 		this.height = height;
 		this.width = width;
 		this.filled = true;
@@ -82,101 +83,90 @@ public class Band extends Figure {
 	}
 
 	@Override
-	public void draw(final Graphics2D g, final DendrogramOrientation or) {
-		double x1, y1, w, h;
-		double xx1, yy1, ww, hh;
-		int prec = getPrecision();
-		Color col = g.getColor();
+	public void draw(final PlotType plotType, final Graphics2D graphics2D) {
+		double x1 = getPosReal().getX();
+		double y1 = getPosReal().getY();
+		double x2 = x1 + this.width;
+		double y2 = y1 + this.height;
 
-		xx1 = this.getPosReal().getX();
-		yy1 = MathUtils.round(this.getPosReal().getY(), prec);
-		ww = this.getPosReal().getX() + this.getWidth();
-		hh = MathUtils
-				.round(this.getPosReal().getY() + this.getHeight(), prec);
+		LogManager.LOG.finest("Real coord.: x1 = " + x1 + "    y1 = "
+				+ y1 + "    x2 = " + x2 + "    y2 = " + y2);
 
-		LogManager.LOG.finest("Orientation: " + or.toString());
-		LogManager.LOG.finest("Precision: " + prec);
-		LogManager.LOG.finest("Rea coordl: x=" + xx1 + "    y=("
-				+ getPosReal().getY() + ") " + yy1 + "   aglom: ("
-				+ getHeight() + ")  " + hh + "    width= " + ww);
-
-		if (or == DendrogramOrientation.EAST) {
-			y1 = yy1;
-			yy1 = (this.getScaling().getMaxY() - xx1)
-					+ this.getScaling().getMinY();
-			xx1 = y1;
-
-			h = hh;
-			hh = (this.getScaling().getMaxY() - ww)
-					+ this.getScaling().getMinY();
-			ww = h;
-
-			y1 = yy1;
-			yy1 = hh;
-			hh = y1;
-
-		} else if (or == DendrogramOrientation.WEST) {
+		Scaling scale = getScaling();
+		double minX = scale.getMinX();
+		double maxX = scale.getMaxX();
+		double minY = scale.getMinY();
+		double maxY = scale.getMaxY();
+		DendrogramOrientation dendroOrientation = getDendrogramOrientation();
+		if (dendroOrientation == DendrogramOrientation.EAST) {
+			double yy1 = y1;
+			y1 = minY + (maxY - x1);
+			x1 = yy1;
+			double yy2 = y2;
+			y2 = minY + (maxY - x2);
+			x2 = yy2;
+			yy1 = y1;
+			y1 = y2;
+			y2 = yy1;
+		} else if (dendroOrientation == DendrogramOrientation.WEST) {
 			// rotation of P(x,y)
-			x1 = xx1;
-			xx1 = (this.getScaling().getMaxX() - yy1)
-					+ this.getScaling().getMinX();
-			yy1 = (this.getScaling().getMaxY() - x1)
-					+ this.getScaling().getMinY();
-
+			double xx1 = x1;
+			x1 = minX + (maxX - y1);
+			y1 = minY + (maxY - xx1);
 			// rotation of P(x',y')
-			w = ww;
-			ww = (this.getScaling().getMaxX() - hh)
-					+ this.getScaling().getMinX();
-			hh = (this.getScaling().getMaxY() - w)
-					+ this.getScaling().getMinY();
-
+			double xx2 = x2;
+			x2 = minX + (maxX - y2);
+			y2 = minY + (maxY - xx2);
 			// translation of origin
-			y1 = yy1;
-			yy1 = hh;
-			hh = y1;
-
-			x1 = xx1;
-			xx1 = ww;
-			ww = x1;
-
-		} else if (or == DendrogramOrientation.SOUTH) {
+			xx1 = x1;
+			x1 = x2;
+			x2 = xx1;
+			double yy1 = y1;
+			y1 = y2;
+			y2 = yy1;
+		} else if (dendroOrientation == DendrogramOrientation.SOUTH) {
 			// rotation of P(x,y)
-			yy1 = (this.getScaling().getMaxY() - yy1)
-					+ this.getScaling().getMinY();
-
-			hh = (this.getScaling().getMaxY() - hh)
-					+ this.getScaling().getMinY();
-			h = yy1;
-			yy1 = hh;
-			hh = h;
-
-		} else {
-			// nothing to do in North
+			y1 = minY + (maxY - y1);
+			y2 = minY + (maxY - y2);
+			double yy2 = y1;
+			y1 = y2;
+			y2 = yy2;
 		}
 
 		// scaling
-		x1 = this.getScaling().transformX(xx1);
-		y1 = this.getScaling().transformY(yy1);
-		w = this.getScaling().transformX(ww);
-		h = this.getScaling().transformY(hh);
+		x1 = scale.transformX(x1);
+		y1 = scale.transformY(y1);
+		x2 = scale.transformX(x2);
+		y2 = scale.transformY(y2);
 
 		// drawing
-		if (filled) {
-			g.setPaint(this.getColor());
-			g.setColor(getColor());
-			g.fill(new Rectangle2D.Double(x1, y1, w - x1, h - y1));
-		} else {
-			g.setColor(Color.BLACK);
-			g.draw(new Rectangle2D.Double(x1, y1, w - x1, h - y1));
+		if (plotType.equals(PlotType.PANEL)) {
+			Color originalColor = graphics2D.getColor();
+			if (this.filled) {
+				graphics2D.setPaint(getColor());
+				graphics2D.setColor(getColor());
+				graphics2D.fill(new Rectangle2D.Double(x1, y1, x2 - x1, y2 - y1));
+			} else {
+				graphics2D.setColor(Color.BLACK);
+				graphics2D.draw(new Rectangle2D.Double(x1, y1, x2 - x1, y2 - y1));
+			}
+			graphics2D.setColor(originalColor);
+		} else {// (plotType.equals(PlotType.EPS))
+			EpsUtils.writeLine("gsave");
+			Color color = (this.filled) ? getColor() : Color.BLACK;
+			EpsUtils.writeLine(EpsUtils.setRGBColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f));
+			if (this.filled) {
+				EpsUtils.writeLine(EpsUtils.fRectangle((float) (EpsUtils.xmin + x1), (float) (EpsUtils.ymax + y1), 
+						(float) (EpsUtils.xmin + x2), (float) (EpsUtils.ymax + y2)));
+			} else {
+				EpsUtils.writeLine(EpsUtils.dRectangle((float) (EpsUtils.xmin + x1), (float) (EpsUtils.ymax + y1), 
+						(float) (EpsUtils.xmin + x2), (float) (EpsUtils.ymax + y2)));
+			}
+			EpsUtils.writeLine("grestore");
 		}
 
 		LogManager.LOG.finest("draw Rectangle2D(" + x1 + ", " + y1 + ", "
-				+ (w - x1) + ", " + (h - y1) + ")");
-
-		g.setColor(col);
+				+ (x2 - x1) + ", " + (y2 - y1) + ")");
 	}
 
-	@Override
-	public void draw(DendrogramOrientation or) {
-	}
 }

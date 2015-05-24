@@ -24,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.logging.Level;
-
 import javax.swing.JOptionPane;
 
 import multidendrograms.initial.LogManager.LogType;
@@ -32,6 +31,7 @@ import multidendrograms.utils.VersionNumber;
 import multidendrograms.direct.DirectClustering;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.children.UpgradeBox;
+import multidendrograms.types.OriginType;
 import multidendrograms.types.SimilarityType;
 import multidendrograms.types.MethodName;
 import multidendrograms.methods.Method;
@@ -51,8 +51,8 @@ import multidendrograms.errors.MethodError;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "3.2.1";
-	public static final String VERSION_SHORT = "3.2";
+	public static final String VERSION = "4.0.0";
+	public static final String VERSION_SHORT = "4.0";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
 	public static final String AFFILIATION = "Universitat Rovira i Virgili, Tarragona (Spain)";
@@ -64,12 +64,13 @@ public class Main {
 
 	private static final LogType LOG_XML = LogType.XML;
 	private static final String LOG_FILE = "logs/md_log.xml";
-	private static final String CONFIGURATION_FILE = "ini/dendo.ini";
+	private static final String CONFIGURATION_FILE = "ini/md.ini";
 
 	private static VersionNumber vn, vnWeb;
+	private static Boolean isDirect = false;
 
 	public Main() {
-		final String title = InitialProperties.getTitleDesk();
+		final String title = Main.PROGRAM;
 		PrincipalDesk desk = new PrincipalDesk(title);
 		Dimension pantalla = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension ventana = desk.getSize();
@@ -80,16 +81,15 @@ public class Main {
 
 	public static void main(final String[] args) throws Exception {
 		Level logLevel = Level.WARNING;
-		Boolean isDirect = false;
 		String fileName = "";
 		SimilarityType simType = SimilarityType.DISTANCE;
 		MethodName method = MethodName.UNWEIGHTED_AVERAGE;
 		int precision = DirectClustering.AUTO_PRECISION;
-		String arg;
+		OriginType originType = OriginType.UNIFORM_ORIGIN;
 
 		int i = 0;
 		while (i < args.length) {
-			arg = args[i].toUpperCase();
+			String arg = args[i].toUpperCase();
 			if (arg.equals("-H") || arg.equals("-HELP")) {
 				showSyntax();
 				return;
@@ -129,15 +129,15 @@ public class Main {
 					// data file name
 					i++;
 					fileName = args[i];
-					// similarity type
+					// proximity type
 					i++;
 					arg = args[i].toUpperCase();
-					if      (arg.equals("D") || arg.equals("DISTANCES"))
+					if (arg.equals("D") || arg.equals("DIST") || arg.equals("DISTANCE") || arg.equals("DISTANCES")) {
 						simType = SimilarityType.DISTANCE;
-					else if (arg.equals("W") || arg.equals("WEIGHTS"))
-						simType = SimilarityType.WEIGHT;
-					else {
-						System.out.println("Error: unknown similarity type '" + args[i] + "'");
+					} else if (arg.equals("S") || arg.equals("SIM") || arg.equals("SIMILARITY") || arg.equals("SIMILARITIES")) {
+						simType = SimilarityType.SIMILARITY;
+					} else {
+						System.out.println("Error: unknown proximity type '" + args[i] + "'");
 						showSyntax();
 						return;
 					}
@@ -150,10 +150,25 @@ public class Main {
 						showSyntax();
 						return;
 					}
-					// precision
+					// precision and/or origin type
 					i++;
 					if (i < args.length) {
-						precision = Integer.parseInt(args[i]);
+						try {
+							precision = Integer.parseInt(args[i]);
+							i++;
+						} catch (NumberFormatException e) {}
+						if (i < args.length) {
+							arg = args[i].toUpperCase();
+							if (arg.equals("UO") || arg.equals("UNIFORM_ORIGIN")) {
+								originType = OriginType.UNIFORM_ORIGIN;
+							} else if (arg.equals("NUO") || arg.equals("NON_UNIFORM_ORIGIN")) {
+								originType = OriginType.NON_UNIFORM_ORIGIN;
+							} else {
+								System.out.println("Error: unknown origin type '" + args[i] + "'");
+								showSyntax();
+								return;
+							}
+						}
 					}
 					isDirect = true;
 				} catch (Exception e) {
@@ -173,55 +188,56 @@ public class Main {
 
 		// initial properties
 		try {
-			MainProperties props = new MainProperties(Main.CONFIGURATION_FILE);
-			InitialProperties ip = new InitialProperties();
-			ip.setParametres(props);
+			new MainProperties(Main.CONFIGURATION_FILE);
+			new InitialProperties();
 		} catch (Exception e) {
 			LogManager.LOG.severe(e.getMessage());
 			if (!isDirect) {
-				JOptionPane.showMessageDialog(null, e.getMessage(),
-						Main.PROGRAM, JOptionPane.OK_OPTION);
+				JOptionPane.showMessageDialog(null, e.getMessage(), Main.PROGRAM, JOptionPane.OK_OPTION);
 			}
 		}
 
 		// language file
 		try {
-			new Language(InitialProperties.getSPath_language());
-			LogManager.LOG.config("Language loaded: "
-					+ InitialProperties.getSPath_language());
+			new Language(InitialProperties.getLanguage());
+			LogManager.LOG.config("Language loaded: " + InitialProperties.getLanguage());
 		} catch (Exception e) {
 			LogManager.LOG.warning("Loading default language");
 			if (!isDirect) {
-				JOptionPane.showMessageDialog(null, e.getMessage(),
-						Main.PROGRAM, JOptionPane.OK_OPTION);
+				JOptionPane.showMessageDialog(null, e.getMessage(), Main.PROGRAM, JOptionPane.OK_OPTION);
 			}
 		}
 
-		if (hasUpgrade()) {
-			if (isDirect) {
-				String str = Language.getLabel(129) + " " + Main.PROGRAM + " " + vnWeb.getVersion() + " "
-				+ Language.getLabel(130) + " " + Main.HOMEPAGE_URL;
-				System.out.println(str);
-				System.out.println("---");
-			} else {
-				UpgradeBox upgr = new UpgradeBox(vn.getVersion(), vnWeb.getVersion());
-				upgr.setVisible(true);
-			}
-		}
+    Thread checkVersion = new Thread() {
+	    public void run() {
+				if (hasUpgrade()) {
+					if (isDirect) {
+						String str = Language.getLabel(129) + " " + Main.PROGRAM + " " + vnWeb.getVersion() + " "
+							+ Language.getLabel(130) + " " + Main.HOMEPAGE_URL;
+						System.out.println(str);
+						System.out.println("---");
+					} else {
+						UpgradeBox upgr = new UpgradeBox(vn.getVersion(), vnWeb.getVersion());
+						upgr.setVisible(true);
+					}
+				}
+		  }
+  	};
+  	checkVersion.start();
 
 		if (isDirect) {
 			try {
-				DirectClustering dirClus = new DirectClustering(fileName, simType, method, precision);
+				DirectClustering dirClus = new DirectClustering(fileName, simType, method, precision, originType);
 				dirClus.saveAsTxt();
 				dirClus.saveAsNewick();
 				dirClus.saveUltrametric();
 				dirClus.printDeviationMeasures();
 			} catch (Exception e) {
-				if (precision == DirectClustering.AUTO_PRECISION) {
-					System.out.println("Parameters: -direct " + fileName + " " + simType + " " + method);
-				} else {
-					System.out.println("Parameters: -direct " + fileName + " " + simType + " " + method + " " + precision);
+				String parameters = "Parameters: -direct " + fileName + " " + simType + " " + method;
+				if (precision != DirectClustering.AUTO_PRECISION) {
+					parameters += " " + precision;
 				}
+				System.out.println(parameters);
 				LogManager.LOG.severe(e.getMessage());
 			}
 		} else {
@@ -238,35 +254,43 @@ public class Main {
 	private static void showSyntax() {
 		System.out.println("Usage: java -jar multidendrograms.jar [ options ]");
 		System.out.println("");
-		System.out.println("    -loglevel  LEVEL");
-		System.out.println("        LEVEL     : verbosity level of the logger");
-		System.out.println("                      OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL");
+		System.out.println("    -h | -help");
+		System.out.println("        Syntax help");
 		System.out.println("");
-		System.out.println("    -direct  FILE_NAME  SIM_TYPE  METHOD  [ PRECISION ]");
-		System.out.println("        direct calculation of multidendrogram without graphic interface");
-		System.out.println("        FILE_NAME : name of the data file name");
-		System.out.println("        SIM_TYPE  : similarity type");
-		System.out.println("                      D, DISTANCES,");
-		System.out.println("                      W, WEIGHTS");
-		System.out.println("        METHOD    : agglomeration type");
-		System.out.println("                      SL, SINGLE_LINKAGE,");
-		System.out.println("                      CL, COMPLETE_LINKAGE,");
-		System.out.println("                      UA, UNWEIGHTED_AVERAGE,");
-		System.out.println("                      WA, WEIGHTED_AVERAGE,");
-		System.out.println("                      UC, UNWEIGHTED_CENTROID,");
-		System.out.println("                      WC, WEIGHTED_CENTROID,");
+		System.out.println("    -loglevel  LEVEL");
+		System.out.println("        Sets de verbosity level of the logger");
+		System.out.println("        LEVEL     : verbosity level, one of");
+		System.out.println("                      OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL");
+		System.out.println("        Default value of LEVEL: WARNING");
+		System.out.println("");
+		System.out.println("    -direct  FILE_NAME  PROX_TYPE  METHOD  [ PRECISION ]  [ ORIGIN ]");
+		System.out.println("        Direct calculation of the multidendrogram without graphic interface");
+		System.out.println("        FILE_NAME : name of the data file");
+		System.out.println("        PROX_TYPE : proximity type, one of");
+		System.out.println("                      D, DIST, DISTANCE, DISTANCES");
+		System.out.println("                      S, SIM, SIMILARITY, SIMILARITIES");
+		System.out.println("        METHOD    : agglomeration type, one of");
+		System.out.println("                      SL, SINGLE_LINKAGE");
+		System.out.println("                      CL, COMPLETE_LINKAGE");
+		System.out.println("                      UA, UNWEIGHTED_AVERAGE");
+		System.out.println("                      WA, WEIGHTED_AVERAGE");
+		System.out.println("                      UC, UNWEIGHTED_CENTROID");
+		System.out.println("                      WC, WEIGHTED_CENTROID");
 		System.out.println("                      WD, WARD");
 		System.out.println("        PRECISION : number of decimal significant digits, auto if missing value");
-		System.out.println("");
-		System.out.println("    -h | -help");
-		System.out.println("        syntax help");
+		System.out.println("        ORIGIN    : origin type, one of");
+		System.out.println("                      UO, UNIFORM_ORIGIN");
+		System.out.println("                      NUO, NON_UNIFORM_ORIGIN");
+		System.out.println("        Default value of ORIGIN: UNIFORM_ORIGIN");
 		System.out.println("");
 		System.out.println("");
 		System.out.println("Examples: java -jar multidendrograms.jar");
 		System.out.println("          java -jar multidendrograms.jar -loglevel OFF");
+		System.out.println("          java -jar multidendrograms.jar -direct data.txt DISTANCES Complete_Linkage 3");
 		System.out.println("          java -jar multidendrograms.jar -direct data.txt D CL");
 		System.out.println("          java -jar multidendrograms.jar -direct data.txt D CL 3");
-		System.out.println("          java -jar multidendrograms.jar -direct data.txt DISTANCES Complete_Linkage 3");
+		System.out.println("          java -jar multidendrograms.jar -direct data.txt D CL UO");
+		System.out.println("          java -jar multidendrograms.jar -direct data.txt D CL 3 NUO");
 	}
 
 	private static boolean hasUpgrade() {
@@ -283,8 +307,8 @@ public class Main {
 			}
 		} catch (Exception e) {
 			upgradeable = false;
-//			e.printStackTrace();
 		}
 		return upgradeable;
 	}
+
 }

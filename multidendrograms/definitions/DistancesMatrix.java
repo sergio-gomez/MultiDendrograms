@@ -21,7 +21,6 @@ package multidendrograms.definitions;
 import java.util.Vector;
 
 import multidendrograms.initial.Language;
-import multidendrograms.types.SimilarityType;
 
 /**
  * <p>
@@ -36,179 +35,130 @@ import multidendrograms.types.SimilarityType;
  */
 public class DistancesMatrix {
 
-	// Type of data stored in the matrix
-	private SimilarityType simType = SimilarityType.DISTANCE;
-
-	// When it's 'true', it indicates that the matrix has a single element
-	private boolean isSingle = false;
-
-	private int numElems = 0;
+	// Number of clusters
+	private int numClusters = 0;
 
 	// Distances minimum and maximum among all existing distances
-	private double minValue = Double.MAX_VALUE;
-	private double maxValue = Double.MIN_VALUE;
+	private double minValue = Double.POSITIVE_INFINITY;
+	private double maxValue = Double.NEGATIVE_INFINITY;
 
-	// Storage of distance data
-	private Vector<Cluster> arrClusters;
-	private Vector<Vector<Double>> arrDistances;
-	private IdToKey<Integer> claus;
+	// Storage of distances data
+	private Vector<Cluster> arrayClusters;
+	private Vector<Vector<Double>> arraysDistances;
+	private IdToKey<Integer> keys;
 
-	public DistancesMatrix(int size, final SimilarityType simType) throws Exception {
-		this.simType = simType;
-		if (size < 2) {
-			this.isSingle = true;
-			size = 2;
-		} else {
-			this.isSingle = false;
-		}
-		initialize(size);
-	}
-
-	public DistancesMatrix(int size) throws Exception {
-		this.simType = SimilarityType.DISTANCE;
-		if (size < 2) {
-			this.isSingle = true;
-			size = 2;
-		} else {
-			this.isSingle = false;
-		}
-		initialize(size);
-	}
-
-	private void initialize(final int size) throws Exception {
-		arrClusters = new Vector<Cluster>(size);
-		arrDistances = new Vector<Vector<Double>>(size);
-		for (int n = 0; n < size; n++) {
+	public DistancesMatrix(final int size) throws Exception {
+		arrayClusters = new Vector<Cluster>(size);
+		arraysDistances = new Vector<Vector<Double>>(size);
+		for (int n = 0; n < size; n ++) {
 			try {
-				arrDistances.add(new Vector<Double>((size - n - 1)));
-				for (int nn = 0; nn < (size - n - 1); nn++) {
-					arrDistances.get(n).add(null);
+				arraysDistances.add(new Vector<Double>((size - n)));
+				for (int nn = 0; nn < (size - n); nn ++) {
+					arraysDistances.get(n).add(null);
 				}
 			} catch (final Exception e) {
-				String err_msg;
-				err_msg = e.getMessage();
-				err_msg += "\n" + Language.getLabel(73);
+				String err_msg = e.getMessage() + "\n" + Language.getLabel(73);
 				throw new Exception(err_msg);
 			}
 		}
-		claus = new IdToKey<Integer>();
+		keys = new IdToKey<Integer>();
 	}
 
-	public boolean isUnari() {
-		return isSingle;
+	public boolean existsDistance(final Cluster c1, final Cluster c2) {
+		return (keys.containsKey(c1.getId()) && keys.containsKey(c2.getId()));
 	}
 
-	public boolean existsDistance(final Cluster ci, final Cluster cii) {
-		return (claus.containsKey(ci.getId()) && claus.containsKey(cii.getId()));
-	}
-
-	public void setDistance(final Cluster ci, final Cluster cii, final double dis) throws Exception {
-		int k1, k2, tmp;
-
-		if (claus.containsKey(ci.getId())) {
-			k1 = claus.getIndex(ci.getId());
+	public void setDistance(final Cluster c1, final Cluster c2, final double dist) throws Exception {
+		int k1;
+		if (keys.containsKey(c1.getId())) {
+			k1 = keys.getIndex(c1.getId());
 		} else {
-			k1 = claus.setIndex(ci.getId());
-			numElems++;
-			arrClusters.add(k1, ci);
+			k1 = keys.setIndex(c1.getId());
+			numClusters ++;
+			arrayClusters.add(k1, c1);
 		}
-		if (claus.containsKey(cii.getId())) {
-			k2 = claus.getIndex(cii.getId());
+		int k2;
+		if (keys.containsKey(c2.getId())) {
+			k2 = keys.getIndex(c2.getId());
 		} else {
-			k2 = claus.setIndex(cii.getId());
-			numElems++;
-			arrClusters.add(k2, cii);
+			k2 = keys.setIndex(c2.getId());
+			numClusters ++;
+			arrayClusters.add(k2, c2);
 		}
 		try {
 			if (k1 > k2) {
-				tmp = k2;
+				int tmp = k2;
 				k2 = k1;
 				k1 = tmp;
 			}
-			if ((k1 == k2) && (k1 == 0)) {
+			if ((k1 == k2) && (k2 == 0)) {
 				// single cluster matrix
-				arrDistances.get(k1).setElementAt(new Double(dis), k1);
+				arraysDistances.get(0).setElementAt(dist, 0);
 			} else {
-				arrDistances.get(k1).setElementAt(new Double(dis), k2 - k1 - 1);
+				arraysDistances.get(k1).setElementAt(dist, k2 - k1);
 			}
 		} catch (final Exception e) {
-			String err_msg;
-			err_msg = e.getMessage();
-			err_msg += "\n" + Language.getLabel(71);
+			String err_msg = e.getMessage() + "\n" + Language.getLabel(71);
 			throw new Exception(err_msg);
 		}
-		if (dis < minValue || minValue == Double.MAX_VALUE) {
-			minValue = new Double(dis);
-		}
-		if (dis > maxValue || maxValue == Double.MIN_VALUE) {
-			maxValue = new Double(dis);
+		if (k1 != k2) {
+			minValue = Math.min(minValue, dist);
+			maxValue = Math.max(maxValue, dist);
 		}
 	}
 
-	public void setDistance(final Cluster ci) throws Exception {
-		if (numElems == 0) {
-			this.setDistance(ci, ci, 0);
-			isSingle = true;
-			numElems = 1;
-		}
-	}
-
-	public double getDistance(final Cluster i, final Cluster ii) throws Exception {
-		int tmp;
-		int k1 = 0, k2 = 0;
-		double dis = 0.0;
-
+	public double getDistance(final Cluster c1, final Cluster c2) throws Exception {
+		double dist = 0.0;
 		try {
-			k1 = claus.getIndex(i.getId());
-			k2 = claus.getIndex(ii.getId());
+			int k1 = keys.getIndex(c1.getId());
+			int k2 = keys.getIndex(c2.getId());
 			if (k1 > k2) {
-				tmp = k2;
+				int tmp = k2;
 				k2 = k1;
 				k1 = tmp;
 			}
-			dis = arrDistances.get(k1).get(k2 - k1 - 1);
+			dist = arraysDistances.get(k1).get(k2 - k1);
 		} catch (final Exception e) {
-			String err_msg;
-			err_msg = e.getMessage();
-			err_msg += "\n" + Language.getLabel(70);
+			String err_msg = e.getMessage() + "\n" + Language.getLabel(70);
 			throw new Exception(err_msg);
 		}
-		return dis;
+		return dist;
 	}
 
 	public int getCardinality() {
-		return numElems;
+		return numClusters;
 	}
 
-	public Double minValue() {
+	public double getMinValue() {
 		return minValue;
 	}
 
-	public Double maxValue() {
+	public double getMaxValue() {
 		return maxValue;
 	}
 
 	public Vector<Cluster> getClusters() {
-		return arrClusters;
+		return arrayClusters;
 	}
 
-	public Cluster getCluster(final int pos) {
-		return arrClusters.elementAt(pos);
+	public Cluster getCluster(final int position) {
+		return arrayClusters.elementAt(position);
 	}
 
 	public double[][] getMatrix() throws Exception {
-		final double[][] matrix = new double[numElems][numElems];
+		final double[][] matrix = new double[numClusters][numClusters];
 		try {
-			for (int n = 0; n < numElems - 1; n++) {
-				for (int m = n + 1; m < numElems; m++) {
-					matrix[n][m] = this.getDistance(arrClusters.get(n), arrClusters.get(m));
-					matrix[m][n] = matrix[n][m];
+			for (int i = 0; i < numClusters; i ++) {
+				Cluster clusterI = arrayClusters.get(i);
+				matrix[i][i] = getDistance(clusterI, clusterI);
+				for (int j = i + 1; j < numClusters; j ++) {
+					Cluster clusterJ = arrayClusters.get(j);
+					matrix[i][j] = getDistance(clusterI, clusterJ);
+					matrix[j][i] = matrix[i][j];
 				}
 			}
 		} catch (Exception e) {
-			String err_msg;
-			err_msg = e.getMessage();
-			err_msg += "\n" + Language.getLabel(72);
+			String err_msg = e.getMessage() + "\n" + Language.getLabel(72);
 			throw new Exception(err_msg);
 		}
 		return matrix;
@@ -216,18 +166,6 @@ public class DistancesMatrix {
 
 	public Cluster getRoot() {
 		return this.getCluster(0);
-	}
-
-	public SimilarityType getSimilarityType() {
-		return simType;
-	}
-
-	public void setSimilarityType(final SimilarityType simType) {
-		this.simType = simType;
-	}
-
-	public boolean isDistancesType() {
-		return simType.equals(SimilarityType.DISTANCE);
 	}
 
 }

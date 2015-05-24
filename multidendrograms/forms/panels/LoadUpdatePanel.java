@@ -24,9 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.LinkedList;
 
-import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -50,13 +48,14 @@ import multidendrograms.forms.children.DendrogramPanel;
 import multidendrograms.forms.scrollabledesktop.DesktopConstants;
 import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.types.MethodName;
+import multidendrograms.types.OriginType;
 import multidendrograms.types.SimilarityType;
 import multidendrograms.data.DataFile;
 import multidendrograms.data.ExternalData;
-import multidendrograms.data.SimilarityStruct;
-import multidendrograms.definitions.Cluster;
 import multidendrograms.definitions.Config;
 import multidendrograms.definitions.DistancesMatrix;
+import multidendrograms.definitions.Formats;
+import multidendrograms.definitions.SettingsInfo;
 
 /**
  * <p>
@@ -107,7 +106,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 
 	// File with the input data
 	private static DataFile dataFile = null;
-	private ExternalData data;
+	private ExternalData externalData;
 
 	// MultiDendrogram
 	private DistancesMatrix distMatrix = null;
@@ -119,38 +118,25 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		private final MethodName method;
 		private final int precision;
 		private final int nbElements;
-		private double minBase;
 
 		public MDComputation(final String action, final SimilarityType simType,
-				final MethodName method, final int precision, final int nbElements,
-				double minBase) {
+				final MethodName method, final int precision, final int nbElements) {
 			this.action = action;
 			this.simType = simType;
 			this.method = method;
 			this.precision = precision;
 			this.nbElements = nbElements;
-			this.minBase = minBase;
 		}
 
 		@Override
 		public Void doInBackground() {
-			BuildDendrogram bd;
-			DistancesMatrix mdNew;
-			double b;
-			int progress;
-
 			// Initialize progress property
-			progress = 0;
+			int progress = 0;
 			setProgress(progress);
 			while (distMatrix.getCardinality() > 1) {
 				try {
-					bd = new BuildDendrogram(distMatrix, simType, method, precision);
-					mdNew = bd.recalculate();
-					distMatrix = mdNew;
-					b = distMatrix.getRoot().getBase();
-					if ((b < minBase) && (b != Double.MAX_VALUE)) {
-						minBase = b;
-					}
+					BuildDendrogram bd = new BuildDendrogram(distMatrix, simType, method, precision);
+					distMatrix = bd.recalculate();
 					progress = 100 * (nbElements - distMatrix.getCardinality()) / (nbElements - 1);
 					setProgress(progress);
 				} catch (final Exception e) {
@@ -162,16 +148,6 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 
 		@Override
 		public void done() {
-			Cluster root = distMatrix.getRoot();
-			root.setBase(minBase);
-			if (!method.equals(MethodName.UNWEIGHTED_CENTROID) 
-					&& !method.equals(MethodName.WEIGHTED_CENTROID)) {
-				try {
-					BuildDendrogram.avoidReversals(root, root.getSummaryHeight(), simType);
-				} catch (final Exception e) {
-					showError(e.getMessage());
-				}
-			}
 			showCalls(action);
 			progressBar.setString("");
 			progressBar.setBorderPainted(false);
@@ -190,24 +166,24 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 
 	private void fillPanel() {
 
-		this.setBorder(BorderFactory.createTitledBorder(Language.getLabel(20))); // File
+		setBorder(Formats.getFormattedTitledBorder(Language.getLabel(20))); // File
 
 		// load
 		strLoad = Language.getLabel(21); // Load
-		btnLoad = new JButton(strLoad);
+		btnLoad = Formats.getFormattedBoldButton(strLoad);
 		btnLoad.addActionListener(this);
 
 		// update
 		strUpdate = Language.getLabel(110); // Update
-		btnUpdate = new JButton(strUpdate);
+		btnUpdate = Formats.getFormattedBoldButton(strUpdate);
 		btnUpdate.addActionListener(this);
 		btnUpdate.setEnabled(false);
 
 		// file name
-		txtFileName = new JTextField();
+		txtFileName = Formats.getformattedTextField();
 		txtFileName.addActionListener(this);
 		txtFileName.setEditable(false);
-		txtFileName.setColumns(21);
+		// txtFileName.setColumns(24);
 		txtFileName.setHorizontalAlignment(JTextField.LEFT);
 		setFileName(Language.getLabel(112)); // No file loaded
 
@@ -230,21 +206,20 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 								layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 										.addGroup(
 												layout.createSequentialGroup()
-														.addComponent(btnLoad, 90, 90, 90)
+														.addComponent(btnLoad, 110, 110, 110)
 														.addGap(3, 3, 3)
-														.addComponent(btnUpdate, 90, 90, 90))
+														.addComponent(btnUpdate, 110, 110, 110))
 										.addGroup(GroupLayout.Alignment.CENTER,
 												layout.createSequentialGroup()
-														.addComponent(txtFileName))
+														.addComponent(txtFileName, 223, 223, 223))
 										.addGroup(GroupLayout.Alignment.CENTER,
 												layout.createSequentialGroup()
 														.addComponent(progressBar)))
 						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 						.addGap(6, 6, 6));
 
-//		layout.linkSize(SwingConstants.HORIZONTAL, btnLoad, btnUpdate);
 		layout.linkSize(SwingConstants.HORIZONTAL, txtFileName, progressBar);
-	
+
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 						.addGap(1, 1, 1)
@@ -258,7 +233,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 						.addComponent(progressBar)
 						.addGap(1, 1, 1));
 
-}
+	}
 
 	public static void enableUpdate() {
 		if (precisionCorrect && axisMinCorrect && axisMaxCorrect
@@ -293,7 +268,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 	}
 
 	public DistancesMatrix getDistancesMatrix() {
-		return data.getDistancesMatrix();
+		return this.externalData.getDistancesMatrix();
 	}
 
 	@Override
@@ -302,7 +277,6 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		DataFile tmpDataFile;
 		boolean withData = false;
 		DendrogramParameters dendroParams;
-		double minBase;
 		MDComputation mdComputation;
 
 		if (evt.getActionCommand().equals(strLoad)) {
@@ -338,23 +312,22 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		}
 		if (withData && (action.equals("Load") || action.equals("Reload"))) {
 			try {
-				data = new ExternalData(dataFile, true);
+				this.externalData = new ExternalData(dataFile);
 				if (action.equals("Load")) {
-					SettingsPanel.setPrecision(data.getPrecision());
+					SettingsPanel.setPrecision(this.externalData.getPrecision());
 				}
-				distMatrix = null;
+				this.distMatrix = null;
 				try {
-					distMatrix = data.getDistancesMatrix();
-					minBase = Double.MAX_VALUE;
-					progressBar.setBorderPainted(true);
-					progressBar.setString(null);
-					principalDesk.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					this.distMatrix = this.externalData.getDistancesMatrix();
+					this.progressBar.setBorderPainted(true);
+					this.progressBar.setString(null);
+					this.principalDesk.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					// Instances of javax.swing.SwingWorker are not reusable,
 					// so we create new instances as needed.
 					mdComputation = new MDComputation(action,
 							SettingsPanel.getSimilarityType(), SettingsPanel.getMethod(),
 							SettingsPanel.getPrecision(),
-							distMatrix.getCardinality(), minBase);
+							this.distMatrix.getCardinality());
 					mdComputation.addPropertyChangeListener(this);
 					mdComputation.execute();
 				} catch (final Exception e2) {
@@ -384,34 +357,28 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		buttonClicked = false;
 	}
 
-	public void show(String action, final MethodName method, final int precision) {
-		boolean isUpdate;
-		DendrogramFrame dendroFrame;
-		Config cfg;
-		DendrogramParameters dendroParams;
-		DendrogramPanel dendroPanel;
-		DendrogramPlot dendroPlot;
-
-		isUpdate = !action.equals("Load");
+	private void show(String action, final MethodName method, final int precision) {
 		try {
-			dendroFrame = principalDesk.createDendrogramFrame(isUpdate, method);
-			cfg = principalDesk.getConfig();
+			boolean isUpdate = !action.equals("Load");
+			DendrogramFrame dendroFrame = this.principalDesk.createDendrogramFrame(isUpdate, method);
+			SettingsInfo settingsInfo = SettingsPanel.getSettingsInfo();
+			Config cfg = new Config(settingsInfo);
 			cfg.setDendrogramFrame(dendroFrame);
 			cfg.setDataFile(dataFile);
-			cfg.setDistancesMatrix(distMatrix);
-			cfg.setNames(data.getNames());
+			cfg.setDistancesMatrix(this.distMatrix);
+			cfg.setNames(this.externalData.getNames());
 			if (!cfg.isDistance()) {
 				if (cfg.getDendrogramOrientation().equals(DendrogramOrientation.NORTH)) {
-					cfg.setOrientacioDendo(DendrogramOrientation.SOUTH);
+					cfg.setDendrogramOrientation(DendrogramOrientation.SOUTH);
 				} else if (cfg.getDendrogramOrientation().equals(DendrogramOrientation.SOUTH)) {
-					cfg.setOrientacioDendo(DendrogramOrientation.NORTH);
+					cfg.setDendrogramOrientation(DendrogramOrientation.NORTH);
 				} else if (cfg.getDendrogramOrientation().equals(DendrogramOrientation.EAST)) {
-					cfg.setOrientacioDendo(DendrogramOrientation.WEST);
+					cfg.setDendrogramOrientation(DendrogramOrientation.WEST);
 				} else if (cfg.getDendrogramOrientation().equals(DendrogramOrientation.WEST)) {
-					cfg.setOrientacioDendo(DendrogramOrientation.EAST);
+					cfg.setDendrogramOrientation(DendrogramOrientation.EAST);
 				}
 			}
-			dendroParams = new DendrogramParameters(dataFile, distMatrix);
+			DendrogramParameters dendroParams = new DendrogramParameters(this.externalData, this.distMatrix);
 			dendroFrame.setDendrogramParameters(dendroParams);
 			// Title for the child window
 			String title = dataFile.getName() + " - " + dendroFrame.getTitle();
@@ -419,18 +386,20 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			dendroFrame.getAssociatedButton().setText(title);
 			dendroFrame.getAssociatedButton().setToolTipText(title);
 			// Load the window to show the dendrogram
-			dendroPanel = new DendrogramPanel(principalDesk);
+			DendrogramPanel dendroPanel = new DendrogramPanel(this.principalDesk);
 			dendroFrame.add(dendroPanel);
 			// Call SettingsPanel -> internalFrameActivated()
 			dendroFrame.setVisible(true);
 			if (action.equals("Load") || action.equals("Reload")) {
 				SettingsPanel.adjustValues(cfg);
 			}
-			principalDesk.setCurrentFrame(dendroFrame);
+			this.principalDesk.setCurrentFrame(dendroFrame);
 			// Convert tree into figures
-			dendroPlot = new DendrogramPlot(distMatrix.getRoot(), cfg);
-			LinkedList<SimilarityStruct<String>> data = dendroParams.getExternalData().getData();
-			UltrametricMatrix ultraMatrix = new UltrametricMatrix(data, distMatrix.getRoot(), precision);
+			DendrogramPlot dendroPlot = new DendrogramPlot(this.distMatrix.getRoot(), cfg);
+			OriginType originType = settingsInfo.getOriginType();
+			SimilarityType simType = cfg.getSimilarityType();
+			UltrametricMatrix ultraMatrix = new UltrametricMatrix(this.externalData.getData(),
+					this.distMatrix.getRoot(), precision, simType, originType);
 			dendroParams.setUltrametricMatrix(ultraMatrix);
 			// Pass figures to the window
 			dendroPanel.setNodesList(dendroPlot.getNodesList());
@@ -469,20 +438,17 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 				JOptionPane.ERROR_MESSAGE);
 	}
 
-
 	@Override
 	public void internalFrameActivated(InternalFrameEvent e) {
-		DendrogramParameters dendroParams;
-
-		currentDendrogramFrame = (DendrogramFrame) e.getSource();
+		this.currentDendrogramFrame = (DendrogramFrame) e.getSource();
 		btnUpdate.setEnabled(true);
 		if (!buttonClicked) {
-			principalDesk.setCurrentFrame(currentDendrogramFrame);
-			dendroParams = currentDendrogramFrame.getDendrogramParameters();
-			data = dendroParams.getExternalData();
-			dataFile = data.getDataFile();
+			this.principalDesk.setCurrentFrame(this.currentDendrogramFrame);
+			DendrogramParameters dendroParams = this.currentDendrogramFrame.getDendrogramParameters();
+			this.externalData = dendroParams.getExternalData();
+			dataFile = this.externalData.getDataFile();
 			setFileName(dataFile.getName());
-			distMatrix = dendroParams.getDistancesMatrix();
+			this.distMatrix = dendroParams.getDistancesMatrix();
 			SettingsPanel.setConfigPanel(dendroParams);
 		}
 	}

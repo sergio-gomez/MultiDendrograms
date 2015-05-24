@@ -38,7 +38,7 @@ public class MathUtils {
 
 	public static double round(final double num, final int prec) {
 		final double epsilon = 1.0e-4;
-		double r, rs, x, result;
+		double r, rs, x;
 		double factor;
 
 		factor = Math.pow(10, prec);

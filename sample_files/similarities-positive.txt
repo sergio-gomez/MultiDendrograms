@@ -1,0 +1,6 @@
+# positive similarities
+a a  1.8
+a b  1.5
+a c  0.5
+b b  2.0
+b c  0.5

@@ -49,26 +49,25 @@ public class BuildDendrogram {
 	private final MethodName methodName;
 	private final int precision;
 
-	private int numElems = 0;
-	private double minVal, maxVal;
+	private int numClusters;
+	private double groupingHeight;
 	private Vector<Integer> groups;
 	private int nextGroup = 0;
 
 	private final Integer nullGroup = new Integer(0);
 
-	public BuildDendrogram(final DistancesMatrix distances, final SimilarityType simType,
-			final MethodName method, final int precision) {
-		LogManager.LOG.info("DistancesMatrix" + distances);
-		this.distMatrix = distances;
-		this.distMatrix.setSimilarityType(simType);
+	public BuildDendrogram(final DistancesMatrix distMatrix, final SimilarityType simType,
+			final MethodName methodName, final int precision) {
+		LogManager.LOG.info("DistancesMatrix" + distMatrix);
+		this.distMatrix = distMatrix;
 		this.simType = simType;
-		this.methodName = method;
+		this.methodName = methodName;
 		this.precision = precision;
-		this.numElems = this.distMatrix.getCardinality();
-		this.minVal = this.distMatrix.minValue();
-		this.maxVal = this.distMatrix.maxValue();
-		this.groups = new Vector<Integer>(this.numElems);
-		for (int n = 0; n < this.numElems; n ++) {
+		this.numClusters = this.distMatrix.getCardinality();
+		this.groupingHeight = simType.equals(SimilarityType.DISTANCE) ? 
+				distMatrix.getMinValue() : distMatrix.getMaxValue();
+		this.groups = new Vector<Integer>(this.numClusters);
+		for (int n = 0; n < this.numClusters; n ++) {
 			this.groups.add(n, this.nullGroup);
 		}
 	}
@@ -78,7 +77,6 @@ public class BuildDendrogram {
 		LinkedHashMap<Integer, Cluster> lhm = createNewClusters();
 		Vector<Cluster> clusters = updateInternalDistances(lhm);
 		DistancesMatrix newDistMatrix = newDistancesMatrix(clusters);
-		setRootBase(clusters, newDistMatrix.getRoot());
 		return newDistMatrix;
 	}
 
@@ -86,27 +84,25 @@ public class BuildDendrogram {
 		// Put each cluster in a group.
 		// If they have to be joined, they are put in the same group.
 		final Vector<Cluster> clusters = this.distMatrix.getClusters();
-		int numElements = this.distMatrix.getCardinality();
-		for (int i = 0; i < numElements; i ++) {
-			// Group of the cluster, if any, otherwise null
-			Integer groupI = new Integer(this.groups.get(i));
+		for (int i = 0; i < this.numClusters - 1; i ++) {
+			Cluster clusterI = clusters.get(i);
+			Integer groupI = this.groups.get(i);
 			// Element "i" compared with all elements below it
-			for (int j = i + 1; j < numElements; j ++) {
-				Integer groupJ = new Integer(this.groups.get(j));
-				double dist = this.distMatrix.getDistance(clusters.get(i), clusters.get(j));
-				dist = MathUtils.round(dist, this.precision);
+			for (int j = i + 1; j < this.numClusters; j ++) {
+				Cluster clusterJ = clusters.get(j);
+				Integer groupJ = this.groups.get(j);
+				double dist = this.distMatrix.getDistance(clusterI, clusterJ);
 				if (isInRange(dist)) {
-					// Merging groups at minimum distance
+					// Merge groups at minimum distance (or maximum similarity)
 					if (groupI.equals(this.nullGroup)
 							&& groupJ.equals(this.nullGroup)) {
-						// If cluster does not have a group identifier, then new group id
+						// If both clusters do not have any group identifier, then new group id
 						groupI = ++ this.nextGroup;
 						this.groups.set(i, new Integer(groupI));
 						this.groups.set(j, new Integer(groupI));
 					} else if (groupI.equals(this.nullGroup)
 							&& (!groupJ.equals(this.nullGroup))) {
-						groupI = new Integer(groupJ);
-						this.groups.set(i, new Integer(groupI));
+						this.groups.set(i, new Integer(groupJ));
 					} else if ((!groupI.equals(this.nullGroup))
 							&& groupJ.equals(this.nullGroup)) {
 						this.groups.set(j, new Integer(groupI));
@@ -114,9 +110,10 @@ public class BuildDendrogram {
 						// Both clusters have group identifiers
 						if (!groupI.equals(groupJ)) {
 							// Join the two clusters in the same group
-							for (int n = 0; n < this.numElems; n ++) {
-								if (this.groups.get(n).equals(groupJ)) {
-									this.groups.set(n, new Integer(groupI));
+							for (int k = 0; k < this.numClusters; k ++) {
+								Integer groupK = this.groups.get(k); 
+								if (groupK.equals(groupJ)) {
+									this.groups.set(k, new Integer(groupI));
 								}
 							}
 						}
@@ -127,9 +124,8 @@ public class BuildDendrogram {
 
 		if (LogManager.LOG.isLoggable(Level.INFO)) {
 			String str = "GROUPS\n";
-			for (int n = 0; n < this.numElems; n ++) {
-				str += "Id: " + clusters.get(n).getId() + "   --->   " + this.groups.get(n)
-						+ "\n";
+			for (int n = 0; n < this.numClusters; n ++) {
+				str += "Id: " + clusters.get(n).getId() + "   --->   " + this.groups.get(n) + "\n";
 			}
 			LogManager.LOG.info(str);
 		}
@@ -137,125 +133,98 @@ public class BuildDendrogram {
 	}
 
 	private boolean isInRange(final double dist) {
-		double min, max, val;
-		boolean inRange;
 		final double epsilon = 1.0 / Math.pow(10, this.precision + 1);
-
-		if (this.simType.equals(SimilarityType.DISTANCE)) {
-			min = MathUtils.round(this.minVal, this.precision);
-			val = MathUtils.round(dist, this.precision);
-			inRange = (Math.abs(val - min) < epsilon);
-		} else {
-			max = MathUtils.round(this.maxVal, this.precision);
-			val = MathUtils.round(dist, this.precision);
-			inRange = (Math.abs(max - val) < epsilon);
-		}
+		double value = MathUtils.round(dist, this.precision);
+		double bound = MathUtils.round(this.groupingHeight, this.precision);
+		boolean inRange = (Math.abs(value - bound) < epsilon);
 		return inRange;
 	}
 
 	private LinkedHashMap<Integer, Cluster> createNewClusters() throws Exception {
 		LinkedHashMap<Integer, Cluster> lhm = new LinkedHashMap<Integer, Cluster>();
-		for (int i = 0; i < this.groups.size(); i ++) {
-			Integer id = this.groups.get(i);
-			Cluster ci = this.distMatrix.getCluster(i);
-			if (id == this.nullGroup) {
-				ci.setSupercluster(false);
-				lhm.put(ci.hashCode(), ci);
+		for (int n = 0; n < this.groups.size(); n ++) {
+			Cluster cluster = this.distMatrix.getCluster(n);
+			Integer group = this.groups.get(n);
+			if (group.equals(this.nullGroup)) {
+				cluster.setSupercluster(false);
+				lhm.put(cluster.hashCode(), cluster);
 			} else {
 				// Add cluster to the corresponding supercluster
-				if (lhm.containsKey(id)) {
-					lhm.get(id).addCluster(ci);
+				if (lhm.containsKey(group)) {
+					Cluster supercluster = lhm.get(group);
+					supercluster.addSubcluster(cluster);
 				} else {
 					Cluster newCluster = new Cluster();
-					// Height of the grouping
-					if (this.simType.equals(SimilarityType.DISTANCE)) {
-						newCluster.setHeight(this.minVal);
-					} else {
-						newCluster.setHeight(this.maxVal);
-					}
-					newCluster.addCluster(ci);
-					lhm.put(id, newCluster);
+					newCluster.setRootHeights(this.groupingHeight);
+					newCluster.setBandsHeights(this.groupingHeight);
+					newCluster.addSubcluster(cluster);
+					lhm.put(group, newCluster);
 				}
 			}
 		}
 		return lhm;
 	}
 
-	private Vector<Cluster> updateInternalDistances(final LinkedHashMap<Integer,
-			Cluster> lhm) throws Exception {
+	private Vector<Cluster> updateInternalDistances(final LinkedHashMap<Integer,Cluster> lhm) throws Exception {
 		Vector<Cluster> clusters = new Vector<Cluster>(lhm.size());
 		final Iterator<Cluster> iter = lhm.values().iterator();
 		while (iter.hasNext()) {
-			Cluster c = iter.next();
-			if (c.isSupercluster()) {
-				double minHeight = c.getHeight();
-				c.setSummaryHeight(minHeight);
-				int numSubclusters = c.getNumSubclusters();
-				if (numSubclusters <= 2) {
-					c.setAgglomeration(0.0);
-				} else {
-					double maxHeight;
-					if (this.simType.equals(SimilarityType.DISTANCE)) {
-						maxHeight = Double.MIN_VALUE;
-					} else {
-						maxHeight = Double.MAX_VALUE;
-					}
+			Cluster cluster = iter.next();
+			if (cluster.isSupercluster()) {
+				int numSubclusters = cluster.getNumSubclusters();
+				if (numSubclusters > 2) {
+					double rootTopHeight = this.simType.equals(SimilarityType.DISTANCE) ? 
+							Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
 					for (int i = 0; i < numSubclusters - 1; i ++) {
-						Cluster subci = c.getSubcluster(i);
+						Cluster subcI = cluster.getSubcluster(i);
 						for (int j = i + 1; j < numSubclusters; j ++) {
-							Cluster subcj = c.getSubcluster(j);
-							double dij = this.distMatrix.getDistance(subci, subcj);
+							Cluster subcJ = cluster.getSubcluster(j);
+							double dij = this.distMatrix.getDistance(subcI, subcJ);
 							if (this.simType.equals(SimilarityType.DISTANCE)) {
-								maxHeight = Math.max(maxHeight, dij);
+								rootTopHeight = Math.max(rootTopHeight, dij);
 							} else {
-								maxHeight = Math.min(maxHeight, dij);
+								rootTopHeight = Math.min(rootTopHeight, dij);
 							}
 						}
 					}
-					c.setAgglomeration(Math.abs(maxHeight - minHeight));
+					cluster.setRootTopHeight(rootTopHeight);
 				}
 			}
-			clusters.add(c);
+			clusters.add(cluster);
 		}
 		return clusters;
 	}
 
 	private DistancesMatrix newDistancesMatrix(final Vector<Cluster> clusters)
 			throws Exception {
-		final Method mt = getMethod();
+		final Method method = getMethod();
 		final int numClusters = clusters.size();
-		DistancesMatrix newDistMatrix = new DistancesMatrix(numClusters, this.simType);
-		if (numClusters == 1) {
-			// Matrix with one element
-			newDistMatrix.setDistance(clusters.get(0));
-		} else {
-			// (numClusters > 1)
-			for (int i = 0; i < numClusters - 1; i ++) {
-				Cluster ci = clusters.get(i);
-				for (int j = i + 1; j < numClusters; j ++) {
-					Cluster cj = clusters.get(j);
-					// Calculations only if there is a new cluster or group
-					double dist;
-					if (ci.isSupercluster() || cj.isSupercluster()) {
-						dist = mt.distance(ci, cj);
-					} else {
-						dist = this.distMatrix.getDistance(ci, cj);
-					}
-					newDistMatrix.setDistance(ci, cj, dist);
+		DistancesMatrix newDistMatrix = new DistancesMatrix(numClusters);
+		for (int i = 0; i < numClusters; i ++) {
+			Cluster clusterI = clusters.get(i);
+			double dist = clusterI.getRootBottomHeight();
+			newDistMatrix.setDistance(clusterI, clusterI, dist);
+			for (int j = i + 1; j < numClusters; j ++) {
+				Cluster clusterJ = clusters.get(j);
+				// Calculations only if there is a new cluster or group
+				if (clusterI.isSupercluster() || clusterJ.isSupercluster()) {
+					dist = method.distance(clusterI, clusterJ);
+				} else {
+					dist = this.distMatrix.getDistance(clusterI, clusterJ);
 				}
+				newDistMatrix.setDistance(clusterI, clusterJ, dist);
 			}
 		}
 
 		if (LogManager.LOG.getLevel().equals(Level.FINER)) {
 			System.out.println("\nMatrix created.\n");
 			for (int i = 0; i < numClusters - 1; i ++) {
+				Cluster clusterI = newDistMatrix.getCluster(i);
 				for (int j = i + 1; j < numClusters; j ++) {
+					Cluster clusterJ = newDistMatrix.getCluster(j);
 					LogManager.LOG.finer("Distance between "
-							+ newDistMatrix.getCluster(i).getId()
-							+ " and "
-							+ newDistMatrix.getCluster(j).getId()
-							+ " = "
-							+ newDistMatrix.getDistance(newDistMatrix.getCluster(i), newDistMatrix.getCluster(j)));
+							+ clusterI.getId() + " and " + clusterJ.getId() + " = "
+							+ newDistMatrix.getDistance(clusterI, clusterJ));
 				}
 			}
 			System.out.println("\n");
@@ -264,23 +233,14 @@ public class BuildDendrogram {
 		return newDistMatrix;
 	}
 
-	private void setRootBase(final Vector<Cluster> clusters, final Cluster root) {
-		double minBase = Double.MAX_VALUE;
-		for (int i = 0; i < clusters.size(); i++) {
-			double base = clusters.get(i).getBase();
-			minBase = Math.min(minBase, base);
-		}
-		root.setBase(minBase);
-	}
-
 	private Method getMethod() {
 		Method m;
 		switch (this.methodName) {
 		case SINGLE_LINKAGE:
-			m = new SingleLinkage(this.distMatrix);
+			m = new SingleLinkage(this.distMatrix, this.simType);
 			break;
 		case COMPLETE_LINKAGE:
-			m = new CompleteLinkage(this.distMatrix);
+			m = new CompleteLinkage(this.distMatrix, this.simType);
 			break;
 		case UNWEIGHTED_AVERAGE:
 			m = new UnweightedAverage(this.distMatrix);
@@ -302,26 +262,6 @@ public class BuildDendrogram {
 			break;
 		}
 		return m;
-	}
-
-	public static void avoidReversals(final Cluster c, final double heightParent,
-			final SimilarityType simType) throws Exception {
-		int numSubclusters = c.getNumSubclusters();
-		if (numSubclusters > 1) {
-			double heightCurrent = c.getSummaryHeight();
-			if (c.isSupercluster()) {
-				if ((simType.equals(SimilarityType.DISTANCE)
-						&& (heightCurrent > heightParent))
-						|| (simType.equals(SimilarityType.WEIGHT)
-						&& (heightCurrent < heightParent))) {
-					heightCurrent = heightParent;
-					c.setSummaryHeight(heightCurrent);
-				}
-			}
-			for (int n = 0; n < numSubclusters; n ++) {
-				avoidReversals(c.getSubcluster(n), heightCurrent, simType);
-			}
-		}
 	}
 
 }

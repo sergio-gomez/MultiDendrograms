@@ -22,6 +22,7 @@ import multidendrograms.definitions.Cluster;
 import multidendrograms.definitions.DistancesMatrix;
 import multidendrograms.initial.Language;
 import multidendrograms.types.MethodName;
+import multidendrograms.types.SimilarityType;
 
 /**
  * <p>
@@ -36,8 +37,11 @@ import multidendrograms.types.MethodName;
  */
 public class CompleteLinkage extends Method {
 
-	public CompleteLinkage(final DistancesMatrix distMatrix) {
+	private SimilarityType similarityType;
+
+	public CompleteLinkage(final DistancesMatrix distMatrix, final SimilarityType similarityType) {
 		super(distMatrix);
+		this.similarityType = similarityType;
 	}
 
 	@Override
@@ -62,7 +66,7 @@ public class CompleteLinkage extends Method {
 	protected double gammaTerm(final Cluster cI, final Cluster cJ) throws Exception {
 		double dif, dist;
 		double gamma = getAlpha(cI, null, cJ, null);
-		if (this.dm.isDistancesType()) {
+		if (this.similarityType.equals(SimilarityType.DISTANCE)) {
 			dif = getMaxDistance(cI, cJ);
 		} else {
 			dif = getMinDistance(cI, cJ);

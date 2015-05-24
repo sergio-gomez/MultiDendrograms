@@ -24,8 +24,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
-
 import javax.swing.JLabel;
+
+import multidendrograms.initial.InitialProperties;
 
 /**
  * <p>
@@ -44,7 +45,8 @@ public class URLLabel extends JLabel {
 
 	public URLLabel(String url, String text) {
 		super(text);
-		setForeground(Color.blue);
+		setFont(InitialProperties.getFontLabel());
+		setForeground(Color.BLUE);
 		try {
 			this.url = new URI(url);
 			addMouseListener(new Clicked());

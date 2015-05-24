@@ -211,7 +211,7 @@ public abstract class Method {
 	}
 
 	protected double getMinDistance(final Cluster cI, final Cluster cJ) throws Exception {
-		double min = Double.MAX_VALUE;
+		double min = Double.POSITIVE_INFINITY;
 		double dij;
 
 		if (this.dm.existsDistance(cI, cJ)) {
@@ -242,7 +242,7 @@ public abstract class Method {
 	}
 
 	protected double getMaxDistance(final Cluster cI, final Cluster cJ) throws Exception {
-		double max = Double.MIN_VALUE;
+		double max = Double.NEGATIVE_INFINITY;
 		double dij;
 
 		if (this.dm.existsDistance(cI, cJ)) {

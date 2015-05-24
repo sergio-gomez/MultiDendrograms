@@ -18,6 +18,10 @@
 
 package multidendrograms.utils;
 
+import multidendrograms.definitions.Cluster;
+import multidendrograms.types.OriginType;
+import multidendrograms.types.SimilarityType;
+
 /**
  * <p>
  * <b>MultiDendrograms</b>
@@ -31,15 +35,46 @@ package multidendrograms.utils;
  */
 public class SmartAxis {
 
-	public enum NiceType {NICE_FLOOR, NICE_CEIL, NICE_ROUND}
+	private enum NiceType {NICE_FLOOR, NICE_CEIL, NICE_ROUND}
 
 	private double min, max;
-	double saMin, saMax, saTicksSize;
+	private double saMin, saMax, saTicksSize;
 
-	public SmartAxis(double min, double max) {
-		this.min = min;
-		this.max = max;
-		calculateSmartAxis();
+	public SmartAxis(final SimilarityType simType, final int precision, final OriginType originType, final Cluster root) {
+		min = getDendroMinHeight0(simType, precision, originType, root);
+		max = getDendroMaxHeight(precision, originType, root);
+		saMin = min;
+		saMax = max;
+		roundAxisLimits();
+		roundTicks();
+	}
+
+	private double getDendroMinHeight0(final SimilarityType simType, final int precision, final OriginType originType, 
+			final Cluster root) {
+		double bandsMinHeight = root.getBandsMinHeight();
+		double nodesMinHeight = root.getNodesMinHeight();
+		double minHeight;
+		if (Double.isNaN(nodesMinHeight) || originType.equals(OriginType.UNIFORM_ORIGIN)) {
+			minHeight = bandsMinHeight;
+		} else {
+			minHeight = Math.min(bandsMinHeight, nodesMinHeight);
+		}
+		if (simType.equals(SimilarityType.DISTANCE)) {
+			minHeight = Math.min(minHeight, 0.0);
+		}
+		return minHeight;
+	}
+
+	private double getDendroMaxHeight(final int precision, final OriginType originType, final Cluster root) {
+		double bandsMaxHeight = root.getBandsMaxHeight();
+		double nodesMaxHeight = root.getNodesMaxHeight();
+		double maxHeight;
+		if (Double.isNaN(nodesMaxHeight) || originType.equals(OriginType.UNIFORM_ORIGIN)) {
+			maxHeight = bandsMaxHeight;
+		} else {
+			maxHeight = Math.max(bandsMaxHeight, nodesMaxHeight);
+		}
+		return maxHeight;
 	}
 
 	public double smartMin() {
@@ -52,13 +87,6 @@ public class SmartAxis {
 
 	public double smartTicksSize() {
 		return saTicksSize;
-	}
-
-	public void calculateSmartAxis() {
-		saMin = min;
-		saMax = max;
-		roundAxisLimits();
-		roundTicks();
 	}
 
 	private void roundAxisLimits() {
@@ -107,11 +135,7 @@ public class SmartAxis {
 		saTicksSize = niceNum((saMax - saMin) / (numTicks - 1), 0, NiceType.NICE_ROUND);
 	}
 
-	private int sign(double x) {
-		return (int) Math.round(Math.signum(x));
-	}
-
-	public double niceNum(double x, int nrange, NiceType round) {
+	private double niceNum(double x, int nrange, NiceType round) {
 		long xsign;
 		double f, y, fexp, rx, sx;
 
@@ -145,6 +169,10 @@ public class SmartAxis {
 		sx = rx + (double) y / 10.0;
 
 		return xsign * sx * 10.0 * Math.pow(10.0, fexp);
+	}
+
+	private int sign(double x) {
+		return (int) Math.round(Math.signum(x));
 	}
 
 }

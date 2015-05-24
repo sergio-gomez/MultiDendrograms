@@ -2,14 +2,14 @@
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
 <record>
-  <date>2015-02-06T14:38:54</date>
-  <millis>1423229934754</millis>
+  <date>2015-05-24T21:40:06</date>
+  <millis>1432496406717</millis>
   <sequence>0</sequence>
   <logger>Dendro</logger>
   <level>CONFIG</level>
   <class>multidendrograms.initial.LogManager</class>
   <method>&lt;init&gt;</method>
-  <thread>10</thread>
+  <thread>1</thread>
   <message>Log started</message>
 </record>
 </log>

@@ -29,6 +29,7 @@ import multidendrograms.initial.Language;
 
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.children.AboutBox;
+import multidendrograms.definitions.Formats;
 
 /**
  * <p>
@@ -43,13 +44,13 @@ import multidendrograms.forms.children.AboutBox;
  */
 public class InfoExitPanel extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
-	private JButton btnExit, btnInfo;
+	private JButton btnInfo, btnExit;
 	private final PrincipalDesk fr;
-	private String sExit, sInfo;
+	private String sInfo, sExit;
 
 	private void CarregaIdioma() {
+		sInfo = Language.getLabel(52); // Info
 		sExit = Language.getLabel(46); // exit
-		sInfo = "Info";
 	}
 
 	public InfoExitPanel(final PrincipalDesk fr) {
@@ -63,11 +64,11 @@ public class InfoExitPanel extends JPanel implements ActionListener {
 	private void getPanel() {
 
 		// Info
-		btnInfo = new JButton(sInfo);
+		btnInfo = Formats.getFormattedBoldButton(sInfo); // Info
 		btnInfo.addActionListener(this);
 
 		// Exit
-		btnExit = new JButton(sExit);
+		btnExit = Formats.getFormattedBoldButton(sExit); // Exit
 		btnExit.addActionListener(this);
 
 		// layout
@@ -78,12 +79,12 @@ public class InfoExitPanel extends JPanel implements ActionListener {
 				layout.createSequentialGroup()
 						.addGap(5, 5, 5)
 						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(btnInfo, 90, 90, 90)
+						.addComponent(btnInfo, 110, 110, 110)
 						.addGap(3, 3, 3)
-						.addComponent(btnExit, 90, 90, 90)
+						.addComponent(btnExit, 110, 110, 110)
 						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 						.addGap(5, 5, 5));
-	
+
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
 						.addGap(8, 8, 8)
@@ -92,7 +93,7 @@ public class InfoExitPanel extends JPanel implements ActionListener {
 										.addComponent(btnInfo)
 										.addComponent(btnExit))
 						.addGap(8, 8, 8));
-	
+
 }
 
 	@Override

@@ -22,9 +22,11 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 
+import multidendrograms.definitions.SettingsInfo;
 import multidendrograms.dendrogram.Scaling;
+import multidendrograms.dendrogram.eps.EpsUtils;
 import multidendrograms.types.DendrogramOrientation;
-import multidendrograms.types.SimilarityType;
+import multidendrograms.types.PlotType;
 
 /**
  * <p>
@@ -38,223 +40,109 @@ import multidendrograms.types.SimilarityType;
  * @since JDK 6.0
  */
 public class Axis {
-	private double yMin, yMax;
-	private final double dist;
-	private Color color = Color.BLACK;
-	private Scaling scal;
 
-	public Axis(final double yMin, final double yMax, final double dist,
-			final double ticks) {
-		this.yMin = yMin;
-		this.yMax = yMax;
-		this.dist = dist;
-	}
+	private Color color;
+	private DendrogramOrientation dendroOrientation;
+	private int numTicks;
+	private int ticksGroup;
+	private double x00;
+	private double x05;
+	private double x10;
+	private double x15;
+	private double x20;
+	private double yMin;
+	private double yMax;
+	private double yIncr;
 
-	public Scaling getScaling() {
-		return scal;
-	}
-
-	public void setScaling(final Scaling scal) {
-		this.scal = scal;
-	}
-
-	public double getYmax() {
-		return yMax;
-	}
-
-	public void setYmax(final double yMax) {
-		this.yMax = yMax;
-	}
-
-	public double getYmin() {
-		return yMin;
-	}
-
-	public void setYmin(final double yMin) {
-		this.yMin = yMin;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
-	public void setColor(final Color c) {
-		this.color = c;
-	}
-
-	public void draw(final Graphics2D g, final DendrogramOrientation or,
-			final SimilarityType simType, final int ticks) {
-		double x0, x1, x2;
-		double y0, y1, y2;
-		double y, x, inc, n;
-		final Color originalColor = g.getColor();
-		g.setColor(this.getColor());
-
-		if (or.equals(DendrogramOrientation.WEST) || or.equals(DendrogramOrientation.EAST)) {
-			inc = this.getScaling().scaleX(yMin + dist);
-			inc -= this.getScaling().scaleX(yMin);
-		} else {
-			inc = this.getScaling().scaleY(yMin + dist);
-			inc -= this.getScaling().scaleY(yMin);
+	public Axis(final SettingsInfo settingsInfo, final Scaling scaling) {
+		this.color = settingsInfo.getAxisColor();
+		this.dendroOrientation = settingsInfo.getDendrogramAdaptedOrientation();
+		double minValue = settingsInfo.getAxisMinValue();
+		double maxValue = settingsInfo.getAxisMaxValue();
+		double increment = settingsInfo.getAxisIncrement();
+		this.numTicks = settingsInfo.getAxisNumberOfTicks();
+		this.ticksGroup = settingsInfo.getAxisTicks();
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			this.x00 = scaling.transformX(0.0);
+			this.x05 = scaling.transformX(0.5);
+			this.x10 = scaling.transformX(1.0);
+			this.x15 = scaling.transformX(1.5);
+			this.x20 = scaling.transformX(2.0);
+			this.yMin = scaling.transformY(minValue);
+			this.yMax = scaling.transformY(maxValue);
+			this.yIncr = scaling.transformY(minValue + increment) - scaling.transformY(minValue);
+		} else {// (dendroOrientation.equals(DendrogramOrientation.EAST) || dendroOrientation.equals(DendrogramOrientation.WEST))
+			this.x00 = scaling.transformY(0.0);
+			this.x05 = scaling.transformY(0.5);
+			this.x10 = scaling.transformY(1.0);
+			this.x15 = scaling.transformY(1.5);
+			this.x20 = scaling.transformY(2.0);
+			this.yMin = scaling.transformX(minValue);
+			this.yMax = scaling.transformX(maxValue);
+			this.yIncr = scaling.transformX(minValue + increment) - scaling.transformX(minValue);
 		}
-		if (inc > 0) // should be always like this
-		{
-			x1 = this.getScaling().scaleX(0);
-			y1 = this.getScaling().scaleY(0);
+	}
 
-			if (or.equals(DendrogramOrientation.EAST) || or.equals(DendrogramOrientation.WEST)) {
-				/* WEST and EAST */
-				x0 = this.getScaling().transformX(yMin);
-				x1 = x0;
-				x2 = this.getScaling().transformX(yMax);
+	public void draw(final PlotType plotType, final Graphics2D graphics2D) {
+		Color originalColor = null;
+		if (plotType.equals(PlotType.PANEL)) {
+			originalColor = graphics2D.getColor();
+			graphics2D.setColor(color);
+		} else {// (plotType.equals(PlotType.EPS))
+			EpsUtils.writeLine("gsave");
+			EpsUtils.writeLine(EpsUtils.setRGBColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f));
+		}
 
-				y0 = this.getScaling().transformY(0);
-				y1 = this.getScaling().transformY(1);
-				y2 = this.getScaling().transformY(2);
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			drawLine(plotType, graphics2D, x10, yMin, x10, yMax);
+		} else {// (dendroOrientation.equals(DendrogramOrientation.EAST) || dendroOrientation.equals(DendrogramOrientation.WEST))
+			drawLine(plotType, graphics2D, yMin, x10, yMax, x10);
+		}
 
-				g.draw(new Line2D.Double(x0, y1, x2, y1));
-
-				y0 = this.getScaling().transformY(0.5);
-				y2 = this.getScaling().transformY(1.5);
-				n = 0;
-				if (simType.equals(SimilarityType.DISTANCE)) {
-					/* DISTANCES */
-					if (DendrogramOrientation.EAST.equals(or)) {
-						x = x0;
-						while (x <= (this.getScaling().transformX(yMax) + inc / 100.0)) {
-							if ((n % ticks) == 0) {
-								g.draw(new Line2D.Double(x, this.getScaling()
-										.transformY(0), x, this.getScaling()
-										.transformY(2)));
-							} else
-								g.draw(new Line2D.Double(x, y0, x, y2));
-
-							x += inc;
-							n++;
-						}
-					} else {
-						x = x2;
-						while (x >= (this.getScaling().transformX(yMin) - inc / 100.0)) {
-							if ((n % ticks) == 0) {
-								g.draw(new Line2D.Double(x, this.getScaling()
-										.transformY(0), x, this.getScaling()
-										.transformY(2)));
-							} else
-								g.draw(new Line2D.Double(x, y0, x, y2));
-
-							x -= inc;
-							n++;
-						}
-					}
+		double y;
+		if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.EAST)) {
+			y = yMin;
+		} else {// (dendroOrientation.equals(DendrogramOrientation.SOUTH) || dendroOrientation.equals(DendrogramOrientation.WEST))
+			y = yMax;
+		}
+		for (int n = 0; n < numTicks; n ++) {
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+				if ((n % ticksGroup) == 0) {
+					drawLine(plotType, graphics2D, x00, y, x20, y);
 				} else {
-					/* WEIGHTS */
-					if (DendrogramOrientation.EAST.equals(or)) {
-						x = x2;
-						while (x >= (this.getScaling().transformX(yMin) - inc / 100.0)) {
-							if ((n % ticks) == 0) {
-								g.draw(new Line2D.Double(x, this.getScaling()
-										.transformY(0), x, this.getScaling()
-										.transformY(2)));
-							} else
-								g.draw(new Line2D.Double(x, y0, x, y2));
-
-							x -= inc;
-							n++;
-						}
-					} else {
-						x = x0;
-						while (x <= (this.getScaling().transformX(yMax) + inc / 100.0)) {
-							if ((n % ticks) == 0) {
-								g.draw(new Line2D.Double(x, this.getScaling()
-										.transformY(0), x, this.getScaling()
-										.transformY(2)));
-							} else
-								g.draw(new Line2D.Double(x, y0, x, y2));
-
-							x += inc;
-							n++;
-						}
-					}
+					drawLine(plotType, graphics2D, x05, y, x15, y);
 				}
-			} else if (or.equals(DendrogramOrientation.SOUTH) || or.equals(DendrogramOrientation.NORTH)) {
-				/* SOUTH and NORTH */
-				x0 = this.getScaling().transformX(0);
-				x1 = this.getScaling().transformX(1);
-				x2 = this.getScaling().transformX(2);
-
-				y0 = this.getScaling().transformY(yMin);
-				y1 = this.getScaling().transformY(0);
-				y2 = this.getScaling().transformY(yMax);
-
-				g.draw(new Line2D.Double(x1, y0, x1, y2));
-
-				x0 = this.getScaling().transformX(0.5);
-				x2 = this.getScaling().transformX(1.5);
-
-				n = 0;
-				if (simType.equals(SimilarityType.DISTANCE)) {
-					/* DISTANCES */
-					if (DendrogramOrientation.NORTH.equals(or)) {
-						y = y0;
-						while (y <= (this.getScaling().transformY(yMax) + inc / 100.0)) {
-
-							if ((n % ticks) == 0) {
-								g.draw(new Line2D.Double(this.getScaling()
-										.transformX(0), y, this.getScaling()
-										.transformX(2), y));
-							} else
-								g.draw(new Line2D.Double(x0, y, x2, y));
-
-							y += inc;
-							n++;
-						}
-					} else {
-						y = y2;
-						while (y >= (this.getScaling().transformY(yMin) - inc / 100.0)) {
-							if ((n % ticks) == 0) {
-								g.draw(new Line2D.Double(this.getScaling()
-										.transformX(0), y, this.getScaling()
-										.transformX(2), y));
-							} else
-								g.draw(new Line2D.Double(x0, y, x2, y));
-
-							y -= inc;
-							n++;
-						}
-					}
+			} else {
+				// (dendroOrientation.equals(DendrogramOrientation.EAST) || dendroOrientation.equals(DendrogramOrientation.WEST))
+				if ((n % ticksGroup) == 0) {
+					drawLine(plotType, graphics2D, y, x00, y, x20);
 				} else {
-					/* WEIGHTS */
-					if (DendrogramOrientation.NORTH.equals(or)) {
-						y = y2;
-						while (y >= (this.getScaling().transformY(yMin) - inc / 100.0)) {
-							if ((n % ticks) == 0) {
-								g.draw(new Line2D.Double(this.getScaling()
-										.transformX(0), y, this.getScaling()
-										.transformX(2), y));
-							} else
-								g.draw(new Line2D.Double(x0, y, x2, y));
-
-							y -= inc;
-							n++;
-						}
-					} else {
-						y = y0;
-						while (y <= (this.getScaling().transformY(yMax) + inc / 100.0)) {
-							if ((n % ticks) == 0) {
-								g.draw(new Line2D.Double(this.getScaling()
-										.transformX(0), y, this.getScaling()
-										.transformX(2), y));
-							} else
-								g.draw(new Line2D.Double(x0, y, x2, y));
-
-							y += inc;
-							n++;
-						}
-					}
+					drawLine(plotType, graphics2D, y, x05, y, x15);
 				}
+			}
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH) || dendroOrientation.equals(DendrogramOrientation.EAST)) {
+				y += yIncr;
+			} else {
+				// (dendroOrientation.equals(DendrogramOrientation.SOUTH) || dendroOrientation.equals(DendrogramOrientation.WEST))
+				y -= yIncr;
 			}
 		}
 
-		g.setColor(originalColor);
+		if (plotType.equals(PlotType.PANEL)) {
+			graphics2D.setColor(originalColor);
+		} else {// (plotType.equals(PlotType.EPS))
+			EpsUtils.writeLine("grestore");
+		}
 	}
+
+	private void drawLine(final PlotType plotType, final Graphics2D graphics2D, final double x0, final double y0, 
+			final double x1, final double y1) {
+		if (plotType.equals(PlotType.PANEL)) {
+			graphics2D.draw(new Line2D.Double(x0, y0, x1, y1));
+		} else {// (plotType.equals(PlotType.EPS))
+			EpsUtils.writeLine(EpsUtils.dLine((float) (EpsUtils.xmin + x0), (float) (EpsUtils.ymax + y0), 
+					(float) (EpsUtils.xmin + x1), (float) (EpsUtils.ymax + y1)));
+		}
+	}
+
 }

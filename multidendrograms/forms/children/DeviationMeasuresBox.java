@@ -19,7 +19,6 @@
 package multidendrograms.forms.children;
 
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,6 +35,7 @@ import multidendrograms.initial.Language;
 import multidendrograms.methods.Method;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.definitions.Config;
+import multidendrograms.definitions.Formats;
 import multidendrograms.dendrogram.UltrametricMatrix;
 
 
@@ -61,10 +61,6 @@ public class DeviationMeasuresBox extends JDialog implements ActionListener {
 	private JLabel nmseLabel;
 	private JLabel nmseValue;
 	private JButton okButton;
-
-	private final Font font1 = new Font("Arial", Font.BOLD | Font.ITALIC, 12);
-	private final Font font2 = new Font("Arial", Font.PLAIN, 12);
-	private final Font font3 = new Font("Arial", Font.BOLD, 12);
 
 	private UltrametricMatrix ultraMatrix;
 	private Config cfg;
@@ -97,45 +93,15 @@ public class DeviationMeasuresBox extends JDialog implements ActionListener {
 		String errSE = nf.format(ultraMatrix.getSquaredError());
 		String errAE = nf.format(ultraMatrix.getAbsoluteError());
 
-		nameLabel = new JLabel();
-		cccLabel = new JLabel();
-		nmseLabel = new JLabel();
-		nmaeLabel = new JLabel();
-		cccValue = new JLabel();
-		nmseValue = new JLabel();
-		nmaeValue = new JLabel();
-		okButton = new JButton();
+		nameLabel = Formats.getFormattedTitleItalicsLabel(cfg.getDataFile().getName() + " - " + Method.toName(cfg.getMethod()));
+		cccLabel  = Formats.getFormattedBoldLabel("Cophenetic Correlation Coefficient:");
+		nmseLabel = Formats.getFormattedBoldLabel("Normalized Mean Squared Error:");
+		nmaeLabel = Formats.getFormattedBoldLabel("Normalized Mean Absolute Error:");
+		cccValue  = Formats.getFormattedLabel(errCC);
+		nmseValue = Formats.getFormattedLabel(errSE);
+		nmaeValue = Formats.getFormattedLabel(errAE);
+		okButton  = Formats.getFormattedButton(Language.getLabel(60));
 
-		nameLabel.setFont(font1);
-		nameLabel.setText(cfg.getDataFile().getName() + " - " + Method.toName(cfg.getMethod()));
-		nameLabel.setName("nameLabel");
-
-		cccLabel.setFont(font3);
-		cccLabel.setText("Cophenetic Correlation Coefficient:");
-		cccLabel.setName("cccLabel");
-
-		nmseLabel.setFont(font3);
-		nmseLabel.setText("Normalized Mean Squared Error:");
-		nmseLabel.setName("nmseLabel");
-
-		nmaeLabel.setFont(font3);
-		nmaeLabel.setText("Normalized Mean Absolute Error:");
-		nmaeLabel.setName("nmaeLabel");
-
-		cccValue.setFont(font2);
-		cccValue.setText(errCC);
-		cccValue.setName("cccValue");
-
-		nmseValue.setFont(font2);
-		nmseValue.setText(errSE);
-		nmseValue.setName("nmseValue");
-
-		nmaeValue.setFont(font2);
-		nmaeValue.setText(errAE);
-		nmaeValue.setName("nmaeValue");
-
-		okButton.setText(Language.getLabel(60));
-		okButton.setName("okButton");
 		okButton.addActionListener(this);
 
 		GroupLayout layout = new GroupLayout(getContentPane());

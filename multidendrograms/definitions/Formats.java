@@ -18,14 +18,20 @@
 
 package multidendrograms.definitions;
 
+import java.awt.Font;
 import java.util.Locale;
+import javax.swing.border.TitledBorder;
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JMenuItem;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import multidendrograms.initial.InitialProperties;
+import multidendrograms.utils.FontUtils;
 
 /**
  * <p>
@@ -41,53 +47,112 @@ import multidendrograms.initial.InitialProperties;
  */
 public class Formats {
 
-	public static JCheckBox AtributCHKFont(final String caption) {
+	public static TitledBorder getFormattedTitledBorder(final String caption) {
+		TitledBorder tb = BorderFactory.createTitledBorder(caption);
+		tb.setTitleFont(InitialProperties.getFontTitle());
+		return tb;
+	}
+
+	public static JCheckBox getFormattedCheckBox(final String caption) {
 		final JCheckBox chk = new JCheckBox(caption);
-		chk.setFont(InitialProperties.getFontMenuCHK());
-		chk.setForeground(InitialProperties.getColor_chk_font());
+		chk.setFont(InitialProperties.getFontCheckBox());
+		chk.setForeground(InitialProperties.getColorCheckBox());
 		return chk;
 	}
 
-	public static JComboBox AttributCBFont(final String[] s) {
+	public static JComboBox getFormattedComboBox(final String[] s) {
 		final JComboBox cb = new JComboBox(s);
-		cb.setFont(InitialProperties.getFontMenuCB());
-		cb.setBackground(InitialProperties.getColor_cb_background());
-		cb.setForeground(InitialProperties.getColor_cb_font());
+		cb.setFont(InitialProperties.getFontComboBox());
+		cb.setForeground(InitialProperties.getColorComboBox());
+		cb.setBackground(InitialProperties.getColorComboBoxBackground());
 		return cb;
 	}
 
-	public static JLabel AtributTitleFont(final String caption) {
+	public static JLabel getFormattedShadedTitleLabel(final String caption) {
 		final JLabel lbl = new JLabel(caption);
-		lbl.setFont(InitialProperties.getFontMenuTitle());
-		lbl.setBackground(InitialProperties.getColor_title_background());
-		lbl.setForeground(InitialProperties.getColor_title_font());
+		lbl.setFont(InitialProperties.getFontTitle());
+		lbl.setForeground(InitialProperties.getColorTitle());
+		lbl.setBackground(InitialProperties.getColorTitleBackground());
 		lbl.setOpaque(true);
 		return lbl;
 	}
 
-	public static JLabel AtributLabelFont(final String caption) {
+	public static JLabel getFormattedTitleLabel(final String caption) {
 		final JLabel lbl = new JLabel(caption);
-		lbl.setFont(InitialProperties.getFontMenuLabel());
-		lbl.setForeground(InitialProperties.getColor_label_font());
+		lbl.setFont(InitialProperties.getFontTitle());
+		lbl.setForeground(InitialProperties.getColorTitle());
+		lbl.setOpaque(true);
+		return lbl;
+	}
+
+	public static JLabel getFormattedTitleItalicsLabel(final String caption) {
+		final JLabel lbl = new JLabel(caption);
+		lbl.setFont(FontUtils.addStyle(InitialProperties.getFontTitle(), Font.ITALIC));
+		lbl.setForeground(InitialProperties.getColorTitle());
+		lbl.setOpaque(true);
+		return lbl;
+	}
+
+	public static JMenuItem getFormattedMenuItem(final String caption) {
+		final JMenuItem mi = new JMenuItem(caption);
+		mi.setFont(InitialProperties.getFontMenuItem());
+		mi.setForeground(InitialProperties.getColorMenuItem());
+		mi.setOpaque(false);
+		return mi;
+	}
+
+	public static JButton getFormattedButton(final String caption) {
+		final JButton btn = new JButton(caption);
+		btn.setFont(InitialProperties.getFontButton());
+		btn.setForeground(InitialProperties.getColorButton());
+		btn.setOpaque(false);
+		return btn;
+	}
+
+	public static JButton getFormattedBoldButton(final String caption) {
+		final JButton btn = new JButton(caption);
+		btn.setFont(FontUtils.addStyle(InitialProperties.getFontButton(), Font.BOLD));
+		btn.setForeground(InitialProperties.getColorButton());
+		btn.setOpaque(false);
+		return btn;
+	}
+
+	public static JLabel getFormattedLabel(final String caption) {
+		final JLabel lbl = new JLabel(caption);
+		lbl.setFont(InitialProperties.getFontLabel());
+		lbl.setForeground(InitialProperties.getColorLabel());
 		lbl.setOpaque(false);
 		return lbl;
 	}
 
-	public static JRadioButton AtributOPTFont(final String caption,
-			final boolean selec) {
+	public static JLabel getFormattedBoldLabel(final String caption) {
+		final JLabel lbl = new JLabel(caption);
+		lbl.setFont(FontUtils.addStyle(InitialProperties.getFontLabel(), Font.BOLD));
+		lbl.setForeground(InitialProperties.getColorLabel());
+		lbl.setOpaque(false);
+		return lbl;
+	}
+
+	public static JRadioButton getFormattedRadioButton(final String caption, final boolean selec) {
 		final JRadioButton opt = new JRadioButton(caption, selec);
-		opt.setFont(InitialProperties.getFontMenuOPT());
-		opt.setForeground(InitialProperties.getColor_opt_font());
+		opt.setFont(InitialProperties.getFontRadioButton());
+		opt.setForeground(InitialProperties.getColorRadioButton());
 		return opt;
 	}
 
-	public static JTextField AtributTXTFont(final String caption,
-			final int size, Locale loc) {
+	public static JTextField getformattedTextField(final String caption, final int size, Locale loc) {
 		final JTextField txt = new JTextField(caption, size);
-		txt.setFont(InitialProperties.getFontMenuTXT());
-		txt.setBackground(InitialProperties.getColor_jtxt_background());
-		txt.setForeground(InitialProperties.getColor_jtxt_font());
+		txt.setFont(InitialProperties.getFontTextField());
+		txt.setForeground(InitialProperties.getColorTextField());
+		txt.setBackground(InitialProperties.getColorTextFieldBackground());
 		txt.setLocale(loc);
+		return txt;
+	}
+
+	public static JTextField getformattedTextField() {
+		final JTextField txt = new JTextField();
+		txt.setFont(InitialProperties.getFontTextField());
+		txt.setForeground(InitialProperties.getColorTextField());
 		return txt;
 	}
 

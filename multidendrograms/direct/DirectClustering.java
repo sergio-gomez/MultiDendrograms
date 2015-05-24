@@ -31,8 +31,8 @@ import multidendrograms.dendrogram.UltrametricMatrix;
 import multidendrograms.methods.Method;
 import multidendrograms.methods.BuildDendrogram;
 import multidendrograms.types.MethodName;
+import multidendrograms.types.OriginType;
 import multidendrograms.types.SimilarityType;
-import multidendrograms.utils.MathUtils;
 
 /**
  * <p>
@@ -56,77 +56,55 @@ public class DirectClustering {
 	private SimilarityType simType;
 	private MethodName method;
 	private int precision;
+	private OriginType originType;
 
 	private String infix;
 	private DataFile dataFile = null;
-	private ExternalData data = null;
+	private ExternalData externalData = null;
 	private DistancesMatrix distMatrix = null;
 	private UltrametricMatrix ultraMatrix = null;
 
 	public DirectClustering(final String dataFileName, final SimilarityType simType,
-			final MethodName method) throws Exception {
-		this(dataFileName, simType, method, AUTO_PRECISION);
-	}
-
-	public DirectClustering(final String dataFileName, final SimilarityType simType,
-			final MethodName method, final int precision) throws Exception {
-		this.dataFileName = dataFileName;
+			final MethodName method, final int precision, final OriginType originType) throws Exception {
 		this.simType = simType;
-		this.method = method;
-		this.precision = precision;
-		this.infix = "-" + Method.toShortName(method);
-		if (precision != AUTO_PRECISION) {
-			this.infix = this.infix + precision;
-		}
-		doClustering();
-	}
-
-	private void doClustering() throws Exception {
-		dataFile = new DataFile(dataFileName);
+		this.dataFileName = dataFileName;
+		this.dataFile = new DataFile(dataFileName);
 		try {
-			data = new ExternalData(dataFile, true);
+			this.externalData = new ExternalData(this.dataFile);
 		} catch (Exception e) {
 			throw e;
 		}
-		if (precision == AUTO_PRECISION) {
-			precision = data.getPrecision();
+		this.method = method;
+		this.infix = "-" + Method.toShortName(method);
+		if (precision == DirectClustering.AUTO_PRECISION) {
+			this.precision = this.externalData.getPrecision();
+		} else {
+			this.precision = precision;
+			this.infix = this.infix + precision;
 		}
+		this.originType = originType;
 
-		System.out.println("Data file       : " + dataFileName);
-		System.out.println("Similarity type : " + simType.toString().toLowerCase());
-		System.out.println("Method name     : " + method.toString().toLowerCase());
-		System.out.println("Precision       : " + precision);
+		System.out.println("Data file       : " + this.dataFileName);
+		System.out.println("Similarity type : " + this.simType.toString().toLowerCase());
+		System.out.println("Method name     : " + this.method.toString().toLowerCase());
+		System.out.println("Precision       : " + this.precision);
+		System.out.println("Origin          : " + this.originType.toString().toLowerCase());
 		System.out.println("---");
 
-		distMatrix = data.getDistancesMatrix();
-		distMatrix.setSimilarityType(simType);
-		double minBase = Double.MAX_VALUE;
-		double base;
-
-		BuildDendrogram bd;
-		while (distMatrix.getCardinality() > 1) {
+		this.distMatrix = this.externalData.getDistancesMatrix();
+		while (this.distMatrix.getCardinality() > 1) {
 			try {
-				bd = new BuildDendrogram(distMatrix, simType, method, precision);
-				distMatrix = bd.recalculate();
-				base = distMatrix.getRoot().getBase();
-				if ((base < minBase) && (base != Double.MAX_VALUE)) {
-					minBase = base;
-				}
+				BuildDendrogram bd = new BuildDendrogram(this.distMatrix, this.simType, this.method, this.precision);
+				this.distMatrix = bd.recalculate();
 			} catch (final Exception e) {
 				throw e;
 			}
 		}
-		Cluster root = distMatrix.getRoot();
-		root.setBase(minBase);
-		if (!method.equals(MethodName.UNWEIGHTED_CENTROID)
-				&& !method.equals(MethodName.WEIGHTED_CENTROID)) {
-			BuildDendrogram.avoidReversals(root, root.getSummaryHeight(), simType);
-		}
 	}
 
 	public void saveAsTxt() {
-		String outFileName = dataFile.getPathNameNoExt() + this.infix + TXT_TREE_SUFIX;
-		ToTxt saveTxt = new ToTxt(distMatrix.getRoot(), precision, simType);
+		String outFileName = this.dataFile.getPathNameNoExt() + this.infix + DirectClustering.TXT_TREE_SUFIX;
+		ToTxt saveTxt = new ToTxt(this.distMatrix.getRoot(), this.precision);
 		try {
 			saveTxt.saveAsTxt(outFileName);
 		} catch (Exception e) {
@@ -135,20 +113,9 @@ public class DirectClustering {
 	}
 
 	public void saveAsNewick() {
-		String outFileName = dataFile.getPathNameNoExt() + this.infix + NEWICK_TREE_SUFIX;
-		double heightBottom, heightMin, heightMax, extraSpace;
-		if (simType.equals(SimilarityType.DISTANCE)) {
-			heightBottom = 0.0;
-		} else {
-			heightMin = distMatrix.getRoot().getBase();
-			heightMax = distMatrix.maxValue();
-			extraSpace = (heightMax - heightMin)
-					* (0.05 * MathUtils.round((heightMax - heightMin),
-							precision));
-			extraSpace = MathUtils.round(extraSpace, precision);
-			heightBottom = heightMax + extraSpace;
-		}
-		ToNewick saveNewick = new ToNewick(distMatrix.getRoot(), precision, simType, heightBottom);
+		String outFileName = this.dataFile.getPathNameNoExt() + this.infix + DirectClustering.NEWICK_TREE_SUFIX;
+		Cluster root = this.distMatrix.getRoot();
+		ToNewick saveNewick = new ToNewick(root, this.precision, this.simType, this.originType);
 		try {
 			saveNewick.saveAsNewick(outFileName);
 		} catch (Exception e) {
@@ -157,20 +124,22 @@ public class DirectClustering {
 	}
 
 	public void saveUltrametric() {
-		String outFileName = dataFile.getPathNameNoExt() + this.infix + ULTRAMETRIC_SUFIX;
-		if (ultraMatrix == null) {
-			ultraMatrix = new UltrametricMatrix(data.getData(), distMatrix.getRoot(), precision);
+		String outFileName = this.dataFile.getPathNameNoExt() + this.infix + DirectClustering.ULTRAMETRIC_SUFIX;
+		if (this.ultraMatrix == null) {
+			this.ultraMatrix = new UltrametricMatrix(this.externalData.getData(), this.distMatrix.getRoot(),
+					this.precision, this.simType, this.originType);
 		}
 		try {
-			ultraMatrix.saveAsTXT(outFileName, precision);
+			this.ultraMatrix.saveAsTxt(outFileName, this.precision);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
 	public void printDeviationMeasures() {
-		if (ultraMatrix == null) {
-			ultraMatrix = new UltrametricMatrix(data.getData(), distMatrix.getRoot(), precision);
+		if (this.ultraMatrix == null) {
+			this.ultraMatrix = new UltrametricMatrix(this.externalData.getData(), this.distMatrix.getRoot(),
+					this.precision, this.simType, this.originType);
 		}
 
 		NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
@@ -178,13 +147,14 @@ public class DirectClustering {
 		nf.setMaximumFractionDigits(6);
 		nf.setGroupingUsed(false);
 
-		String errCC = nf.format(ultraMatrix.getCopheneticCorrelation());
-		String errSE = nf.format(ultraMatrix.getSquaredError());
-		String errAE = nf.format(ultraMatrix.getAbsoluteError());
+		String errCC = nf.format(this.ultraMatrix.getCopheneticCorrelation());
+		String errSE = nf.format(this.ultraMatrix.getSquaredError());
+		String errAE = nf.format(this.ultraMatrix.getAbsoluteError());
 
 		System.out.println("Cophenetic Correlation Coefficient : " + errCC);
 		System.out.println("Normalized Mean Squared Error      : " + errSE);
 		System.out.println("Normalized Mean Absolute Error     : " + errAE);
 		System.out.println("---");
 	}
+
 }

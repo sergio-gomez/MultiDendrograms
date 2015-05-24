@@ -27,7 +27,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -38,9 +37,9 @@ import javax.swing.JPopupMenu;
 
 import multidendrograms.initial.LogManager;
 import multidendrograms.initial.Language;
-import multidendrograms.initial.InitialProperties;
+import multidendrograms.types.PlotType;
 import multidendrograms.dendrogram.Clipping;
-import multidendrograms.dendrogram.ScalingBox;
+import multidendrograms.dendrogram.Scaling;
 import multidendrograms.dendrogram.figures.Axis;
 import multidendrograms.dendrogram.figures.AxisLabel;
 import multidendrograms.dendrogram.figures.Band;
@@ -49,12 +48,9 @@ import multidendrograms.dendrogram.figures.Node;
 import multidendrograms.dendrogram.figures.NodeLabel;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.XYBox;
-import multidendrograms.types.DendrogramOrientation;
-import multidendrograms.types.LabelOrientation;
-import multidendrograms.utils.TextBoxSize;
-import multidendrograms.definitions.BoxContainer;
 import multidendrograms.definitions.Config;
-import multidendrograms.definitions.Dimensions;
+import multidendrograms.definitions.Formats;
+import multidendrograms.definitions.SettingsInfo;
 
 /**
  * <p>
@@ -73,44 +69,7 @@ public class DendrogramPanel extends JPanel {
 	private ActionListener al;
 	private JPopupMenu menu;
 
-	private ScalingBox scaledDendrogram = null;
-	private ScalingBox scaledBullets = null;
-	private ScalingBox scaledAxis = null;
-	private ScalingBox scaledNames = null;
-	private ScalingBox scaledAxisLabels = null;
-
-	// axis labels
-	double axisLabelWidth = 0.0;
-	double axisLabelHeight = 0.0;
-
-	// node labels
-	double nameWidth = 0.0;
-	double nameHeight = 0.0;
-
-	// node bullet size
-	double bulletsWidth = 0.0;
-	double bulletsHeight = 0.0;
-
-	// axis
-	double axisWidth = 0.0;
-	double axisHeight = 0.0;
-
-	// dendrogram size
-	double dendroWidth = 0.0;
-	double dendroHeight = 0.0;
-
-	// clipping of dendrogram
-	private double axisMaxVal;
-	private double axisMinVal;
-
 	private Config cfg = null;
-
-	private int numClusters;
-	private double radius;
-
-	private DendrogramOrientation dendroOrientation = DendrogramOrientation.NORTH;
-	private LabelOrientation nodeNameOrientation = LabelOrientation.HORIZONTAL;
-	private String strMax = "";
 
 	private LinkedList<Node> nodesList;
 	private LinkedList<Line> linesList;
@@ -122,7 +81,7 @@ public class DendrogramPanel extends JPanel {
 	public DendrogramPanel(final PrincipalDesk frm) {
 		super();
 		this.frm = frm;
-		this.initComponentsMenu();
+		initComponentsMenu();
 		this.dendroPanel = this;
 	}
 
@@ -140,7 +99,8 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(97))) {
 					// SAVE TO PNG
@@ -149,7 +109,8 @@ public class DendrogramPanel extends JPanel {
 						frm.savePicture(buff, "png", cfg);
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(95))) {
 					// VIEW TREE
@@ -158,7 +119,8 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
 						errMsg = Language.getLabel(76);
-						JOptionPane.showMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(98))) {
 					// SAVE TO TXT
@@ -167,7 +129,8 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(87))) {
 					// SAVE TO NEWICK
@@ -176,7 +139,8 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(99))) {
 					// SAVE TO EPS
@@ -185,16 +149,18 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(116))) {
 					// SAVE ULTRAMETRIC AS TXT
 					try {
-						frm.saveUltrametricTXT(cfg);
+						frm.saveUltrametricTxt(cfg);
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(117))) {
 					// SHOW ULTRAMETRIC ERRORS
@@ -203,30 +169,22 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+								JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
 		};
 
 		menu = new JPopupMenu();
-		final JMenuItem me0 = new JMenuItem();
-		final JMenuItem me1 = new JMenuItem();
-		final JMenuItem me2 = new JMenuItem();
-		final JMenuItem me3 = new JMenuItem();
-		final JMenuItem me4 = new JMenuItem();
-		final JMenuItem me5 = new JMenuItem();
-		final JMenuItem me6 = new JMenuItem();
-		final JMenuItem me7 = new JMenuItem();
-
-		me0.setText(Language.getLabel(87)); // save newick
-		me1.setText(Language.getLabel(95)); // show dendrogram details
-		me2.setText(Language.getLabel(98)); // save txt
-		me3.setText(Language.getLabel(96)); // save jpg
-		me4.setText(Language.getLabel(97)); // save png
-		me5.setText(Language.getLabel(99)); // save eps
-		me6.setText(Language.getLabel(116)); // save ultrametric as txt
-		me7.setText(Language.getLabel(117)); // show ultrametric details
+		final JMenuItem me0 = Formats.getFormattedMenuItem(Language.getLabel(87));  // save newick
+		final JMenuItem me1 = Formats.getFormattedMenuItem(Language.getLabel(95));  // show dendrogram details
+		final JMenuItem me2 = Formats.getFormattedMenuItem(Language.getLabel(98));  // save txt
+		final JMenuItem me3 = Formats.getFormattedMenuItem(Language.getLabel(96));  // save jpg
+		final JMenuItem me4 = Formats.getFormattedMenuItem(Language.getLabel(97));  // save png
+		final JMenuItem me5 = Formats.getFormattedMenuItem(Language.getLabel(99));  // save eps
+		final JMenuItem me6 = Formats.getFormattedMenuItem(Language.getLabel(116)); // save ultrametric as txt
+		final JMenuItem me7 = Formats.getFormattedMenuItem(Language.getLabel(117)); // show ultrametric details
 
 		me0.addActionListener(al);
 		me1.addActionListener(al);
@@ -261,41 +219,33 @@ public class DendrogramPanel extends JPanel {
 
 	public void setConfig(final Config cfg) {
 		this.cfg = cfg;
-
-		radius = cfg.getRadius();
-		numClusters = cfg.getDistancesMatrix().getRoot().getNumLeaves();
-		dendroOrientation = cfg.getDendrogramOrientation();
-		nodeNameOrientation = cfg.getNodeNameOrientation();
-
-		axisMaxVal = cfg.getAxisMaxVal();
-		axisMinVal = cfg.getAxisMinVal();
 	}
 
 	public LinkedList<Node> getNodesList() {
-		return nodesList;
+		return this.nodesList;
 	}
 
 	public LinkedList<Line> getLinesList() {
-		return linesList;
+		return this.linesList;
 	}
 
 	public LinkedList<Band> getBandsList() {
-		return bandsList;
+		return this.bandsList;
 	}
 
-	public void setNodesList(final LinkedList<Node> lst) {
-		this.nodesList = lst;
-		LogManager.LOG.finest("Number of nodes: (" + lst.size() + ")");
+	public void setNodesList(final LinkedList<Node> list) {
+		this.nodesList = list;
+		LogManager.LOG.finest("Number of nodes: (" + list.size() + ")");
 	}
 
-	public void setLinesList(final LinkedList<Line> lst) {
-		this.linesList = lst;
-		LogManager.LOG.finest("Number of nodes: (" + lst.size() + ")");
+	public void setLinesList(final LinkedList<Line> list) {
+		this.linesList = list;
+		LogManager.LOG.finest("Number of nodes: (" + list.size() + ")");
 	}
 
-	public void setBandsList(final LinkedList<Band> lst) {
-		this.bandsList = lst;
-		LogManager.LOG.finest("Number of nodes: (" + lst.size() + ")");
+	public void setBandsList(final LinkedList<Band> list) {
+		this.bandsList = list;
+		LogManager.LOG.finest("Number of nodes: (" + list.size() + ")");
 	}
 
 	@Override
@@ -303,294 +253,119 @@ public class DendrogramPanel extends JPanel {
 		super.update(arg0);
 	}
 
-	private double boxClustersWidth() {
-		return ((2 * radius * numClusters) + ((numClusters - 1) * radius));
-	}
-
-	private void translateScreen(final BoxContainer b, final double height) {
-		double h;
-		h = height - b.getCornerY();
-		b.setCornerY(-h);
-	}
-
-	private void setWidths(final Graphics2D g) {
-		final DendrogramOrientation or = cfg.getDendrogramOrientation();
-
-		/* dendrogram */
-		if (DendrogramOrientation.NORTH.equals(or) || DendrogramOrientation.SOUTH.equals(or)) {
-			dendroWidth = this.boxClustersWidth();
-			dendroHeight = axisMaxVal - axisMinVal;
-		} else {
-			dendroWidth = axisMaxVal - axisMinVal;
-			dendroHeight = this.boxClustersWidth();
-		}
-
-		/* axis */
-		if (cfg.getConfigMenu().isAxisVisible()) {
-			/* size of the axis */
-			if (DendrogramOrientation.NORTH.equals(or) || DendrogramOrientation.SOUTH.equals(or)) {
-				axisWidth = 2 * radius; // east and west
-				axisHeight = axisMaxVal - axisMinVal;
-			} else {
-				axisHeight = 2 * radius; // north and south
-				axisWidth = axisMaxVal - axisMinVal;
-			}
-		} else {
-			axisWidth = 0;
-			axisHeight = 0;
-		}
-
-		/* show the nodesList */
-		double rr = cfg.getConfigMenu().getNodeRadius();
-		if ((rr = cfg.getConfigMenu().getNodeRadius()) > 0) {
-			if (DendrogramOrientation.NORTH.equals(or) || DendrogramOrientation.SOUTH.equals(or)) {
-				bulletsWidth = this.boxClustersWidth();
-				bulletsHeight = 2 * rr;
-			} else {
-				bulletsWidth = 2 * rr;
-				bulletsHeight = this.boxClustersWidth();
-			}
-		} else {
-			bulletsWidth = 0;
-			bulletsHeight = 0;
-		}
-
-		/* show the labels of the axis */
-		if (cfg.getConfigMenu().isAxisLabelVisible()) {
-			final TextBoxSize bf = new TextBoxSize(cfg.getConfigMenu().getAxisLabelFont());
-			String txt;
-			int ent;
-			Dimensions<Double> dim;
-			ent = (int) Math.round(axisMaxVal);
-			txt = Integer.toString(ent);
-			if (DendrogramOrientation.EAST.equals(or) || DendrogramOrientation.WEST.equals(or)) {
-				if (cfg.isDistance()) {
-					dim = bf.getBoxPositiveNumber(90, (txt.trim()).length(),
-							cfg.getAxisLabelDecimals());
-				} else {
-					dim = bf.getBoxNegativeNumber(90, (txt.trim()).length(),
-							cfg.getAxisLabelDecimals());
-				}
-			} else {
-				if (cfg.isDistance()) {
-					dim = bf.getBoxPositiveNumber(0, (txt.trim()).length(),
-							cfg.getAxisLabelDecimals());
-				} else {
-					dim = bf.getBoxNegativeNumber(0, (txt.trim()).length(),
-							cfg.getAxisLabelDecimals());
-				}
-			}
-			axisLabelWidth = dim.getWidth();
-			axisLabelHeight = dim.getHeight();
-		} else {
-			axisLabelWidth = 0;
-			axisLabelHeight = 0;
-		}
-
-		/* names of the nodes */
-		if (cfg.getConfigMenu().isNodeNameVisible()) {
-			int alf;
-			final TextBoxSize bf = new TextBoxSize(cfg.getConfigMenu().getNodeNameFont());
-			String tmp;
-			Dimensions<Double> dim, dim_tmp;
-
-			/* size of labels of nodes */
-			if (cfg.getNodeNameOrientation().equals(LabelOrientation.HORIZONTAL))
-				alf = 0;
-			else if (cfg.getNodeNameOrientation().equals(LabelOrientation.OBLIQUE))
-				alf = 45;
-			else
-				alf = -90;
-			dim = new Dimensions<Double>(0.0, 0.0);
-			if (strMax.equals("")) {
-				final Enumeration<String> el = cfg.getNames().elements();
-				while (el.hasMoreElements()) {
-					tmp = el.nextElement();
-					dim_tmp = bf.getBox(alf, tmp);
-					if (dim_tmp.getWidth() > dim.getWidth())
-						dim.setWidth(dim_tmp.getWidth());
-					if (dim_tmp.getHeight() > dim.getHeight())
-						dim.setHeight(dim_tmp.getHeight());
-				}
-			}
-
-			nameWidth = dim.getWidth();
-			nameHeight = dim.getHeight();
-		} else {
-			nameWidth = 0;
-			nameHeight = 0;
-		}
-	}
-
 	@Override
 	public void paint(final Graphics arg0) {
 		super.paint(arg0);
 		final Graphics2D g2d = (Graphics2D) arg0;
-		this.drawDendro(g2d);
+		drawDendro(g2d);
 	}
 
 	private BufferedImage draw() {
-		Graphics2D g2d;
-		final double worldWidth = this.getSize().getWidth();
-		final double worldHeight = this.getSize().getHeight();
+		final double worldWidth = getSize().getWidth();
+		final double worldHeight = getSize().getHeight();
 		final BufferedImage buff = new BufferedImage((int) worldWidth, (int) worldHeight, BufferedImage.TYPE_INT_RGB);
-		g2d = buff.createGraphics();
+		Graphics2D g2d = buff.createGraphics();
 		g2d.setColor(Color.white);
 		g2d.fillRect(0, 0, (int) worldWidth, (int) worldHeight);
-		this.drawDendro(g2d);
+		drawDendro(g2d);
 		g2d.dispose();
-
 		return buff;
 	}
 
 	private void drawDendro(final Graphics2D g2d) {
-		BoxContainer boxDendogram, boxBullets, boxAxis, boxAxisLabels, boxNames;
+		final double worldWidth = getSize().getWidth();
+		final double worldHeight = getSize().getHeight();
+
+		XYBox boxes = new XYBox(this.cfg, worldWidth, worldHeight);
+		Scaling scalingDendro = boxes.getScalingDendrogram();
+		Scaling scalingBullets = boxes.getScalingBullets();
+		Scaling scalingAxis = boxes.getScalingAxis();
+		Scaling scalingAxisLabels = boxes.getScalingAxisLabels();
+
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-		/* Symmetric margin where it won't be able to paint anything */
-		final double margin = InitialProperties.getMargin();// 15
-
-		/* World size */
-		final double worldWidth = this.getSize().getWidth();
-		final double worldHeight = this.getSize().getHeight();
-
-		// recover sizes
-		this.setWidths(g2d);
-
-		// sizes
-		Dimensions<Double> dimDendro, dimBullets, dimName, dimAxis, dimAxisLabel;
-
-		dimDendro = new Dimensions<Double>(dendroWidth, dendroHeight);
-		dimBullets = new Dimensions<Double>(bulletsWidth, bulletsHeight);
-		dimName = new Dimensions<Double>(nameWidth, nameHeight);
-		dimAxis = new Dimensions<Double>(axisWidth, axisHeight);
-		dimAxisLabel = new Dimensions<Double>(axisLabelWidth, axisLabelHeight);
-
-		/* free space and positions */
-		final XYBox posBox = new XYBox(cfg, margin, worldWidth, worldHeight,
-		    dimDendro, dimBullets, dimName, dimAxis, dimAxisLabel);
-
-		// boxes
-		boxDendogram = posBox.getBoxDendro();
-		boxBullets = posBox.getBoxBullets();
-		boxNames = posBox.getBoxNames();
-		boxAxis = posBox.getBoxAxis();
-		boxAxisLabels = posBox.getBoxAxisLabels();
-
-		// situation of boxes in the screen
-		this.translateScreen(boxDendogram, worldHeight);
-		this.translateScreen(boxBullets, worldHeight);
-		this.translateScreen(boxAxis, worldHeight);
-		this.translateScreen(boxAxisLabels, worldHeight);
-		this.translateScreen(boxNames, worldHeight);
-
-		// invert y axis
+		// invert Y axis
 		g2d.scale(1, -1);
 		g2d.setBackground(Color.GREEN);
 
-		/* scaling factors */
-		scaledDendrogram = new ScalingBox(boxDendogram);
-		if (cfg.getConfigMenu().getNodeRadius() > 0)
-			scaledBullets = new ScalingBox(boxBullets);
-		if (cfg.getConfigMenu().isNodeNameVisible())
-			scaledNames = new ScalingBox(boxNames);
-		if (cfg.getConfigMenu().isAxisVisible())
-			scaledAxis = new ScalingBox(boxAxis);
-		if (cfg.getConfigMenu().isAxisLabelVisible())
-			scaledAxisLabels = new ScalingBox(boxAxisLabels);
+		drawDendrogram(g2d, scalingDendro);
+		drawBullets(g2d, scalingBullets, scalingDendro);
+		drawNodesNames(g2d, scalingDendro);
+		drawAxis(g2d, scalingAxis);
+		drawAxisLabels(g2d, scalingAxisLabels);
+	}
 
-		// clipping
-		final Clipping clp = new Clipping(axisMaxVal, axisMinVal,
-				cfg.getSimilarityType(), cfg.getPrecision());
-
+	private void drawDendrogram(final Graphics2D g2d, final Scaling scalingDendro) {
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		final Clipping clipping = new Clipping(this.cfg.getSimilarityType(), this.cfg.getAxisMinValue(), 
+				this.cfg.getAxisMaxValue());
+		
 		// draw interior of bands
-		Band bnd;
-		final Iterator<Band> itb = clp.clipBands(bandsList).iterator();
-		while (itb.hasNext()) {
-			bnd = itb.next();
-			bnd.setScaling(scaledDendrogram);
-			bnd.setColor(cfg.getConfigMenu().getBandColor());
-			bnd.setFilled(true);
-			bnd.draw(g2d, dendroOrientation);
+		final Iterator<Band> iterIB = clipping.clipBands(this.bandsList).iterator();
+		while (iterIB.hasNext()) {
+			Band band = iterIB.next();
+			band.setDendrogramOrientation(this.cfg.getDendrogramOrientation());
+			band.setScaling(scalingDendro);
+			band.setColor(settingsInfo.getBandColor());
+			band.setFilled(true);
+			band.draw(PlotType.PANEL, g2d);
 		}
 
 		// draw lines
-		Line lin;
-		final Iterator<Line> itl = (Iterator<Line>) clp.clipLines(linesList).iterator();
-		while (itl.hasNext()) {
-			lin = itl.next();
-			lin.setScaling(scaledDendrogram);
-			lin.draw(g2d, dendroOrientation);
+		Iterator<Line> iterL = clipping.clipLines(this.linesList).iterator();
+		while (iterL.hasNext()) {
+			Line line = iterL.next();
+			line.setDendrogramOrientation(this.cfg.getDendrogramOrientation());
+			line.setScaling(scalingDendro);
+			line.draw(PlotType.PANEL, g2d);
 		}
 
 		// draw band borders
-		final Iterator<Band> itb2 = (Iterator<Band>) clp.clipBands(bandsList).iterator();
-		while (itb2.hasNext()) {
-			bnd = itb2.next();
-			bnd.setScaling(scaledDendrogram);
-			bnd.setColor(cfg.getConfigMenu().getBandColor());
-			bnd.setFilled(false);
-			bnd.draw(g2d, dendroOrientation);
+		Iterator<Band> iterBB = clipping.clipBands(this.bandsList).iterator();
+		while (iterBB.hasNext()) {
+			Band band = iterBB.next();
+			band.setDendrogramOrientation(this.cfg.getDendrogramOrientation());
+			band.setScaling(scalingDendro);
+			band.setColor(settingsInfo.getBandColor());
+			band.setFilled(false);
+			band.draw(PlotType.PANEL, g2d);
 		}
+	}
 
-		// draw nodes
-		if (cfg.getConfigMenu().getNodeRadius() > 0) {
-			final Iterator<Node> itc = (Iterator<Node>) nodesList.iterator();
-			while (itc.hasNext()) {
-				final Node nod = itc.next();
-				nod.setScaling(scaledBullets);
-				nod.draw(g2d, dendroOrientation);
+	private void drawBullets(final Graphics2D g2d, final Scaling scalingBullets, final Scaling scalingDendro) {
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		if (settingsInfo.getNodeRadius() > 0) {
+			Iterator<Node> iter = this.nodesList.iterator();
+			while (iter.hasNext()) {
+				Node node = iter.next();
+				node.setDendrogramOrientation(this.cfg.getDendrogramOrientation());
+				node.setScaling(scalingBullets);
+				node.setScalingDendrogram(scalingDendro);
+				node.draw(PlotType.PANEL, g2d);
 			}
 		}
+	}
 
-		// draw node names
-		if (cfg.getConfigMenu().isNodeNameVisible()) {
-			NodeLabel nodLab;
-			nodLab = new NodeLabel(nodesList, cfg.getSimilarityType());
-			nodLab.setScaling(scaledNames);
-			nodLab.setColor(cfg.getConfigMenu().getNodeNameColor());
-			nodLab.setFont(cfg.getConfigMenu().getNodeNameFont());
-			nodLab.draw(g2d, dendroOrientation, nodeNameOrientation);
+	private void drawNodesNames(final Graphics2D g2D, final Scaling scalingDendro) {
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		if (settingsInfo.isNodeNameVisible()) {
+			NodeLabel nodeLabel = new NodeLabel(this.nodesList, settingsInfo, scalingDendro);
+			nodeLabel.draw(PlotType.PANEL, g2D);
 		}
+	}
 
-		// draw axis
-		if (cfg.getConfigMenu().isAxisVisible()) {
-			Axis ax;
-			if (dendroOrientation.equals(DendrogramOrientation.WEST)
-					|| dendroOrientation.equals(DendrogramOrientation.EAST))
-				ax = new Axis(boxAxis.getValMinX(),
-						boxAxis.getValMaxX(), cfg.getAxisIncrement(),
-						cfg.getAxisTicks());
-			else
-				ax = new Axis(boxAxis.getValMinY(),
-						boxAxis.getValMaxY(), cfg.getAxisIncrement(),
-						cfg.getAxisTicks());
-
-			ax.setScaling(scaledAxis);
-			ax.setColor(cfg.getConfigMenu().getAxisColor());
-			ax.draw(g2d, dendroOrientation, cfg.getSimilarityType(),
-					cfg.getAxisTicks());
+	private void drawAxis(final Graphics2D g2D, final Scaling scalingAxis) {
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		if (settingsInfo.isAxisVisible() && (this.cfg.getAxisTicks() > 0)) {
+			Axis axis = new Axis(settingsInfo, scalingAxis);
+			axis.draw(PlotType.PANEL, g2D);
 		}
+	}
 
-		// draw axis labels
-		if (cfg.getConfigMenu().isAxisLabelVisible() && cfg.getAxisTicks() > 0) {
-			AxisLabel axLab;
-			if (dendroOrientation.equals(DendrogramOrientation.WEST)
-					|| dendroOrientation.equals(DendrogramOrientation.EAST)) {
-				axLab = new AxisLabel(boxAxisLabels.getValMinX(),
-						boxAxisLabels.getValMaxX(),
-						boxAxisLabels.getValMaxY(), cfg.getAxisIncrement(),
-						cfg.getAxisTicks(), cfg.getAxisLabelDecimals());
-			} else {
-				axLab = new AxisLabel(boxAxisLabels.getValMinY(),
-						boxAxisLabels.getValMaxY(),
-						boxAxisLabels.getValMaxX(), cfg.getAxisIncrement(),
-						cfg.getAxisTicks(), cfg.getAxisLabelDecimals());
-			}
-			axLab.setScaling(scaledAxisLabels);
-			axLab.setColor(cfg.getConfigMenu().getAxisLabelColor());
-			axLab.setFont(cfg.getConfigMenu().getAxisLabelFont());
-			axLab.draw(g2d, dendroOrientation, cfg.getSimilarityType());
+	private void drawAxisLabels(final Graphics2D g2D, final Scaling scalingAxisLabels) {
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		if (settingsInfo.isAxisLabelVisible() && (this.cfg.getAxisTicks() > 0)) {
+			AxisLabel axisLabel = new AxisLabel(settingsInfo, scalingAxisLabels);
+			axisLabel.draw(PlotType.PANEL, g2D);
 		}
 	}
 

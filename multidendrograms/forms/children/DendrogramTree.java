@@ -20,6 +20,8 @@ package multidendrograms.forms.children;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.Color;
+import java.awt.Font;
 
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
@@ -53,24 +55,28 @@ public class DendrogramTree extends JDialog {
 	private final Cluster branch;
 	private final JTextArea txt;
 	private final DefaultMutableTreeNode root;
-	private final int prec;
-	private final Config cfg;
+	private final int precision;
+	private String leafPrefix, leafPostfix;
+	private String numPrefix, numPostfix;
+	private String bandPrefix, bandPostfix;
 
-	public DendrogramTree(final Cluster c, final Config cfg)
-			throws Exception {
+	public DendrogramTree(final Cluster c, final Config cfg) throws Exception {
 		super();
 
 		this.branch = c;
-		this.prec = cfg.getPrecision();
-		this.cfg = cfg;
+		this.precision = cfg.getPrecision();
 
 		this.root = new DefaultMutableTreeNode(Language.getLabel(62));
 		final JTree tree = new JTree(this.root);
+		tree.setFont(InitialProperties.getFontLabel());
+
 		this.txt = new JTextArea();
 		final JScrollPane p = new JScrollPane(tree,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+
 		try {
+			calculateHTMLTags();
 			showBranch(this.branch, this.root);
 
 			tree.setExpandsSelectedPaths(true);
@@ -92,13 +98,12 @@ public class DendrogramTree extends JDialog {
 			throw new Exception(errMsg);
 		}
 
-		final int frmWidth = InitialProperties.getWidth_frmDesk();
-		final int frmHeight = InitialProperties.getHeight_frmDesk();
+		final int frmWidth = InitialProperties.getWidthDendroWindow();
+		final int frmHeight = InitialProperties.getHeightDendroWindow();
 
 		this.txt.setSize(frmWidth, frmHeight);
 		setVisible(true);
-		setTitle(cfg.getDataFile().getName() + " - "
-				+ Method.toName(cfg.getMethod()));
+		setTitle(cfg.getDataFile().getName() + " - " + Method.toName(cfg.getMethod()));
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		pack();
 
@@ -108,40 +113,93 @@ public class DendrogramTree extends JDialog {
 				(screenSize.height - windowSize.height) / 2);
 	}
 
-	private void showBranch(final Cluster c, final DefaultMutableTreeNode branch)
-			throws Exception {
-		double pmin, pmax, tmp;
-		String spmin, spmax;
-
+	private void showBranch(final Cluster cluster, final DefaultMutableTreeNode branch) throws Exception {
 		DefaultMutableTreeNode full;
-		if (c.getNumSubclusters() == 1) {
-			full = new DefaultMutableTreeNode("<html><b COLOR='#888888'>"
-					+ c.getName() + "</b></html>");
+		if (cluster.getNumSubclusters() == 1) {
+			full = new DefaultMutableTreeNode("<html>" + leafPrefix + cluster.getName() + leafPostfix + "</html>");
 		} else {
-			pmin = c.getHeight();
-			if (cfg.isDistance()) {
-				pmax = pmin + c.getAgglomeration();
-			} else {
-				pmax = pmin - c.getAgglomeration();
-			}
+			double pmin = cluster.getRootBottomHeight();
+			double pmax = cluster.getRootTopHeight();
 			if (pmin > pmax) {
-				tmp = pmin;
+				double tmp = pmin;
 				pmin = pmax;
 				pmax = tmp;
 			}
-			pmin = MathUtils.round(pmin, prec);
-			pmax = MathUtils.round(pmax, prec);
-			spmin = MathUtils.format(pmin, prec);
-			spmax = MathUtils.format(pmax, prec);
-			full = new DefaultMutableTreeNode("<html>" + c.getNumSubclusters()
-					+ " &nbsp;&nbsp;<b COLOR='#000000'>[" + spmin + ", " + spmax + "]</b>&nbsp;&nbsp; "
-					+ "<i>" + c.getNumLeaves() + "</i></html>");
+			pmin = MathUtils.round(pmin, precision);
+			pmax = MathUtils.round(pmax, precision);
+			String spmin = MathUtils.format(pmin, precision);
+			String spmax = MathUtils.format(pmax, precision);
+			full = new DefaultMutableTreeNode(
+					"<html>"
+					+ numPrefix + cluster.getNumSubclusters() + numPostfix
+					+ " &nbsp;&nbsp; "
+					+ bandPrefix + " [" + spmin + ", " + spmax + "] " + bandPostfix
+					+ " &nbsp;&nbsp; "
+					+ numPrefix + " <i>" + cluster.getNumLeaves() + "</i> " + numPostfix
+					+ "</html>");
 		}
 		branch.add(full);
-		if (c.getNumSubclusters() > 1) {
-			for (int n = 0; n < c.getNumSubclusters(); n ++) {
-				showBranch(c.getSubcluster(n), full);
+		if (cluster.getNumSubclusters() > 1) {
+			for (int n = 0; n < cluster.getNumSubclusters(); n ++) {
+				showBranch(cluster.getSubcluster(n), full);
 			}
 		}
+	}
+
+	private void calculateHTMLTags() {
+		Color c;
+		Font f;
+
+		f = InitialProperties.getFontTreeLeaf();
+		c = InitialProperties.getColorTreeLeaf();
+		if (f.isBold() && f.isItalic()) {
+			leafPrefix = "<b color='" + colorToString(c) + "'><i>";
+			leafPostfix = "</i></b>";
+		} else if (f.isBold()) {
+			leafPrefix = "<b color='" + colorToString(c) + "'>";
+			leafPostfix = "</b>";
+		} else if (f.isItalic()) {
+			leafPrefix = "<i color='" + colorToString(c) + "'>";
+			leafPostfix = "</i>";
+		} else {
+			leafPrefix = "<font color='" + colorToString(c) + "'>";
+			leafPostfix = "</font>";
+		}
+
+		f = InitialProperties.getFontTreeNum();
+		c = InitialProperties.getColorTreeNum();
+		if (f.isBold() && f.isItalic()) {
+			numPrefix = "<b color='" + colorToString(c) + "'><i>";
+			numPostfix = "</i></b>";
+		} else if (f.isBold()) {
+			numPrefix = "<b color='" + colorToString(c) + "'>";
+			numPostfix = "</b>";
+		} else if (f.isItalic()) {
+			numPrefix = "<i color='" + colorToString(c) + "'>";
+			numPostfix = "</i>";
+		} else {
+			numPrefix = "<font color='" + colorToString(c) + "'>";
+			numPostfix = "</font>";
+		}
+
+		f = InitialProperties.getFontTreeBand();
+		c = InitialProperties.getColorTreeBand();
+		if (f.isBold() && f.isItalic()) {
+			bandPrefix = "<b color='" + colorToString(c) + "'><i>";
+			bandPostfix = "</i></b>";
+		} else if (f.isBold()) {
+			bandPrefix = "<b color='" + colorToString(c) + "'>";
+			bandPostfix = "</b>";
+		} else if (f.isItalic()) {
+			bandPrefix = "<i color='" + colorToString(c) + "'>";
+			bandPostfix = "</i>";
+		} else {
+			bandPrefix = "<font color='" + colorToString(c) + "'>";
+			bandPostfix = "</font>";
+		}
+	}
+
+	private String colorToString(Color c) {
+		return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
 	}
 }

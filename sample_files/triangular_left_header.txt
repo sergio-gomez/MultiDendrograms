@@ -1,4 +1,4 @@
-Alice 0
-Bob 1 0
-Carol 2 1 0
-Dave 4 3 2 0
+Alice 0.0
+Bob   2.0 1.0
+Carol 4.0 2.0 0.0
+Dave  8.0 6.0 4.0 3.5

@@ -87,7 +87,7 @@ public class DeviationMeasures {
 		for (int i = 0; i < size; i++) {
 			for (int j = i + 1; j < size; j++) {
 				num += Math.abs(distsMatrix[i][j] - ultraMatrix[i][j]);
-				den += distsMatrix[i][j];
+				den += Math.abs(distsMatrix[i][j]);
 			}
 		}
 		return num / den;

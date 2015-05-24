@@ -23,12 +23,12 @@ package multidendrograms.types;
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Identification of the data type
+ * Type of origin
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
  *
  * @since JDK 6.0
  */
-public enum SimilarityType {
-	DISTANCE, SIMILARITY;
+public enum OriginType {
+	UNIFORM_ORIGIN, NON_UNIFORM_ORIGIN;
 };

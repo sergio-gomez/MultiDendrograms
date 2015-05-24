@@ -21,8 +21,11 @@ package multidendrograms.dendrogram.figures;
 import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 
-import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.definitions.Coordinates;
+import multidendrograms.dendrogram.Scaling;
+import multidendrograms.dendrogram.eps.EpsUtils;
+import multidendrograms.types.DendrogramOrientation;
+import multidendrograms.types.PlotType;
 
 /**
  * <p>
@@ -36,55 +39,50 @@ import multidendrograms.definitions.Coordinates;
  * @since JDK 6.0
  */
 public class Node extends Figure {
+
 	private double radius;
-	private String name = "";
+	private String name;
+	private Scaling scalingDendro;
 
-	public Node(final Coordinates<Double> pos, final double radius, final int precision, final String name) {
-		super(pos.getX(), pos.getY(), precision);
+	public Node(final double x, final double y, final double radius, final String name) {
+		super(x, y);
 		this.radius = radius;
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(final String name) {
 		this.name = name;
 	}
 
 	public double getRadius() {
-		return radius;
+		return this.radius;
 	}
 
-	public void setRadius(final double radius) {
-		this.radius = radius;
+	public String getName() {
+		return this.name;
+	}
+
+	public void setScalingDendrogram(final Scaling scalingDendro) {
+		this.scalingDendro = scalingDendro;
 	}
 
 	@Override
-	public void draw(final Graphics2D g, final DendrogramOrientation or) {
-		double x, y, r1, r2, rr;
-
-		rr = this.getRadius();
-		r1 = this.getScaling().scaleX(rr);
-		r2 = this.getScaling().scaleY(rr);
-		rr = (r1 <= r2) ? r1 : r2;
-
-		if ((or == DendrogramOrientation.EAST) || (or == DendrogramOrientation.WEST)) {
-			y = this.getScaling().getValuesHeight() - this.getPosReal().getX();
-			x = this.getScaling().transformX(0d);
-			y = this.getScaling().transformY(y);
-			y -= (rr / 2d);
-		} else {
-			x = this.getScaling().transformX(this.getPosReal().getX());
-			y = this.getScaling().transformY(0d);
-			x -= (rr / 2d);
+	public void draw(final PlotType plotType, final Graphics2D graphics2D) {
+		double worldX = getPosReal().getX();
+		double worldY = getPosReal().getY();
+		Coordinates<Double> world = new Coordinates<Double>(worldX, worldY);
+		DendrogramOrientation dendroOrientation = getDendrogramOrientation();
+		Coordinates<Double> screen = this.scalingDendro.transform(world, dendroOrientation);
+		double screenX = screen.getX();
+		double screenY = screen.getY();
+		
+		Scaling scalingBullets = getScaling();
+		double r1 = scalingBullets.scaleX(this.radius);
+		double r2 = scalingBullets.scaleY(this.radius);
+		double rr = Math.min(r1, r2);
+		if (plotType.equals(PlotType.PANEL)) {
+			screenX = screenX - (rr / 2d);
+			screenY = screenY - (rr / 2d);
+			graphics2D.fill(new Ellipse2D.Double(screenX, screenY, rr, rr));
+		} else if (plotType.equals(PlotType.EPS)) {
+			EpsUtils.writeLine(EpsUtils.fCircle((float) (EpsUtils.xmin + screenX), (float) (EpsUtils.ymax + screenY), (float) rr));
 		}
-
-		g.fill(new Ellipse2D.Double(x, y, rr, rr));
 	}
 
-	@Override
-	public void draw(DendrogramOrientation or) {
-	}
 }

@@ -1,0 +1,6 @@
+# negative similarities
+a a -0.2
+a b -0.5
+a c -1.5
+b b  0.0
+b c -1.5

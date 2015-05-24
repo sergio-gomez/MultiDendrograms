@@ -1,0 +1,6 @@
+# positive and negative distances
+a a -0.8
+a b -0.5
+a c  0.5
+b b -1.0
+b c  0.5

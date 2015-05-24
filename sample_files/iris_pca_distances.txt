@@ -1,3 +1,4 @@
+# Fisher's Iris data set, 2D PCA Euclidean distances
 1 2 0.021577
 1 3 0.012658
 1 4 0.025283

@@ -24,7 +24,9 @@ import java.awt.Font;
 import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.types.MethodName;
 import multidendrograms.types.LabelOrientation;
+import multidendrograms.types.OriginType;
 import multidendrograms.types.SimilarityType;
+import multidendrograms.utils.MathUtils;
 
 /**
  * <p>
@@ -59,12 +61,13 @@ public class SettingsInfo {
 	private Font nodeNameFont;
 	private Color nodeNameColor;
 	private LabelOrientation nodeNameOrientation = LabelOrientation.VERTICAL;
+	private OriginType originType = OriginType.UNIFORM_ORIGIN;
 
 	// AXIS
 	private boolean axisVisible = true;
 	private Color axisColor = Color.BLACK;
-	private double axisMinVal = 0.0;
-	private double axisMaxVal = 1.0;
+	private double axisMinValue = 0.0;
+	private double axisMaxValue = 1.0;
 	private double axisIncrement = 0.1;
 	private int axisTicks = 10;
 	private boolean axisLabelVisible = true;
@@ -98,6 +101,22 @@ public class SettingsInfo {
 
 	public DendrogramOrientation getDendrogramOrientation() {
 		return dendroOrientation;
+	}
+
+	public DendrogramOrientation getDendrogramAdaptedOrientation() {
+		if (simType.equals(SimilarityType.DISTANCE)) {
+			return dendroOrientation;
+		} else {// (simType.equals(SimilarityType.SIMILARITY))
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH)) {
+				return DendrogramOrientation.SOUTH;
+			} else if (dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+				return DendrogramOrientation.NORTH;
+			} else if (dendroOrientation.equals(DendrogramOrientation.EAST)) {
+				return DendrogramOrientation.WEST;
+			} else {// (dendroOrientation.equals(DendrogramOrientation.WEST))
+				return DendrogramOrientation.EAST;
+			}
+		}
 	}
 
 	public void setDendrogramOrientation(final DendrogramOrientation dendroOrientation) {
@@ -160,6 +179,14 @@ public class SettingsInfo {
 		this.nodeNameOrientation = nodeNameOrientation;
 	}
 
+	public OriginType getOriginType() {
+		return originType;
+	}
+
+	public void setOriginType(final OriginType originType) {
+		this.originType = originType;
+	}
+
 	public boolean isAxisVisible() {
 		return axisVisible;
 	}
@@ -176,20 +203,20 @@ public class SettingsInfo {
 		this.axisColor = axisColor;
 	}
 
-	public double getAxisMinVal() {
-		return axisMinVal;
+	public double getAxisMinValue() {
+		return axisMinValue;
 	}
 
-	public void setAxisMinVal(final double axisMinVal) {
-		this.axisMinVal = axisMinVal;
+	public void setAxisMinValue(final double axisMinValue) {
+		this.axisMinValue = axisMinValue;
 	}
 
-	public double getAxisMaxVal() {
-		return axisMaxVal;
+	public double getAxisMaxValue() {
+		return axisMaxValue;
 	}
 
-	public void setAxisMaxVal(final double axisMaxVal) {
-		this.axisMaxVal = axisMaxVal;
+	public void setAxisMaxValue(final double axisMaxValue) {
+		this.axisMaxValue = axisMaxValue;
 	}
 
 	public double getAxisIncrement() {
@@ -198,6 +225,12 @@ public class SettingsInfo {
 
 	public void setAxisIncrement(final double axisIncrement) {
 		this.axisIncrement = axisIncrement;
+	}
+
+	public int getAxisNumberOfTicks() {
+		double axisNumTicks = (axisMaxValue - axisMinValue) / axisIncrement;
+		axisNumTicks = MathUtils.round(axisNumTicks, 6);
+		return (1 + (int) (axisNumTicks));
 	}
 
 	public int getAxisTicks() {
@@ -260,8 +293,8 @@ public class SettingsInfo {
 			str += "\n\n/// AXIS  ///\n";
 			str += "\nAxis: " + this.isAxisVisible();
 			str += "\nAxis color" + this.getAxisColor();
-			str += "\nAxis minimum value: " + Double.toString(this.getAxisMinVal());
-			str += "\nAxis maximum value: " + Double.toString(this.getAxisMaxVal());
+			str += "\nAxis minimum value: " + Double.toString(this.getAxisMinValue());
+			str += "\nAxis maximum value: " + Double.toString(this.getAxisMaxValue());
 			str += "\nAxis increment: " + Double.toString(this.getAxisIncrement());
 			str += "\nAxis ticks: " + Double.toString(this.getAxisTicks());
 			str += "\nAxis label: " + this.isAxisLabelVisible();

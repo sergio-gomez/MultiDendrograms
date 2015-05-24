@@ -18,6 +18,10 @@
 
 package multidendrograms.dendrogram;
 
+import multidendrograms.definitions.BoxContainer;
+import multidendrograms.definitions.Coordinates;
+import multidendrograms.types.DendrogramOrientation;
+
 /**
  * <p>
  * <b>MultiDendrograms</b>
@@ -31,98 +35,110 @@ package multidendrograms.dendrogram;
  */
 public class Scaling {
 
-	private double width = 0.0, height = 0.0;
-	private double minX = 0.0, maxX = 0.0, minY = 0.0, maxY = 0.0;
-	private double factorX = 1.0, factorY = 1.0;
-	private double translationX = 0.0, translationY = 0.0;
+	private double screenOriginX, screenOriginY;
+	private double screenWidth, screenHeight;
+	private double worldMinX, worldMaxX, worldMinY, worldMaxY;
 
-	public Scaling() {
+	public Scaling(final double worldMaxX, final double worldMaxY, final double worldMinX,
+			final double worldMinY, final double screenWidth, final double screenHeight) {
+		this.screenOriginX = 0.0;
+		this.screenOriginY = 0.0;
+		this.screenWidth = screenWidth;
+		this.screenHeight = screenHeight;
+		this.worldMinX = worldMinX;
+		this.worldMaxX = worldMaxX;
+		this.worldMinY = worldMinY;
+		this.worldMaxY = worldMaxY;
 	}
 
-	public Scaling(final double maxX, final double maxY, final double minX,
-			final double minY, final double width, final double heigth) {
-		this.setWidth(width);
-		this.setHeigth(heigth);
-		this.setValuesRange(maxX, maxY, minX, minY);
+	public Scaling(BoxContainer box) {
+		this.screenOriginX = box.getCornerX();
+		this.screenOriginY = box.getCornerY();
+		this.screenWidth = box.getWidth();
+		this.screenHeight = box.getHeight();
+		this.worldMinX = box.getValMinX();
+		this.worldMaxX = box.getValMaxX();
+		this.worldMinY = box.getValMinY();
+		this.worldMaxY = box.getValMaxY();
 	}
 
-	private void calculateFactors() {
-		factorX = width / (maxX - minX);
-		factorY = height / (maxY - minY);
-	}
-
-	public void setWidth(final double width) {
-		this.width = width;
-		this.calculateFactors();
-	}
-
-	public void setHeigth(final double heigth) {
-		this.height = heigth;
-		this.calculateFactors();
+	public void setWidth(final double screenWidth) {
+		this.screenWidth = screenWidth;
 	}
 
 	public double getWidth() {
-		return width;
+		return this.screenWidth;
+	}
+
+	public void setHeight(final double screenHeight) {
+		this.screenHeight = screenHeight;
 	}
 
 	public double getHeight() {
-		return height;
+		return this.screenHeight;
 	}
 
 	public double getValuesWidth() {
-		return maxX - minX;
+		return (this.worldMaxX - this.worldMinX);
 	}
 
 	public double getValuesHeight() {
-		return maxY - minY;
+		return (this.worldMaxY - this.worldMinY);
 	}
 
 	public double getMinX() {
-		return minX;
-	}
-
-	public double getMinY() {
-		return minY;
+		return this.worldMinX;
 	}
 
 	public double getMaxX() {
-		return maxX;
+		return this.worldMaxX;
+	}
+
+	public double getMinY() {
+		return this.worldMinY;
 	}
 
 	public double getMaxY() {
-		return maxY;
+		return this.worldMaxY;
 	}
 
-	public void setValuesRange(final double maxX, final double maxY,
-			final double minX, final double minY) {
-		this.maxX = maxX;
-		this.maxY = maxY;
-		this.minX = minX;
-		this.minY = minY;
-		this.calculateFactors();
+	public double scaleX(final double worldX) {
+		return (this.screenWidth * (worldX - this.worldMinX) / (this.worldMaxX - this.worldMinX));
 	}
 
-	public void setTranslationX(final double translationX) {
-		this.translationX = translationX;
+	public double scaleY(final double worldY) {
+		return (this.screenHeight * (worldY - this.worldMinY) / (this.worldMaxY - this.worldMinY));
 	}
 
-	public void setTranslationY(final double translationY) {
-		this.translationY = translationY;
+	public double transformX(final double worldX) {
+		return (this.screenOriginX + scaleX(worldX));
 	}
 
-	public double scaleX(final double x) {
-		return (factorX * (x - minX));
+	public double transformY(final double worldY) {
+		return (this.screenOriginY + scaleY(worldY));
 	}
 
-	public double scaleY(final double y) {
-		return (factorY * (y - minY));
+	public Coordinates<Double> transform(final Coordinates<Double> world, final DendrogramOrientation dendroOrientation) {
+		double worldX = world.getX();
+		double worldY = world.getY();
+		if (dendroOrientation == DendrogramOrientation.EAST) {
+			// inversion
+			double x = worldY;
+			worldY = this.worldMaxY - worldX;
+			worldX = x;
+		} else if (dendroOrientation == DendrogramOrientation.WEST) {
+			// inversion
+			double y = this.worldMaxY - worldX;
+			worldX = this.worldMinX + (this.worldMaxX - worldY);
+			worldY = y;
+		} else if (dendroOrientation == DendrogramOrientation.SOUTH) {
+			// translation
+			worldY = this.worldMinY + (this.worldMaxY - worldY);
+		}
+		double screenX = transformX(worldX);
+		double screenY = transformY(worldY);
+		Coordinates<Double> screen = new Coordinates<Double>(screenX, screenY);
+		return screen;
 	}
 
-	public double transformX(final double x) {
-		return (translationX + this.scaleX(x));
-	}
-
-	public double transformY(final double y) {
-		return (translationY + (this.scaleY(y)));
-	}
 }
