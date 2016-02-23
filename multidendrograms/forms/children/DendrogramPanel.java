@@ -99,7 +99,7 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(97))) {
@@ -109,7 +109,7 @@ public class DendrogramPanel extends JPanel {
 						frm.savePicture(buff, "png", cfg);
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(95))) {
@@ -119,7 +119,7 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
 						errMsg = Language.getLabel(76);
-						JOptionPane.showMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+						JOptionPane.showMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(98))) {
@@ -129,7 +129,7 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(87))) {
@@ -139,7 +139,17 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				} else if (evt.getActionCommand().equals(Language.getLabel(79))) {
+					// SAVE TO JSON
+					try {
+						frm.saveJson(cfg.getDistancesMatrix().getRoot(), cfg);
+					} catch (Exception e) {
+						errMsg = Language.getLabel(81);
+						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(99))) {
@@ -149,7 +159,7 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(116))) {
@@ -159,7 +169,7 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(117))) {
@@ -169,7 +179,7 @@ public class DendrogramPanel extends JPanel {
 					} catch (Exception e) {
 						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms", 
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				}
@@ -177,14 +187,15 @@ public class DendrogramPanel extends JPanel {
 		};
 
 		menu = new JPopupMenu();
-		final JMenuItem me0 = Formats.getFormattedMenuItem(Language.getLabel(87));  // save newick
+		final JMenuItem me0 = Formats.getFormattedMenuItem(Language.getLabel(117)); // show ultrametric details
 		final JMenuItem me1 = Formats.getFormattedMenuItem(Language.getLabel(95));  // show dendrogram details
-		final JMenuItem me2 = Formats.getFormattedMenuItem(Language.getLabel(98));  // save txt
-		final JMenuItem me3 = Formats.getFormattedMenuItem(Language.getLabel(96));  // save jpg
-		final JMenuItem me4 = Formats.getFormattedMenuItem(Language.getLabel(97));  // save png
-		final JMenuItem me5 = Formats.getFormattedMenuItem(Language.getLabel(99));  // save eps
-		final JMenuItem me6 = Formats.getFormattedMenuItem(Language.getLabel(116)); // save ultrametric as txt
-		final JMenuItem me7 = Formats.getFormattedMenuItem(Language.getLabel(117)); // show ultrametric details
+		final JMenuItem me2 = Formats.getFormattedMenuItem(Language.getLabel(116)); // save ultrametric as txt
+		final JMenuItem me3 = Formats.getFormattedMenuItem(Language.getLabel(98));  // save txt
+		final JMenuItem me4 = Formats.getFormattedMenuItem(Language.getLabel(87));  // save newick
+		final JMenuItem me5 = Formats.getFormattedMenuItem(Language.getLabel(79));  // save JSON
+		final JMenuItem me6 = Formats.getFormattedMenuItem(Language.getLabel(96));  // save jpg
+		final JMenuItem me7 = Formats.getFormattedMenuItem(Language.getLabel(97));  // save png
+		final JMenuItem me8 = Formats.getFormattedMenuItem(Language.getLabel(99));  // save eps
 
 		me0.addActionListener(al);
 		me1.addActionListener(al);
@@ -194,17 +205,19 @@ public class DendrogramPanel extends JPanel {
 		me5.addActionListener(al);
 		me6.addActionListener(al);
 		me7.addActionListener(al);
+		me8.addActionListener(al);
 
-		menu.add(me7);
+		menu.add(me0);
 		menu.add(me1);
 		menu.addSeparator();
-		menu.add(me6);
 		menu.add(me2);
-		menu.add(me0);
-		menu.addSeparator();
 		menu.add(me3);
 		menu.add(me4);
 		menu.add(me5);
+		menu.addSeparator();
+		menu.add(me6);
+		menu.add(me7);
+		menu.add(me8);
 
 		this.enableEvents(AWTEvent.MOUSE_EVENT_MASK);
 	}
@@ -296,9 +309,9 @@ public class DendrogramPanel extends JPanel {
 
 	private void drawDendrogram(final Graphics2D g2d, final Scaling scalingDendro) {
 		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
-		final Clipping clipping = new Clipping(this.cfg.getSimilarityType(), this.cfg.getAxisMinValue(), 
+		final Clipping clipping = new Clipping(this.cfg.getSimilarityType(), this.cfg.getAxisMinValue(),
 				this.cfg.getAxisMaxValue());
-		
+
 		// draw interior of bands
 		final Iterator<Band> iterIB = clipping.clipBands(this.bandsList).iterator();
 		while (iterIB.hasNext()) {

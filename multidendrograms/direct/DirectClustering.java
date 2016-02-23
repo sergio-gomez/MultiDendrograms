@@ -25,8 +25,9 @@ import multidendrograms.data.DataFile;
 import multidendrograms.data.ExternalData;
 import multidendrograms.definitions.Cluster;
 import multidendrograms.definitions.DistancesMatrix;
-import multidendrograms.dendrogram.ToNewick;
 import multidendrograms.dendrogram.ToTxt;
+import multidendrograms.dendrogram.ToNewick;
+import multidendrograms.dendrogram.ToJson;
 import multidendrograms.dendrogram.UltrametricMatrix;
 import multidendrograms.methods.Method;
 import multidendrograms.methods.BuildDendrogram;
@@ -50,6 +51,7 @@ public class DirectClustering {
 	public static final int AUTO_PRECISION = Integer.MIN_VALUE;
 	private static final String TXT_TREE_SUFIX = "-tree.txt";
 	private static final String NEWICK_TREE_SUFIX = "-newick.txt";
+	private static final String JSON_TREE_SUFIX = ".json";
 	private static final String ULTRAMETRIC_SUFIX = "-ultrametric.txt";
 
 	private String dataFileName;
@@ -118,6 +120,17 @@ public class DirectClustering {
 		ToNewick saveNewick = new ToNewick(root, this.precision, this.simType, this.originType);
 		try {
 			saveNewick.saveAsNewick(outFileName);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public void saveAsJson() {
+		String outFileName = this.dataFile.getPathNameNoExt() + this.infix + DirectClustering.JSON_TREE_SUFIX;
+		Cluster root = this.distMatrix.getRoot();
+		ToJson saveJson = new ToJson(root, this.precision, this.simType, this.originType);
+		try {
+			saveJson.saveAsJson(outFileName);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

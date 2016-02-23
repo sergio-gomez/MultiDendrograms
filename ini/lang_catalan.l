@@ -77,7 +77,7 @@ Desar com
 La imatge no s'ha desat correctament
 Imatge nul·la
 No s'ha pogut construir l'arbre jeràrquic
-
+Desar dendrograma en format JSON
 Desa com
 No s'ha pogut crear l'arxiu
 L'arxiu existeix. Vol sobreescriure'l?

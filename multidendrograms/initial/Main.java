@@ -51,8 +51,8 @@ import multidendrograms.errors.MethodError;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "4.0.0";
-	public static final String VERSION_SHORT = "4.0";
+	public static final String VERSION = "4.1.0";
+	public static final String VERSION_SHORT = "4.1";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
 	public static final String AFFILIATION = "Universitat Rovira i Virgili, Tarragona (Spain)";
@@ -230,6 +230,7 @@ public class Main {
 				DirectClustering dirClus = new DirectClustering(fileName, simType, method, precision, originType);
 				dirClus.saveAsTxt();
 				dirClus.saveAsNewick();
+				dirClus.saveAsJson();
 				dirClus.saveUltrametric();
 				dirClus.printDeviationMeasures();
 			} catch (Exception e) {

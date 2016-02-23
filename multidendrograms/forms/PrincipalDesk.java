@@ -38,8 +38,9 @@ import javax.swing.JScrollPane;
 import multidendrograms.initial.LogManager;
 import multidendrograms.initial.Language;
 import multidendrograms.initial.InitialProperties;
-import multidendrograms.dendrogram.ToNewick;
 import multidendrograms.dendrogram.ToTxt;
+import multidendrograms.dendrogram.ToNewick;
+import multidendrograms.dendrogram.ToJson;
 import multidendrograms.dendrogram.UltrametricMatrix;
 import multidendrograms.dendrogram.eps.EpsExporter;
 import multidendrograms.forms.panels.SettingsPanel;
@@ -167,16 +168,15 @@ public class PrincipalDesk extends JFrame {
 	}
 
 	public void savePicture(final BufferedImage buff, final String imgFormat, Config cfg) throws Exception {
-		String sPath;
-		String sNameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String sInfix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
+		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
+		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
 		final FileDialog fd = new FileDialog(this, Language.getLabel(75) + " " + imgFormat.toUpperCase(), FileDialog.SAVE);
-		fd.setFile(sNameNoExt + sInfix + "." + imgFormat);
+		fd.setFile(nameNoExt + infix + "." + imgFormat);
 		fd.setVisible(true);
 
 		if (fd.getFile() != null) {
-			sPath = fd.getDirectory() + fd.getFile();
-			final File fil = new File(sPath);
+			String path = fd.getDirectory() + fd.getFile();
+			final File fil = new File(path);
 			try {
 				ImageIO.write(buff, imgFormat, fil);
 				LogManager.LOG.info("Image saved");
@@ -193,16 +193,15 @@ public class PrincipalDesk extends JFrame {
 	}
 
 	public void savePostScript(DendrogramPanel dendroPanel, Config cfg) throws Exception {
-		String sPath;
-		String sNameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String sInfix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
+		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
+		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
 		final FileDialog fd = new FileDialog(this, Language.getLabel(75) + " EPS", FileDialog.SAVE);
-		fd.setFile(sNameNoExt + sInfix + ".eps");
+		fd.setFile(nameNoExt + infix + ".eps");
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
-			sPath = fd.getDirectory() + fd.getFile();
+			String path = fd.getDirectory() + fd.getFile();
 			try {
-				new EpsExporter(cfg, dendroPanel, sPath);
+				new EpsExporter(cfg, dendroPanel, path);
 				LogManager.LOG.info("EPS image saved");
 			} catch (Exception e) {
 				String msg_err = Language.getLabel(77);
@@ -213,16 +212,15 @@ public class PrincipalDesk extends JFrame {
 	}
 
 	public void saveTXT(Cluster root, Config cfg) throws Exception {
-		String sPath;
-		String sNameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String sInfix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
 		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " TXT", FileDialog.SAVE);
-		fd.setFile(sNameNoExt + sInfix + "-tree.txt");
+		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
+		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
+		fd.setFile(nameNoExt + infix + "-tree.txt");
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
-			sPath = fd.getDirectory() + fd.getFile();
-			ToTxt saveTXT = new ToTxt(root, cfg.getPrecision());
-			saveTXT.saveAsTxt(sPath);
+			String path = fd.getDirectory() + fd.getFile();
+			ToTxt toTXT = new ToTxt(root, cfg.getPrecision());
+			toTXT.saveAsTxt(path);
 		}
 	}
 
@@ -243,17 +241,34 @@ public class PrincipalDesk extends JFrame {
 		}
 	}
 
-	public void saveUltrametricTxt(Config cfg) throws Exception {
-		String sNameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String sInfix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
-		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " TXT", FileDialog.SAVE);
-		fd.setFile(sNameNoExt + sInfix + "-ultrametric.txt");
+	public void saveJson(Cluster root, Config cfg) throws Exception {
+		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " JSON", FileDialog.SAVE);
+		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
+		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
+		fd.setFile(nameNoExt + infix + ".json");
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
-			String sPath = fd.getDirectory() + fd.getFile();
+			String path = fd.getDirectory() + fd.getFile();
+			int precision = cfg.getPrecision();
+			SimilarityType simType = cfg.getSimilarityType();
+			SettingsInfo settings = cfg.getConfigMenu();
+			OriginType originType = settings.getOriginType();
+			ToJson toJson = new ToJson(root, precision, simType, originType);
+			toJson.saveAsJson(path);
+		}
+	}
+
+	public void saveUltrametricTxt(Config cfg) throws Exception {
+		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
+		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
+		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " TXT", FileDialog.SAVE);
+		fd.setFile(nameNoExt + infix + "-ultrametric.txt");
+		fd.setVisible(true);
+		if (fd.getFile() != null) {
+			String path = fd.getDirectory() + fd.getFile();
 			DendrogramParameters dendroParams = this.currentDendrogramFrame.getDendrogramParameters();
 			UltrametricMatrix ultraMatrix = dendroParams.getUltrametricMatrix();
-			ultraMatrix.saveAsTxt(sPath, cfg.getPrecision());
+			ultraMatrix.saveAsTxt(path, cfg.getPrecision());
 		}
 	}
 

@@ -77,7 +77,7 @@ Save as
 Unable to save the image
 Null image
 Unable to build the hierarchical tree
-
+Save dendrogram as JSON tree
 Save as
 Unable to create the file
 Existing file. Do you want to overwrite it?

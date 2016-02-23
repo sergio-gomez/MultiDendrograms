@@ -77,7 +77,7 @@ Speichern unter
 Das Bild wurde nicht richtig gespeichert
 Leeres Bild
 Der hierarchische Baum konnte nicht konstruiert werden
-
+Dendrogramm speichern als JSON
 Speichern unter
 Die Datei konnte nicht erstellt werden
 Vorhandene Datei. Möchten Sie es überschreiben?

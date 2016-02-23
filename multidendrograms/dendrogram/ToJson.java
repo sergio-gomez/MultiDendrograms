@@ -35,13 +35,13 @@ import multidendrograms.definitions.Cluster;
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Save dendrogram as Newick tree text file
+ * Save dendrogram as JSON text file
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
  *
  * @since JDK 6.0
  */
-public class ToNewick {
+public class ToJson {
 
 	private final Cluster root;
 	private final int precision;
@@ -50,7 +50,7 @@ public class ToNewick {
 	private final double dendroBottomHeight;
 	private PrintWriter printWriter;
 
-	public ToNewick(final Cluster root, final int precision, final SimilarityType simType, final OriginType originType) {
+	public ToJson(Cluster root, int precision, final SimilarityType simType, final OriginType originType) {
 		this.root = root;
 		this.precision = precision;
 		this.simType = simType;
@@ -63,72 +63,76 @@ public class ToNewick {
 		}
 	}
 
-	public void saveAsNewick(String path) throws Exception {
+	public void saveAsJson(String sPath) throws Exception {
+		File file = new File(sPath);
 		try {
-			File file = new File(path);
 			FileWriter fileWriter = new FileWriter(file);
-			saveAsNewick(new PrintWriter(fileWriter));
+			printWriter = new PrintWriter(fileWriter);
+			showCluster(this.root, this.root.getRootBottomHeight(), 0);
+			printWriter.println("");
+			printWriter.close();
 		} catch (Exception e) {
 			String errMsg = Language.getLabel(83);
-			LogManager.LOG.throwing("ToNewick.java", "saveAsNewick()", e);
+			LogManager.LOG.throwing("ToTxt.java", "saveFile()", e);
 			throw new Exception(errMsg);
 		}
 	}
 
-  public void saveAsNewick(PrintWriter printWriter) throws Exception {
-    try {
-      this.printWriter = new PrintWriter(printWriter);
-      showCluster(this.root, this.root.getRootBottomHeight());
-      this.printWriter.print(";");
-      this.printWriter.close();
-    } catch (Exception e) {
-      String errMsg = Language.getLabel(83);
-      LogManager.LOG.throwing("ToNewick.java", "saveAsNewick()", e);
-      throw new Exception(errMsg);
-    }
-  }
-
-	private void showCluster(final Cluster cluster, final double parentHeight) throws Exception {
+	private void showCluster(final Cluster cluster, final double parentHeight, final int level) throws Exception {
 		final int numSubclusters = cluster.getNumSubclusters();
 		final double clusterBottomHeight = cluster.getRootBottomHeight();
-		double clusterHeight;
+		double clusterHeight, topHeight, bottomHeight;
+		String indent = getIndentation(level);
 		if (numSubclusters == 1) {
-			String name = adaptName(cluster.getName());
-			this.printWriter.print(name);
 			if (Double.isNaN(clusterBottomHeight) || this.originType.equals(OriginType.UNIFORM_ORIGIN)) {
 				clusterHeight = this.dendroBottomHeight;
 			} else {
 				clusterHeight = clusterBottomHeight;
 			}
-		} else {// (numSubclusters > 1)
+			topHeight = clusterHeight;
+			bottomHeight = clusterHeight;
+			String str = indent + "{\"name\": \"" + cluster.getName() + "\", ";
+			str += getClusterHeight(clusterHeight) + ", ";
+			str += getClusterMargin(topHeight, bottomHeight) + ", ";
+			str += getClusterLength(parentHeight, clusterHeight) + ", ";
+			str += "\"size\": 1}";
+			printWriter.print(str);
+		} else {
 			clusterHeight = clusterBottomHeight;
-			this.printWriter.print("(");
-			for (int n = 0; n < numSubclusters; n ++) {
-				showCluster(cluster.getSubcluster(n), clusterHeight);
+			topHeight = cluster.getRootTopHeight();
+			bottomHeight = cluster.getRootBottomHeight();
+			printWriter.println(indent + "{");
+			String str = indent + " \"name\": \"\", ";
+			str += getClusterHeight(clusterHeight) + ", ";
+			str += getClusterMargin(topHeight, bottomHeight) + ", ";
+			str += getClusterLength(parentHeight, clusterHeight) + ",";
+			printWriter.println(str);
+			str = indent + " \"children\": [";
+			printWriter.println(str);
+			for (int n = 0; n < numSubclusters; n++) {
+				showCluster(cluster.getSubcluster(n), clusterHeight, level + 1);
 				if (n < numSubclusters - 1) {
-					this.printWriter.print(",");
-				}
+  				printWriter.print(",");
+  			}
+  			printWriter.println("");
 			}
-			this.printWriter.print(")");
+			printWriter.println(indent + " ]");
+			printWriter.print(indent + "}");
 		}
-		printClusterLength(parentHeight, clusterHeight);
 	}
 
-	private String adaptName(final String originalName) {
-		String newName = new String(originalName);
-		newName = newName.replace(' ', '_');
-		newName = newName.replace('\'', '"');
-		newName = newName.replace(':', '|');
-		newName = newName.replace(';', '|');
-		newName = newName.replace(',', '|');
-		newName = newName.replace('(', '{');
-		newName = newName.replace(')', '}');
-		newName = newName.replace('[', '{');
-		newName = newName.replace(']', '}');
-		return newName;
+	private String getClusterHeight(final double clusterHeight) {
+		String sHeight = MathUtils.format(clusterHeight, precision);
+		return "\"height\": " + sHeight;
 	}
 
-	private void printClusterLength(final double parentHeight, final double clusterHeight) {
+	private String getClusterMargin(final double topHeight, final double bottomHeight) {
+		double margin = Math.abs(topHeight - bottomHeight);
+		String sMargin = MathUtils.format(margin, precision);
+		return "\"margin\": " + sMargin;
+	}
+
+	private String getClusterLength(final double parentHeight, final double clusterHeight) {
 		double length;
 		if (this.simType.equals(SimilarityType.DISTANCE)) {
 			length = MathUtils.round(parentHeight, precision) - MathUtils.round(clusterHeight, precision);
@@ -136,10 +140,16 @@ public class ToNewick {
 			length = MathUtils.round(clusterHeight, precision) - MathUtils.round(parentHeight, precision);
 		}
  		length = MathUtils.round(length, precision);
-		if (length > 0.0) {
-			String sLength = MathUtils.format(length, precision);
-			this.printWriter.print(":" + sLength);
+		String sLength = MathUtils.format(length, precision);
+		return "\"length\": " + sLength;
+	}
+
+	private String getIndentation(final int level) {
+		String str = "";
+		for (int n = 0; n < level; n ++) {
+			str += "  ";
 		}
+		return str;
 	}
 
 }

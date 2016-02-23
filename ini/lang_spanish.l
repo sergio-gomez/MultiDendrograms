@@ -77,7 +77,7 @@ Guardar como
 La imagen no se ha guardado correctamente
 Imagen nula
 No se ha podido construir el árbol jerárquico
-
+Guardar dendrograma en formato JSON
 Guardar como
 No se ha podido crear el archivo
 Archivo existente. ¿Desea sobreescribirlo?
