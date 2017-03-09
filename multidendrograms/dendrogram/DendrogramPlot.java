@@ -27,9 +27,9 @@ import multidendrograms.dendrogram.figures.Band;
 import multidendrograms.dendrogram.figures.Line;
 import multidendrograms.dendrogram.figures.Node;
 import multidendrograms.types.OriginType;
-import multidendrograms.types.SimilarityType;
-import multidendrograms.utils.MathUtils;
-import multidendrograms.definitions.Cluster;
+import multidendrograms.types.ProximityType;
+import multidendrograms.core.definitions.Dendrogram;
+import multidendrograms.core.utils.MathUtils;
 import multidendrograms.definitions.Config;
 import multidendrograms.definitions.Coordinates;
 import multidendrograms.definitions.SettingsInfo;
@@ -47,7 +47,7 @@ import multidendrograms.definitions.SettingsInfo;
  */
 public class DendrogramPlot {
 
-	private static SimilarityType simType;
+	private static ProximityType proximityType;
 	private final int precision;
 	private final double radius;
 	private final boolean bandVisible;
@@ -59,23 +59,23 @@ public class DendrogramPlot {
 	private final LinkedList<Line> linesList = new LinkedList<Line>();
 	private final LinkedList<Band> bandsList = new LinkedList<Band>();
 
-	public DendrogramPlot(final Cluster tree, final Config cfg) throws Exception {
-		DendrogramPlot.simType = cfg.getSimilarityType();
+	public DendrogramPlot(final Dendrogram tree, final Config cfg) throws Exception {
+		DendrogramPlot.proximityType = cfg.getProximityType();
 		this.precision = cfg.getPrecision();
 		this.radius = cfg.getRadius();
-		SettingsInfo settings = cfg.getConfigMenu();
+		SettingsInfo settings = cfg.getSettingsInfo();
 		this.bandVisible = settings.isBandVisible();
 		this.originType = settings.getOriginType();
-		this.dendroBottomHeight = DendrogramPlot.simType.equals(SimilarityType.DISTANCE) ?
+		this.dendroBottomHeight = DendrogramPlot.proximityType.equals(ProximityType.DISTANCE) ?
 				cfg.getAxisMinValue() : cfg.getAxisMaxValue();
 		branchNodeCoordinates(tree);
 	}
 
-	private Coordinates<Double> branchNodeCoordinates(final Cluster cluster) throws Exception {
+	private Coordinates<Double> branchNodeCoordinates(final Dendrogram cluster) throws Exception {
 		Coordinates<Double> position = new Coordinates<Double>(0.0, 0.0);
 		double rootBottomHeight = cluster.getRootBottomHeight();
 		double rootTopHeight = cluster.getRootTopHeight();
-		int numSubclusters = cluster.getNumSubclusters();
+		int numSubclusters = cluster.numberOfSubclusters();
 		if (numSubclusters == 1) {
 			this.next ++;
 			double x = this.radius * ((3 * this.next) - 1);
@@ -84,14 +84,14 @@ public class DendrogramPlot {
 				position.setY(this.dendroBottomHeight);
 			} else {
 				double y;
-				if (DendrogramPlot.simType.equals(SimilarityType.DISTANCE)) {
+				if (DendrogramPlot.proximityType.equals(ProximityType.DISTANCE)) {
 					y = Math.max(rootBottomHeight, this.dendroBottomHeight);
-				} else {// (DendrogramPlot.simType.equals(SimilarityType.SIMILARITY))
+				} else {// (DendrogramPlot.proximityType.equals(ProximityType.SIMILARITY))
 					y = Math.min(rootBottomHeight, this.dendroBottomHeight);
 				}
 				position.setY(y);
 			}
-			this.nodesList.add(new Node(position.getX(), position.getY(), this.radius, cluster.getName()));
+			this.nodesList.add(new Node(position.getX(), position.getY(), this.radius, cluster.getLabel()));
 		} else {// (numSubclusters > 1)
 			double rootIncrHeight = this.bandVisible ? Math.abs(rootTopHeight - rootBottomHeight) : 0.0;
 			rootIncrHeight = MathUtils.round(rootIncrHeight, precision);

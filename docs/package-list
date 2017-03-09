@@ -1,0 +1,17 @@
+multidendrograms.core.clusterings
+multidendrograms.core.definitions
+multidendrograms.core.utils
+multidendrograms.data
+multidendrograms.definitions
+multidendrograms.dendrogram
+multidendrograms.dendrogram.eps
+multidendrograms.dendrogram.figures
+multidendrograms.direct
+multidendrograms.errors
+multidendrograms.forms
+multidendrograms.forms.children
+multidendrograms.forms.panels
+multidendrograms.forms.scrollabledesktop
+multidendrograms.initial
+multidendrograms.types
+multidendrograms.utils

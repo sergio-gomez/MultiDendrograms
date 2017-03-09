@@ -35,9 +35,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import multidendrograms.initial.LogManager;
-import multidendrograms.initial.Language;
-import multidendrograms.types.PlotType;
+import multidendrograms.definitions.Config;
+import multidendrograms.definitions.Formats;
+import multidendrograms.definitions.SettingsInfo;
 import multidendrograms.dendrogram.Clipping;
 import multidendrograms.dendrogram.Scaling;
 import multidendrograms.dendrogram.figures.Axis;
@@ -48,9 +48,9 @@ import multidendrograms.dendrogram.figures.Node;
 import multidendrograms.dendrogram.figures.NodeLabel;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.XYBox;
-import multidendrograms.definitions.Config;
-import multidendrograms.definitions.Formats;
-import multidendrograms.definitions.SettingsInfo;
+import multidendrograms.initial.Language;
+import multidendrograms.initial.LogManager;
+import multidendrograms.types.PlotType;
 
 /**
  * <p>
@@ -89,113 +89,116 @@ public class DendrogramPanel extends JPanel {
 		al = new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent evt) {
-				String errMsg;
-
 				if (evt.getActionCommand().equals(Language.getLabel(96))) {
-					// SAVE TO JPG
+					// Save dendrogram as JPG
 					try {
 						final BufferedImage buff = DendrogramPanel.this.draw();
 						frm.savePicture(buff, "jpg", cfg);
 					} catch (Exception e) {
-						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						String errMsg = Language.getLabel(81);
 						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(97))) {
-					// SAVE TO PNG
+					// Save dendrogram as PNG
 					try {
 						final BufferedImage buff = DendrogramPanel.this.draw();
 						frm.savePicture(buff, "png", cfg);
 					} catch (Exception e) {
-						errMsg = Language.getLabel(81);
+						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						String errMsg = Language.getLabel(81);
 						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(95))) {
-					// VIEW TREE
+					// Show dendrogram details
 					try {
-						new DendrogramTree(cfg.getDistancesMatrix().getRoot(), cfg);
+						new DendrogramTree(cfg);
 					} catch (Exception e) {
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						errMsg = Language.getLabel(76);
+						String errMsg = Language.getLabel(76);
 						JOptionPane.showMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(98))) {
-					// SAVE TO TXT
+					// Save dendrogram as TXT
 					try {
-						frm.saveTXT(cfg.getDistancesMatrix().getRoot(), cfg);
+						frm.saveTXT(cfg);
 					} catch (Exception e) {
-						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						String errMsg = Language.getLabel(81);
 						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(87))) {
-					// SAVE TO NEWICK
+					// Save dendrogram as Newick tree
 					try {
-						frm.saveNewick(cfg.getDistancesMatrix().getRoot(), cfg);
+						frm.saveNewick(cfg);
 					} catch (Exception e) {
-						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						String errMsg = Language.getLabel(81);
 						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(79))) {
-					// SAVE TO JSON
+					// Save dendrogram as JSON tree
 					try {
-						frm.saveJson(cfg.getDistancesMatrix().getRoot(), cfg);
+						frm.saveJson(cfg);
 					} catch (Exception e) {
-						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						String errMsg = Language.getLabel(81);
 						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(99))) {
-					// SAVE TO EPS
+					// Save dendrogram as EPS
 					try {
 						frm.savePostScript(dendroPanel, cfg);
 					} catch (Exception e) {
-						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						String errMsg = Language.getLabel(81);
 						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(116))) {
-					// SAVE ULTRAMETRIC AS TXT
+					// Save ultrametric matrix as TXT
 					try {
 						frm.saveUltrametricTxt(cfg);
 					} catch (Exception e) {
-						errMsg = Language.getLabel(81);
 						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						String errMsg = Language.getLabel(81);
+						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				} else if (evt.getActionCommand().equals(Language.getLabel(111))) {
+					// Save dendrogram measures
+					try {
+						frm.saveDendrogramMeasures(cfg);
+					} catch (Exception e) {
+						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
+						String errMsg = Language.getLabel(81);
 						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				} else if (evt.getActionCommand().equals(Language.getLabel(117))) {
-					// SHOW ULTRAMETRIC ERRORS
-					try {
-						frm.showUltrametricErrors(cfg);
-					} catch (Exception e) {
-						errMsg = Language.getLabel(81);
-						LogManager.LOG.throwing("DendrogramPanel", "initComponentsMenu()", e);
-						JOptionPane.showInternalMessageDialog(frm.getPanDesk(), errMsg, "MultiDendrograms",
-								JOptionPane.ERROR_MESSAGE);
-					}
+					// Show dendrogram measures
+					frm.showDendrogramMeasures(cfg);
 				}
 			}
 		};
 
 		menu = new JPopupMenu();
-		final JMenuItem me0 = Formats.getFormattedMenuItem(Language.getLabel(117)); // show ultrametric details
-		final JMenuItem me1 = Formats.getFormattedMenuItem(Language.getLabel(95));  // show dendrogram details
-		final JMenuItem me2 = Formats.getFormattedMenuItem(Language.getLabel(116)); // save ultrametric as txt
-		final JMenuItem me3 = Formats.getFormattedMenuItem(Language.getLabel(98));  // save txt
-		final JMenuItem me4 = Formats.getFormattedMenuItem(Language.getLabel(87));  // save newick
-		final JMenuItem me5 = Formats.getFormattedMenuItem(Language.getLabel(79));  // save JSON
-		final JMenuItem me6 = Formats.getFormattedMenuItem(Language.getLabel(96));  // save jpg
-		final JMenuItem me7 = Formats.getFormattedMenuItem(Language.getLabel(97));  // save png
-		final JMenuItem me8 = Formats.getFormattedMenuItem(Language.getLabel(99));  // save eps
+		final JMenuItem me0 = Formats.getFormattedMenuItem(Language.getLabel(117)); // Show dendrogram characteristics
+		final JMenuItem me1 = Formats.getFormattedMenuItem(Language.getLabel(95));  // Show dendrogram details
+		final JMenuItem me2 = Formats.getFormattedMenuItem(Language.getLabel(111)); // Save dendrogram characteristics
+		final JMenuItem me3 = Formats.getFormattedMenuItem(Language.getLabel(116)); // Save ultrametric matrix as TXT
+		final JMenuItem me4 = Formats.getFormattedMenuItem(Language.getLabel(98));  // Save dendrogram as TXT
+		final JMenuItem me5 = Formats.getFormattedMenuItem(Language.getLabel(87));  // Save dendrogram as Newick tree
+		final JMenuItem me6 = Formats.getFormattedMenuItem(Language.getLabel(79));  // Save dendrogram as JSON tree
+		final JMenuItem me7 = Formats.getFormattedMenuItem(Language.getLabel(96));  // Save dendrogram as JPG
+		final JMenuItem me8 = Formats.getFormattedMenuItem(Language.getLabel(97));  // Save dendrogram as PNG
+		final JMenuItem me9 = Formats.getFormattedMenuItem(Language.getLabel(99));  // Save dendrogram as EPS
 
 		me0.addActionListener(al);
 		me1.addActionListener(al);
@@ -206,6 +209,7 @@ public class DendrogramPanel extends JPanel {
 		me6.addActionListener(al);
 		me7.addActionListener(al);
 		me8.addActionListener(al);
+		me9.addActionListener(al);
 
 		menu.add(me0);
 		menu.add(me1);
@@ -214,12 +218,13 @@ public class DendrogramPanel extends JPanel {
 		menu.add(me3);
 		menu.add(me4);
 		menu.add(me5);
-		menu.addSeparator();
 		menu.add(me6);
+		menu.addSeparator();
 		menu.add(me7);
 		menu.add(me8);
+		menu.add(me9);
 
-		this.enableEvents(AWTEvent.MOUSE_EVENT_MASK);
+		enableEvents(AWTEvent.MOUSE_EVENT_MASK);
 	}
 
 	@Override
@@ -308,8 +313,8 @@ public class DendrogramPanel extends JPanel {
 	}
 
 	private void drawDendrogram(final Graphics2D g2d, final Scaling scalingDendro) {
-		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
-		final Clipping clipping = new Clipping(this.cfg.getSimilarityType(), this.cfg.getAxisMinValue(),
+		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
+		final Clipping clipping = new Clipping(this.cfg.getProximityType(), this.cfg.getAxisMinValue(),
 				this.cfg.getAxisMaxValue());
 
 		// draw interior of bands
@@ -345,7 +350,7 @@ public class DendrogramPanel extends JPanel {
 	}
 
 	private void drawBullets(final Graphics2D g2d, final Scaling scalingBullets, final Scaling scalingDendro) {
-		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
 		if (settingsInfo.getNodeRadius() > 0) {
 			Iterator<Node> iter = this.nodesList.iterator();
 			while (iter.hasNext()) {
@@ -359,7 +364,7 @@ public class DendrogramPanel extends JPanel {
 	}
 
 	private void drawNodesNames(final Graphics2D g2D, final Scaling scalingDendro) {
-		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
 		if (settingsInfo.isNodeNameVisible()) {
 			NodeLabel nodeLabel = new NodeLabel(this.nodesList, settingsInfo, scalingDendro);
 			nodeLabel.draw(PlotType.PANEL, g2D);
@@ -367,7 +372,7 @@ public class DendrogramPanel extends JPanel {
 	}
 
 	private void drawAxis(final Graphics2D g2D, final Scaling scalingAxis) {
-		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
 		if (settingsInfo.isAxisVisible() && (this.cfg.getAxisTicks() > 0)) {
 			Axis axis = new Axis(settingsInfo, scalingAxis);
 			axis.draw(PlotType.PANEL, g2D);
@@ -375,7 +380,7 @@ public class DendrogramPanel extends JPanel {
 	}
 
 	private void drawAxisLabels(final Graphics2D g2D, final Scaling scalingAxisLabels) {
-		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
 		if (settingsInfo.isAxisLabelVisible() && (this.cfg.getAxisTicks() > 0)) {
 			AxisLabel axisLabel = new AxisLabel(settingsInfo, scalingAxisLabels);
 			axisLabel.draw(PlotType.PANEL, g2D);

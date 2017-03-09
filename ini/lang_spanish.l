@@ -51,7 +51,7 @@ Decimales etiquetas
 Valor incorrecto en campo 'Decimales etiquetas'
 Precisión
 Info
-
+Parámetro de algoritmo
 Negrita
 Cursiva
 Normal
@@ -61,12 +61,12 @@ Fuente
 Aceptar
 Cancelar
 Raíz
-
+Pesado
 No se ha podido procesar la figura
 No se ha encontrado el archivo de configuración, se cargaran los valores por defecto
 No se ha encontrado la propiedad
 No se ha podido crear el archivo de propiedades
-
+'Parámetro de algoritmo' debe estar entre -1 y +1
 Error desconocido
 No se ha podido recuperar el cluster
 No se ha podido guardar la distancia
@@ -74,11 +74,11 @@ No se ha podido recuperar la matriz
 No se ha podido inicializar la matriz
 No se han podido cargar las propiedades del dendrograma
 Guardar como
-La imagen no se ha guardado correctamente
+No se ha podido guardar la imagen
 Imagen nula
 No se ha podido construir el árbol jerárquico
 Guardar dendrograma en formato JSON
-Guardar como
+Algoritmo clustering incompatible con datos negativos
 No se ha podido crear el archivo
 Archivo existente. ¿Desea sobreescribirlo?
 No se ha podido escribir en el archivo
@@ -93,7 +93,7 @@ Oeste
 Horizontal
 Oblicua
 Vertical
-Mostrar detalles del dendrograma
+Mostrar estructura en árbol del dendrograma
 Guardar dendrograma en formato JPG
 Guardar dendrograma en formato PNG
 Guardar dendrograma en formato TXT
@@ -109,19 +109,19 @@ No se puede leer/escribir en el archivo
 No se puede escribir en el archivo
 No se puede leer el archivo
 Actualizar
-
+Guardar medidas del dendrograma
 Ningún archivo cargado
 Tamaño nodos
 Tipo de medida
 tics
-Guardar matriz ultramétrica en formato TXT
-Ver medidas de desviación ultramétrica
+Guardar matriz ultramétrica
+Mostrar medidas del dendrograma
 Versión
 Autores
 Supervisores
 GNU Lesser Public License
 Web del proyecto
-Medidas desviación ultramétrica
+Medidas del dendrograma
 Manual online
 Se ha encontrado un carácter no numérico en una fila o columna diferent de la primera
 Descartados los avisos subsiguientes
@@ -131,3 +131,4 @@ Nuevo
 disponible en
 La versión actual es
 Origen uniforme
+Equivalencias entre algoritmos de clustering

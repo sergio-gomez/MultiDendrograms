@@ -37,25 +37,24 @@ import javax.swing.SwingWorker;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-import multidendrograms.initial.Language;
-import multidendrograms.methods.BuildDendrogram;
-import multidendrograms.dendrogram.DendrogramPlot;
-import multidendrograms.dendrogram.UltrametricMatrix;
-import multidendrograms.forms.DendrogramFrame;
-import multidendrograms.forms.PrincipalDesk;
-import multidendrograms.forms.DendrogramParameters;
-import multidendrograms.forms.children.DendrogramPanel;
-import multidendrograms.forms.scrollabledesktop.DesktopConstants;
-import multidendrograms.types.DendrogramOrientation;
-import multidendrograms.types.MethodName;
-import multidendrograms.types.OriginType;
-import multidendrograms.types.SimilarityType;
+import multidendrograms.core.clusterings.HierarchicalClustering;
+import multidendrograms.core.definitions.SymmetricMatrix;
 import multidendrograms.data.DataFile;
 import multidendrograms.data.ExternalData;
 import multidendrograms.definitions.Config;
-import multidendrograms.definitions.DistancesMatrix;
 import multidendrograms.definitions.Formats;
 import multidendrograms.definitions.SettingsInfo;
+import multidendrograms.dendrogram.DendrogramPlot;
+import multidendrograms.dendrogram.UltrametricMatrix;
+import multidendrograms.direct.DirectClustering;
+import multidendrograms.forms.children.DendrogramPanel;
+import multidendrograms.forms.DendrogramFrame;
+import multidendrograms.forms.DendrogramParameters;
+import multidendrograms.forms.PrincipalDesk;
+import multidendrograms.forms.scrollabledesktop.DesktopConstants;
+import multidendrograms.initial.Language;
+import multidendrograms.types.DendrogramOrientation;
+import multidendrograms.types.MethodType;
 
 /**
  * <p>
@@ -95,6 +94,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 
 	// Indicate if the text fields have correct values
 	public static boolean precisionCorrect = false;
+	public static boolean methodParameterCorrect = false;
 	public static boolean axisMinCorrect = false;
 	public static boolean axisMaxCorrect = false;
 	public static boolean axisSeparationCorrect = false;
@@ -109,22 +109,15 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 	private ExternalData externalData;
 
 	// MultiDendrogram
-	private DistancesMatrix distMatrix = null;
+	private HierarchicalClustering clustering = null;
 
 	// SwingWorker MultiDendrogram computation
 	class MDComputation extends SwingWorker<Void, Void> {
 		private final String action;
-		private final SimilarityType simType;
-		private final MethodName method;
-		private final int precision;
 		private final int nbElements;
 
-		public MDComputation(final String action, final SimilarityType simType,
-				final MethodName method, final int precision, final int nbElements) {
+		public MDComputation(final String action, final int nbElements) {
 			this.action = action;
-			this.simType = simType;
-			this.method = method;
-			this.precision = precision;
 			this.nbElements = nbElements;
 		}
 
@@ -133,11 +126,10 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			// Initialize progress property
 			int progress = 0;
 			setProgress(progress);
-			while (distMatrix.getCardinality() > 1) {
+			while (clustering.numberOfRoots() > 1) {
 				try {
-					BuildDendrogram bd = new BuildDendrogram(distMatrix, simType, method, precision);
-					distMatrix = bd.recalculate();
-					progress = 100 * (nbElements - distMatrix.getCardinality()) / (nbElements - 1);
+					clustering.iteration();
+					progress = 100 * (nbElements - clustering.numberOfRoots()) / (nbElements - 1);
 					setProgress(progress);
 				} catch (final Exception e) {
 					showError(e.getMessage());
@@ -180,7 +172,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		btnUpdate.setEnabled(false);
 
 		// file name
-		txtFileName = Formats.getformattedTextField();
+		txtFileName = Formats.getFormattedTextField();
 		txtFileName.addActionListener(this);
 		txtFileName.setEditable(false);
 		// txtFileName.setColumns(24);
@@ -198,25 +190,18 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-						.addGap(6, 6, 6)
-						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addGroup(
-								layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-										.addGroup(
-												layout.createSequentialGroup()
-														.addComponent(btnLoad, 110, 110, 110)
-														.addGap(3, 3, 3)
-														.addComponent(btnUpdate, 110, 110, 110))
-										.addGroup(GroupLayout.Alignment.CENTER,
-												layout.createSequentialGroup()
-														.addComponent(txtFileName, 223, 223, 223))
-										.addGroup(GroupLayout.Alignment.CENTER,
-												layout.createSequentialGroup()
-														.addComponent(progressBar)))
-						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addGap(6, 6, 6));
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGap(6, 6, 6)
+				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addGroup(layout.createSequentialGroup().addComponent(btnLoad, 110, 110, 110).addGap(3, 3, 3)
+								.addComponent(btnUpdate, 110, 110, 110))
+						.addGroup(GroupLayout.Alignment.CENTER, 
+								layout.createSequentialGroup().addComponent(txtFileName, 223, 223, 223))
+						.addGroup(GroupLayout.Alignment.CENTER, 
+								layout.createSequentialGroup().addComponent(progressBar)))
+				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+				.addGap(6, 6, 6));
 
 		layout.linkSize(SwingConstants.HORIZONTAL, txtFileName, progressBar);
 
@@ -236,8 +221,8 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 	}
 
 	public static void enableUpdate() {
-		if (precisionCorrect && axisMinCorrect && axisMaxCorrect
-				&& axisSeparationCorrect && axisTicksCorrect
+		if (precisionCorrect && methodParameterCorrect && axisMinCorrect 
+				&& axisMaxCorrect && axisSeparationCorrect && axisTicksCorrect
 				&& axisDecimalsCorrect) {
 			btnUpdate.setEnabled(true);
 		} else {
@@ -265,10 +250,6 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		txtFileName.setText(name);
 		txtFileName.setCaretPosition(0);
 		txtFileName.setToolTipText(name);
-	}
-
-	public DistancesMatrix getDistancesMatrix() {
-		return this.externalData.getDistancesMatrix();
 	}
 
 	@Override
@@ -301,9 +282,11 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			// UPDATE
 			buttonClicked = true;
 			dendroParams = currentDendrogramFrame.getDendrogramParameters();
-			if ((SettingsPanel.getSimilarityType() == dendroParams.getSimilarityType())
+			if ((SettingsPanel.getProximityType() == dendroParams.getProximityType())
+					&& (SettingsPanel.getPrecision() == dendroParams.getPrecision())
 					&& (SettingsPanel.getMethod() == dendroParams.getMethod())
-					&& (SettingsPanel.getPrecision() == dendroParams.getPrecision())) {
+					&& (SettingsPanel.getMethodParameter() == dendroParams.getMethodParameter())
+					&& (SettingsPanel.isWeighted() == dendroParams.isWeighted())) {
 				action = "Redraw";
 			} else {
 				action = "Reload";
@@ -313,26 +296,35 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		if (withData && (action.equals("Load") || action.equals("Reload"))) {
 			try {
 				this.externalData = new ExternalData(dataFile);
-				if (action.equals("Load")) {
-					SettingsPanel.setPrecision(this.externalData.getPrecision());
-				}
-				this.distMatrix = null;
-				try {
-					this.distMatrix = this.externalData.getDistancesMatrix();
-					this.progressBar.setBorderPainted(true);
-					this.progressBar.setString(null);
-					this.principalDesk.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					// Instances of javax.swing.SwingWorker are not reusable,
-					// so we create new instances as needed.
-					mdComputation = new MDComputation(action,
-							SettingsPanel.getSimilarityType(), SettingsPanel.getMethod(),
-							SettingsPanel.getPrecision(),
-							this.distMatrix.getCardinality());
-					mdComputation.addPropertyChangeListener(this);
-					mdComputation.execute();
-				} catch (final Exception e2) {
+				SymmetricMatrix proximityMatrix = this.externalData.getProximityMatrix();
+				MethodType methodType = SettingsPanel.getMethod();
+				if ((proximityMatrix.minimumValue() < 0.0) && 
+						(methodType.equals(MethodType.VERSATILE_LINKAGE) || 
+						 methodType.equals(MethodType.GEOMETRIC_LINKAGE))) {
 					buttonClicked = false;
-					showError(e2.getMessage());
+					showError(Language.getLabel(80));
+				} else {
+					if (action.equals("Load")) {
+						SettingsPanel.setPrecision(this.externalData.getPrecision());
+					}
+					this.clustering = null;
+					try {
+						this.clustering = DirectClustering.newClustering(methodType, proximityMatrix, 
+								this.externalData.getNames(), SettingsPanel.getProximityType(), 
+								SettingsPanel.getPrecision(), SettingsPanel.isWeighted(), 
+								SettingsPanel.getMethodParameter());
+						this.progressBar.setBorderPainted(true);
+						this.progressBar.setString(null);
+						this.principalDesk.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						// Instances of javax.swing.SwingWorker are not reusable,
+						// so we create new instances as needed.
+						mdComputation = new MDComputation(action, this.externalData.getNumberOfElements());
+						mdComputation.addPropertyChangeListener(this);
+						mdComputation.execute();
+					} catch (final Exception e2) {
+						buttonClicked = false;
+						showError(e2.getMessage());
+					}
 				}
 			} catch (Exception e1) {
 				buttonClicked = false;
@@ -349,15 +341,15 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		if (action.equals("Reload") || action.equals("Redraw")) {
 			currentDendrogramFrame.doDefaultCloseAction();
 		}
-		show(action, SettingsPanel.getMethod(), SettingsPanel.getPrecision());
+		show(action, SettingsPanel.getMethod());
 		currentDendrogramFrame.doDefaultCloseAction();
-		show(action, SettingsPanel.getMethod(), SettingsPanel.getPrecision());
+		show(action, SettingsPanel.getMethod());
 		setFileName(dataFile.getName());
 		btnUpdate.setEnabled(true);
 		buttonClicked = false;
 	}
 
-	private void show(String action, final MethodName method, final int precision) {
+	private void show(String action, MethodType method) {
 		try {
 			boolean isUpdate = !action.equals("Load");
 			DendrogramFrame dendroFrame = this.principalDesk.createDendrogramFrame(isUpdate, method);
@@ -365,8 +357,8 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			Config cfg = new Config(settingsInfo);
 			cfg.setDendrogramFrame(dendroFrame);
 			cfg.setDataFile(dataFile);
-			cfg.setDistancesMatrix(this.distMatrix);
-			cfg.setNames(this.externalData.getNames());
+			cfg.setHierarchicalClustering(this.clustering);
+			cfg.setExternalData(this.externalData);
 			if (!cfg.isDistance()) {
 				if (cfg.getDendrogramOrientation().equals(DendrogramOrientation.NORTH)) {
 					cfg.setDendrogramOrientation(DendrogramOrientation.SOUTH);
@@ -378,7 +370,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 					cfg.setDendrogramOrientation(DendrogramOrientation.EAST);
 				}
 			}
-			DendrogramParameters dendroParams = new DendrogramParameters(this.externalData, this.distMatrix);
+			DendrogramParameters dendroParams = new DendrogramParameters(this.externalData, this.clustering);
 			dendroFrame.setDendrogramParameters(dendroParams);
 			// Title for the child window
 			String title = dataFile.getName() + " - " + dendroFrame.getTitle();
@@ -395,11 +387,9 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			}
 			this.principalDesk.setCurrentFrame(dendroFrame);
 			// Convert tree into figures
-			DendrogramPlot dendroPlot = new DendrogramPlot(this.distMatrix.getRoot(), cfg);
-			OriginType originType = settingsInfo.getOriginType();
-			SimilarityType simType = cfg.getSimilarityType();
-			UltrametricMatrix ultraMatrix = new UltrametricMatrix(this.externalData.getData(),
-					this.distMatrix.getRoot(), precision, simType, originType);
+			DendrogramPlot dendroPlot = new DendrogramPlot(this.clustering.getRoot(), cfg);
+			UltrametricMatrix ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
+					this.externalData.getNames(), settingsInfo.getOriginType());
 			dendroParams.setUltrametricMatrix(ultraMatrix);
 			// Pass figures to the window
 			dendroPanel.setNodesList(dendroPlot.getNodesList());
@@ -433,8 +423,8 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		return dataFile;
 	}
 
-	private void showError(final String msg) {
-		JOptionPane.showMessageDialog(null, msg, Language.getLabel(7),
+	private void showError(String message) {
+		JOptionPane.showMessageDialog(null, message, Language.getLabel(7), 
 				JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -448,7 +438,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			this.externalData = dendroParams.getExternalData();
 			dataFile = this.externalData.getDataFile();
 			setFileName(dataFile.getName());
-			this.distMatrix = dendroParams.getDistancesMatrix();
+			this.clustering = dendroParams.getHierarchicalClustering();
 			SettingsPanel.setConfigPanel(dendroParams);
 		}
 	}

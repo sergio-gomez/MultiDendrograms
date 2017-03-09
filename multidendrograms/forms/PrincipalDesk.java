@@ -35,27 +35,26 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import multidendrograms.initial.LogManager;
-import multidendrograms.initial.Language;
-import multidendrograms.initial.InitialProperties;
-import multidendrograms.dendrogram.ToTxt;
-import multidendrograms.dendrogram.ToNewick;
-import multidendrograms.dendrogram.ToJson;
-import multidendrograms.dendrogram.UltrametricMatrix;
-import multidendrograms.dendrogram.eps.EpsExporter;
-import multidendrograms.forms.panels.SettingsPanel;
-import multidendrograms.forms.panels.LoadUpdatePanel;
-import multidendrograms.forms.panels.InfoExitPanel;
-import multidendrograms.forms.scrollabledesktop.JScrollableDesktopPane;
-import multidendrograms.forms.children.DeviationMeasuresBox;
-import multidendrograms.forms.children.DendrogramPanel;
-import multidendrograms.types.MethodName;
-import multidendrograms.types.OriginType;
-import multidendrograms.types.SimilarityType;
-import multidendrograms.definitions.Cluster;
 import multidendrograms.definitions.Config;
 import multidendrograms.definitions.SettingsInfo;
-import multidendrograms.methods.Method;
+import multidendrograms.dendrogram.DendrogramMeasures;
+import multidendrograms.dendrogram.ToJson;
+import multidendrograms.dendrogram.ToNewick;
+import multidendrograms.dendrogram.ToTxt;
+import multidendrograms.dendrogram.UltrametricMatrix;
+import multidendrograms.dendrogram.eps.EpsExporter;
+import multidendrograms.direct.DirectClustering;
+import multidendrograms.forms.children.DendrogramMeasuresBox;
+import multidendrograms.forms.children.DendrogramPanel;
+import multidendrograms.forms.panels.InfoExitPanel;
+import multidendrograms.forms.panels.LoadUpdatePanel;
+import multidendrograms.forms.panels.SettingsPanel;
+import multidendrograms.forms.scrollabledesktop.JScrollableDesktopPane;
+import multidendrograms.initial.InitialProperties;
+import multidendrograms.initial.Language;
+import multidendrograms.initial.LogManager;
+import multidendrograms.types.MethodType;
+import multidendrograms.types.OriginType;
 
 /**
  * <p>
@@ -75,7 +74,7 @@ public class PrincipalDesk extends JFrame {
 	private static final int xOffset = 8, yOffset = 8;
 	private static final int xDelta = 14, yDelta = 14;
 	private static final int xRep = 100, yRep = 20;
-	private static final int minFrmWidth = 700, minFrmHeight = 680;
+	private static final int minFrmWidth = 700, minFrmHeight = 750;
 
 	private final JPanel panControl, panInfoExit;
 
@@ -97,13 +96,13 @@ public class PrincipalDesk extends JFrame {
 		panDesk = new JScrollableDesktopPane();
 		panDesk.setBorder(BorderFactory.createTitledBorder(""));
 
-		this.getContentPane().add(panDesk);
+		getContentPane().add(panDesk);
 
 		panControl = new JPanel();
 		panControl.setLayout(new BorderLayout());
 
 		panLoadUpdate = new LoadUpdatePanel(this);
-		panSettings = new SettingsPanel(this);
+		panSettings = new SettingsPanel();
 		panInfoExit = new InfoExitPanel(this);
 
 		panControl.add(panLoadUpdate, BorderLayout.NORTH);
@@ -112,23 +111,23 @@ public class PrincipalDesk extends JFrame {
 		panControl.add(scrollPane, BorderLayout.CENTER);
 		panControl.add(panInfoExit, BorderLayout.SOUTH);
 
-		this.add(panControl, BorderLayout.WEST);
+		add(panControl, BorderLayout.WEST);
 
 		JFrame.setDefaultLookAndFeelDecorated(true);
-		this.setMinimumSize(new Dimension(minFrmWidth, minFrmHeight));
-		this.setSize(frmWidth, frmHeight);
+		setMinimumSize(new Dimension(minFrmWidth, minFrmHeight));
+		setSize(frmWidth, frmHeight);
 
-		this.setVisible(true);
-		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		setVisible(true);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-		this.addWindowListener(new WindowAdapter() {
+		addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
 					toGoOut();
 				}
 			});
 	}
 
-	public DendrogramFrame createDendrogramFrame(boolean isUpdate, MethodName method) {
+	public DendrogramFrame createDendrogramFrame(boolean isUpdate, MethodType method) {
 		int x, y, width, height, ofc;
 		DendrogramFrame dendroFrame;
 
@@ -167,13 +166,12 @@ public class PrincipalDesk extends JFrame {
 		}
 	}
 
-	public void savePicture(final BufferedImage buff, final String imgFormat, Config cfg) throws Exception {
-		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
-		final FileDialog fd = new FileDialog(this, Language.getLabel(75) + " " + imgFormat.toUpperCase(), FileDialog.SAVE);
-		fd.setFile(nameNoExt + infix + "." + imgFormat);
+	public void savePicture(BufferedImage buff, String imgFormat, Config cfg) throws Exception {
+		FileDialog fd = new FileDialog(this, Language.getLabel(75) + " " + imgFormat.toUpperCase(), FileDialog.SAVE);
+		String filePrefix = DirectClustering.getFilePrefix(LoadUpdatePanel.getFileNameNoExt(), cfg.getProximityType(),
+				cfg.getPrecision(), cfg.getMethod(), cfg.getMethodParameter(), cfg.isWeighted());
+		fd.setFile(filePrefix + "." + imgFormat);
 		fd.setVisible(true);
-
 		if (fd.getFile() != null) {
 			String path = fd.getDirectory() + fd.getFile();
 			final File fil = new File(path);
@@ -193,10 +191,10 @@ public class PrincipalDesk extends JFrame {
 	}
 
 	public void savePostScript(DendrogramPanel dendroPanel, Config cfg) throws Exception {
-		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
-		final FileDialog fd = new FileDialog(this, Language.getLabel(75) + " EPS", FileDialog.SAVE);
-		fd.setFile(nameNoExt + infix + ".eps");
+		FileDialog fd = new FileDialog(this, Language.getLabel(75) + " EPS", FileDialog.SAVE);
+		String filePrefix = DirectClustering.getFilePrefix(LoadUpdatePanel.getFileNameNoExt(), cfg.getProximityType(),
+				cfg.getPrecision(), cfg.getMethod(), cfg.getMethodParameter(), cfg.isWeighted());
+		fd.setFile(filePrefix + ".eps");
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
 			String path = fd.getDirectory() + fd.getFile();
@@ -211,72 +209,87 @@ public class PrincipalDesk extends JFrame {
 		}
 	}
 
-	public void saveTXT(Cluster root, Config cfg) throws Exception {
-		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " TXT", FileDialog.SAVE);
-		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
-		fd.setFile(nameNoExt + infix + "-tree.txt");
+	public void saveTXT(Config cfg) throws Exception {
+		FileDialog fd = new FileDialog(this, Language.getLabel(75) + " TXT", FileDialog.SAVE);
+		String filePrefix = DirectClustering.getFilePrefix(LoadUpdatePanel.getFileNameNoExt(), cfg.getProximityType(),
+				cfg.getPrecision(), cfg.getMethod(), cfg.getMethodParameter(), cfg.isWeighted());
+		fd.setFile(filePrefix + DirectClustering.TXT_TREE_SUFIX);
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
 			String path = fd.getDirectory() + fd.getFile();
-			ToTxt toTXT = new ToTxt(root, cfg.getPrecision());
+			ToTxt toTXT = new ToTxt(cfg.getRoot());
 			toTXT.saveAsTxt(path);
 		}
 	}
 
-	public void saveNewick(Cluster root, Config cfg) throws Exception {
-		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " Newick", FileDialog.SAVE);
-		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
-		fd.setFile(nameNoExt + infix + "-newick.txt");
+	public void saveNewick(Config cfg) throws Exception {
+		FileDialog fd = new FileDialog(this, Language.getLabel(75) + " Newick", FileDialog.SAVE);
+		String filePrefix = DirectClustering.getFilePrefix(LoadUpdatePanel.getFileNameNoExt(), cfg.getProximityType(),
+				cfg.getPrecision(), cfg.getMethod(), cfg.getMethodParameter(), cfg.isWeighted());
+		fd.setFile(filePrefix + DirectClustering.NEWICK_TREE_SUFIX);
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
 			String path = fd.getDirectory() + fd.getFile();
-			int precision = cfg.getPrecision();
-			SimilarityType simType = cfg.getSimilarityType();
-			SettingsInfo settings = cfg.getConfigMenu();
+			SettingsInfo settings = cfg.getSettingsInfo();
 			OriginType originType = settings.getOriginType();
-			ToNewick toNewick = new ToNewick(root, precision, simType, originType);
+			boolean isUniformOrigin = originType.equals(OriginType.UNIFORM_ORIGIN) ? true : false;
+			ToNewick toNewick = new ToNewick(cfg.getRoot(), isUniformOrigin);
 			toNewick.saveAsNewick(path);
 		}
 	}
 
-	public void saveJson(Cluster root, Config cfg) throws Exception {
-		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " JSON", FileDialog.SAVE);
-		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
-		fd.setFile(nameNoExt + infix + ".json");
+	public void saveJson(Config cfg) throws Exception {
+		FileDialog fd = new FileDialog(this, Language.getLabel(75) + " JSON", FileDialog.SAVE);
+		String filePrefix = DirectClustering.getFilePrefix(LoadUpdatePanel.getFileNameNoExt(), cfg.getProximityType(),
+				cfg.getPrecision(), cfg.getMethod(), cfg.getMethodParameter(), cfg.isWeighted());
+		fd.setFile(filePrefix + DirectClustering.JSON_TREE_SUFIX);
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
 			String path = fd.getDirectory() + fd.getFile();
-			int precision = cfg.getPrecision();
-			SimilarityType simType = cfg.getSimilarityType();
-			SettingsInfo settings = cfg.getConfigMenu();
+			SettingsInfo settings = cfg.getSettingsInfo();
 			OriginType originType = settings.getOriginType();
-			ToJson toJson = new ToJson(root, precision, simType, originType);
+			boolean isUniformOrigin = originType.equals(OriginType.UNIFORM_ORIGIN) ? true : false;
+			ToJson toJson = new ToJson(cfg.getRoot(), isUniformOrigin);
 			toJson.saveAsJson(path);
 		}
 	}
 
 	public void saveUltrametricTxt(Config cfg) throws Exception {
-		String nameNoExt = LoadUpdatePanel.getFileNameNoExt();
-		String infix = "-" + Method.toShortName(cfg.getMethod()) + cfg.getPrecision();
-		FileDialog fd = new FileDialog(this, Language.getLabel(80) + " TXT", FileDialog.SAVE);
-		fd.setFile(nameNoExt + infix + "-ultrametric.txt");
+		FileDialog fd = new FileDialog(this, Language.getLabel(75) + " TXT", FileDialog.SAVE);
+		String filePrefix = DirectClustering.getFilePrefix(LoadUpdatePanel.getFileNameNoExt(), cfg.getProximityType(),
+				cfg.getPrecision(), cfg.getMethod(), cfg.getMethodParameter(), cfg.isWeighted());
+		fd.setFile(filePrefix + DirectClustering.ULTRAMETRIC_SUFIX);
 		fd.setVisible(true);
 		if (fd.getFile() != null) {
 			String path = fd.getDirectory() + fd.getFile();
 			DendrogramParameters dendroParams = this.currentDendrogramFrame.getDendrogramParameters();
-			UltrametricMatrix ultraMatrix = dendroParams.getUltrametricMatrix();
-			ultraMatrix.saveAsTxt(path, cfg.getPrecision());
+			UltrametricMatrix ultrametricMatrix = dendroParams.getUltrametricMatrix();
+			ultrametricMatrix.saveAsTxt(path);
 		}
 	}
 
-	public void showUltrametricErrors(Config cfg) {
+	public void saveDendrogramMeasures(Config cfg) throws Exception {
+		FileDialog fd = new FileDialog(this, Language.getLabel(75) + " TXT", FileDialog.SAVE);
+		String filePrefix = DirectClustering.getFilePrefix(LoadUpdatePanel.getFileNameNoExt(), cfg.getProximityType(),
+				cfg.getPrecision(), cfg.getMethod(), cfg.getMethodParameter(), cfg.isWeighted());
+		fd.setFile(filePrefix + DirectClustering.MEASURES_SUFIX);
+		fd.setVisible(true);
+		if (fd.getFile() != null) {
+			String path = fd.getDirectory() + fd.getFile();
+			DendrogramParameters dendroParams = this.currentDendrogramFrame.getDendrogramParameters();
+			UltrametricMatrix ultrametricMatrix = dendroParams.getUltrametricMatrix();
+			DendrogramMeasures dendroMeasures =
+					new DendrogramMeasures(cfg.getExternalData().getProximityMatrix(), cfg.getRoot(),
+							ultrametricMatrix.getMatrix());
+			dendroMeasures.save(path);
+		}
+	}
+
+	public void showDendrogramMeasures(Config cfg) {
 		DendrogramParameters dendroParams = this.currentDendrogramFrame.getDendrogramParameters();
-		UltrametricMatrix ultraMatrix = dendroParams.getUltrametricMatrix();
-		DeviationMeasuresBox devMeasuresBox = new DeviationMeasuresBox(this, ultraMatrix, cfg);
-		devMeasuresBox.setVisible(true);
+		UltrametricMatrix ultrametricMatrix = dendroParams.getUltrametricMatrix();
+		DendrogramMeasuresBox dendroMeasuresBox = new DendrogramMeasuresBox(ultrametricMatrix, cfg);
+		dendroMeasuresBox.setVisible(true);
 	}
 
 	public SettingsPanel getPanMenu() {

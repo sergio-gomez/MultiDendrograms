@@ -19,8 +19,8 @@
 package multidendrograms.forms;
 
 import multidendrograms.forms.scrollabledesktop.BaseInternalFrame;
-import multidendrograms.methods.Method;
-import multidendrograms.types.MethodName;
+import multidendrograms.initial.MethodName;
+import multidendrograms.types.MethodType;
 
 /**
  * <p>
@@ -40,14 +40,14 @@ public class DendrogramFrame extends BaseInternalFrame {
 
 	private DendrogramParameters dendroParams;
 
-	public DendrogramFrame(MethodName method, boolean isUpdate) {
+	public DendrogramFrame(MethodType method, boolean isUpdate) {
 
 		super("", true, // resizable
 				true, // closable
 				true, // maximizable
 				true);// iconifiable
 
-		setTitle(Method.toName(method));
+		setTitle(MethodName.toName(method));
 
 		if (!isUpdate)
 			openFrameCount++;

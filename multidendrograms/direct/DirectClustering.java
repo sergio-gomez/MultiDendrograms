@@ -18,22 +18,29 @@
 
 package multidendrograms.direct;
 
-import java.text.NumberFormat;
-import java.util.Locale;
+import java.io.IOException;
 
+import multidendrograms.core.clusterings.BetaFlexible;
+import multidendrograms.core.clusterings.Centroid;
+import multidendrograms.core.clusterings.CompleteLinkage;
+import multidendrograms.core.clusterings.HierarchicalClustering;
+import multidendrograms.core.clusterings.SingleLinkage;
+import multidendrograms.core.clusterings.VersatileLinkage;
+import multidendrograms.core.clusterings.Ward;
+import multidendrograms.core.definitions.Dendrogram;
+import multidendrograms.core.definitions.SymmetricMatrix;
 import multidendrograms.data.DataFile;
 import multidendrograms.data.ExternalData;
-import multidendrograms.definitions.Cluster;
-import multidendrograms.definitions.DistancesMatrix;
-import multidendrograms.dendrogram.ToTxt;
-import multidendrograms.dendrogram.ToNewick;
+import multidendrograms.dendrogram.DendrogramMeasures;
 import multidendrograms.dendrogram.ToJson;
+import multidendrograms.dendrogram.ToNewick;
+import multidendrograms.dendrogram.ToTxt;
 import multidendrograms.dendrogram.UltrametricMatrix;
-import multidendrograms.methods.Method;
-import multidendrograms.methods.BuildDendrogram;
-import multidendrograms.types.MethodName;
+import multidendrograms.initial.Language;
+import multidendrograms.initial.MethodName;
+import multidendrograms.types.MethodType;
 import multidendrograms.types.OriginType;
-import multidendrograms.types.SimilarityType;
+import multidendrograms.types.ProximityType;
 
 /**
  * <p>
@@ -49,125 +56,225 @@ import multidendrograms.types.SimilarityType;
 public class DirectClustering {
 
 	public static final int AUTO_PRECISION = Integer.MIN_VALUE;
-	private static final String TXT_TREE_SUFIX = "-tree.txt";
-	private static final String NEWICK_TREE_SUFIX = "-newick.txt";
-	private static final String JSON_TREE_SUFIX = ".json";
-	private static final String ULTRAMETRIC_SUFIX = "-ultrametric.txt";
+	public static final String MEASURES_SUFIX = "-measures.txt";
+	public static final String ULTRAMETRIC_SUFIX = "-ultrametric.txt";
+	public static final String TXT_TREE_SUFIX = "-tree.txt";
+	public static final String NEWICK_TREE_SUFIX = "-newick.txt";
+	public static final String JSON_TREE_SUFIX = ".json";
 
-	private String dataFileName;
-	private SimilarityType simType;
-	private MethodName method;
-	private int precision;
+	private DataFile dataFile;
+	private ExternalData externalData;
+	private String filePrefix;
 	private OriginType originType;
-
-	private String infix;
-	private DataFile dataFile = null;
-	private ExternalData externalData = null;
-	private DistancesMatrix distMatrix = null;
+	private HierarchicalClustering clustering;
 	private UltrametricMatrix ultraMatrix = null;
+	private DendrogramMeasures dendroMeasures = null;
 
-	public DirectClustering(final String dataFileName, final SimilarityType simType,
-			final MethodName method, final int precision, final OriginType originType) throws Exception {
-		this.simType = simType;
-		this.dataFileName = dataFileName;
-		this.dataFile = new DataFile(dataFileName);
+	public DirectClustering(String filename, ProximityType proximityType, 
+			int initialPrecision, MethodType methodType, double methodParameter, 
+			boolean isWeighted, OriginType originType) 
+	throws Exception {
+		this.dataFile = new DataFile(filename);
 		try {
 			this.externalData = new ExternalData(this.dataFile);
 		} catch (Exception e) {
 			throw e;
 		}
-		this.method = method;
-		this.infix = "-" + Method.toShortName(method);
+		SymmetricMatrix proximityMatrix = this.externalData.getProximityMatrix();
+		int precision = initialPrecision;
 		if (precision == DirectClustering.AUTO_PRECISION) {
-			this.precision = this.externalData.getPrecision();
-		} else {
-			this.precision = precision;
-			this.infix = this.infix + precision;
+			precision = this.externalData.getPrecision();
 		}
+		this.filePrefix = getFilePrefix(this.dataFile.getPathNameNoExt(), proximityType, precision, 
+				methodType, methodParameter, isWeighted);
 		this.originType = originType;
-
-		System.out.println("Data file       : " + this.dataFileName);
-		System.out.println("Similarity type : " + this.simType.toString().toLowerCase());
-		System.out.println("Method name     : " + this.method.toString().toLowerCase());
-		System.out.println("Precision       : " + this.precision);
-		System.out.println("Origin          : " + this.originType.toString().toLowerCase());
+		
+		if ((proximityMatrix.minimumValue() < 0.0) && 
+				(methodType.equals(MethodType.VERSATILE_LINKAGE) || 
+				 methodType.equals(MethodType.GEOMETRIC_LINKAGE))) {
+			throw new Exception(Language.getLabel(80));
+		}
+		
+		System.out.println("Data file        : " + filename);
+		System.out.println("Proximity type   : " + proximityType.toString().toLowerCase());
+		System.out.println("Precision        : " + precision);
+		System.out.println("Method name      : " + methodType.toString().toLowerCase());
+		System.out.println("Method parameter : " + methodParameter);
+		System.out.println("Weighted         : " + isWeighted);
+		System.out.println("Origin           : " + this.originType.toString().toLowerCase());
 		System.out.println("---");
-
-		this.distMatrix = this.externalData.getDistancesMatrix();
-		while (this.distMatrix.getCardinality() > 1) {
-			try {
-				BuildDendrogram bd = new BuildDendrogram(this.distMatrix, this.simType, this.method, this.precision);
-				this.distMatrix = bd.recalculate();
-			} catch (final Exception e) {
-				throw e;
-			}
-		}
+		
+		this.clustering = newClustering(methodType, proximityMatrix, this.externalData.getNames(), 
+				proximityType, precision, isWeighted, methodParameter);
+		this.clustering.build();
 	}
 
-	public void saveAsTxt() {
-		String outFileName = this.dataFile.getPathNameNoExt() + this.infix + DirectClustering.TXT_TREE_SUFIX;
-		ToTxt saveTxt = new ToTxt(this.distMatrix.getRoot(), this.precision);
-		try {
-			saveTxt.saveAsTxt(outFileName);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
+	public static String getFilePrefix(String pathNameNoExt, 
+			ProximityType proximityType, int precision, MethodType methodType, 
+			double methodParameter, boolean isWeighted) {
+		String prefix = pathNameNoExt;
+		if (proximityType.equals(ProximityType.DISTANCE)) {
+			prefix += "-d" + precision + "-";
+		} else {
+			prefix += "-s" + precision + "-";
 		}
+		if (isWeighted && (methodType.equals(MethodType.VERSATILE_LINKAGE) || 
+						   methodType.equals(MethodType.ARITHMETIC_LINKAGE) || 
+						   methodType.equals(MethodType.GEOMETRIC_LINKAGE) || 
+						   methodType.equals(MethodType.HARMONIC_LINKAGE) || 
+						   methodType.equals(MethodType.CENTROID) || 
+						   methodType.equals(MethodType.BETA_FLEXIBLE))) {
+			prefix += "w";
+		}
+		prefix += MethodName.toShortName(methodType);
+		if (methodType.equals(MethodType.VERSATILE_LINKAGE) || 
+			methodType.equals(MethodType.BETA_FLEXIBLE)) {
+			prefix += methodParameter;
+		}
+		return prefix;
 	}
 
-	public void saveAsNewick() {
-		String outFileName = this.dataFile.getPathNameNoExt() + this.infix + DirectClustering.NEWICK_TREE_SUFIX;
-		Cluster root = this.distMatrix.getRoot();
-		ToNewick saveNewick = new ToNewick(root, this.precision, this.simType, this.originType);
-		try {
-			saveNewick.saveAsNewick(outFileName);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
+	public void printMeasures() {
+		if (this.ultraMatrix == null) {
+			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
+					this.externalData.getNames(), this.originType);
 		}
+		if (this.dendroMeasures == null) {
+			this.dendroMeasures = new DendrogramMeasures(this.externalData.getProximityMatrix(), 
+					this.clustering.getRoot(), this.ultraMatrix.getMatrix());
+		}
+		System.out.println(DendrogramMeasures.TREE_BALANCE_LABEL + "            : " 
+				+ this.dendroMeasures.getTreeBalance());
+		System.out.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL + " : " 
+				+ this.dendroMeasures.getCopheneticCorrelation());
+		System.out.println(DendrogramMeasures.SQUARED_ERROR_LABEL + "      : " 
+				+ this.dendroMeasures.getSquaredError());
+		System.out.println(DendrogramMeasures.ABSOLUTE_ERROR_LABEL + "     : " 
+				+ this.dendroMeasures.getAbsoluteError());
+		System.out.println(DendrogramMeasures.SPACE_DISTORTION_LABEL + "                   : " 
+				+ this.dendroMeasures.getSpaceDistortion());
+		System.out.println("---");
 	}
 
-	public void saveAsJson() {
-		String outFileName = this.dataFile.getPathNameNoExt() + this.infix + DirectClustering.JSON_TREE_SUFIX;
-		Cluster root = this.distMatrix.getRoot();
-		ToJson saveJson = new ToJson(root, this.precision, this.simType, this.originType);
+	public void saveMeasures() {
+		if (this.ultraMatrix == null) {
+			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
+					this.externalData.getNames(), this.originType);
+		}
+		if (this.dendroMeasures == null) {
+			this.dendroMeasures = new DendrogramMeasures(this.externalData.getProximityMatrix(), 
+					this.clustering.getRoot(), this.ultraMatrix.getMatrix());
+		}
+		String filename = this.filePrefix + DirectClustering.MEASURES_SUFIX;
 		try {
-			saveJson.saveAsJson(outFileName);
-		} catch (Exception e) {
+			this.dendroMeasures.save(filename);
+		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
 	public void saveUltrametric() {
-		String outFileName = this.dataFile.getPathNameNoExt() + this.infix + DirectClustering.ULTRAMETRIC_SUFIX;
 		if (this.ultraMatrix == null) {
-			this.ultraMatrix = new UltrametricMatrix(this.externalData.getData(), this.distMatrix.getRoot(),
-					this.precision, this.simType, this.originType);
+			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
+					this.externalData.getNames(), this.originType);
 		}
+		String filename = this.filePrefix + DirectClustering.ULTRAMETRIC_SUFIX;
 		try {
-			this.ultraMatrix.saveAsTxt(outFileName, this.precision);
-		} catch (Exception e) {
+			this.ultraMatrix.saveAsTxt(filename);
+		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
-	public void printDeviationMeasures() {
-		if (this.ultraMatrix == null) {
-			this.ultraMatrix = new UltrametricMatrix(this.externalData.getData(), this.distMatrix.getRoot(),
-					this.precision, this.simType, this.originType);
+	public void saveAsTxt() {
+		String filename = this.filePrefix + DirectClustering.TXT_TREE_SUFIX;
+		ToTxt saveTxt = new ToTxt(this.clustering.getRoot());
+		try {
+			saveTxt.saveAsTxt(filename);
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
 		}
+	}
 
-		NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
-		nf.setMinimumFractionDigits(6);
-		nf.setMaximumFractionDigits(6);
-		nf.setGroupingUsed(false);
+	public void saveAsNewick() {
+		String filename = this.filePrefix + DirectClustering.NEWICK_TREE_SUFIX;
+		Dendrogram root = this.clustering.getRoot();
+		boolean isUniformOrigin = this.originType.equals(OriginType.UNIFORM_ORIGIN) ? true : false;
+		ToNewick saveNewick = new ToNewick(root, isUniformOrigin);
+		try {
+			saveNewick.saveAsNewick(filename);
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
 
-		String errCC = nf.format(this.ultraMatrix.getCopheneticCorrelation());
-		String errSE = nf.format(this.ultraMatrix.getSquaredError());
-		String errAE = nf.format(this.ultraMatrix.getAbsoluteError());
+	public void saveAsJson() {
+		String filename = this.filePrefix + DirectClustering.JSON_TREE_SUFIX;
+		Dendrogram root = this.clustering.getRoot();
+		boolean isUniformOrigin = this.originType.equals(OriginType.UNIFORM_ORIGIN) ? true : false;
+		ToJson saveJson = new ToJson(root, isUniformOrigin);
+		try {
+			saveJson.saveAsJson(filename);
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
 
-		System.out.println("Cophenetic Correlation Coefficient : " + errCC);
-		System.out.println("Normalized Mean Squared Error      : " + errSE);
-		System.out.println("Normalized Mean Absolute Error     : " + errAE);
-		System.out.println("---");
+	public static HierarchicalClustering newClustering(MethodType methodType, 
+			SymmetricMatrix proximityMatrix, String[] labels, ProximityType proximityType, 
+			int precision, boolean isWeighted, double methodParameter) {
+		boolean isDistanceBased = proximityType.equals(ProximityType.DISTANCE) ? true : false;
+		double power;
+		HierarchicalClustering clustering;
+		switch (methodType) {
+		case VERSATILE_LINKAGE:
+			power = inverseSigmoid(methodParameter);
+			clustering = new VersatileLinkage(proximityMatrix, labels, isDistanceBased, precision, isWeighted, power);
+			break;
+		case SINGLE_LINKAGE:
+			clustering = new SingleLinkage(proximityMatrix, labels, isDistanceBased, precision);
+			break;
+		case COMPLETE_LINKAGE:
+			clustering = new CompleteLinkage(proximityMatrix, labels, isDistanceBased, precision);
+			break;
+		case ARITHMETIC_LINKAGE:
+			power = +1.0;
+			clustering = new VersatileLinkage(proximityMatrix, labels, isDistanceBased, precision, isWeighted, power);
+			break;
+		case GEOMETRIC_LINKAGE:
+			power = 0.0;
+			clustering = new VersatileLinkage(proximityMatrix, labels, isDistanceBased, precision, isWeighted, power);
+			break;
+		case HARMONIC_LINKAGE:
+			power = -1.0;
+			clustering = new VersatileLinkage(proximityMatrix, labels, isDistanceBased, precision, isWeighted, power);
+			break;
+		case CENTROID:
+			clustering = new Centroid(proximityMatrix, labels, isDistanceBased, precision, isWeighted);
+			break;
+		case WARD:
+			clustering = new Ward(proximityMatrix, labels, isDistanceBased, precision);
+			break;
+		case BETA_FLEXIBLE:
+			clustering = new BetaFlexible(proximityMatrix, labels, isDistanceBased, precision, isWeighted, methodParameter);
+			break;
+		default:
+			clustering = null;
+			break;
+		}
+		return clustering;
+	}
+
+	private static double inverseSigmoid(double y) {
+		if (y <= -1.0) {
+			return Double.NEGATIVE_INFINITY;
+		} else if (y >= +1.0) {
+			return Double.POSITIVE_INFINITY;
+		} else {
+			double y1 = 0.1;	// 0 < y1 = sigmoid(1) < 1
+			return Math.log((1.0 + y) / (1.0 - y)) 
+				 / Math.log((1.0 + y1) / (1.0 - y1));
+		}
 	}
 
 }
