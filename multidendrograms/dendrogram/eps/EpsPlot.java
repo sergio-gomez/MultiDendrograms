@@ -107,8 +107,8 @@ public class EpsPlot {
 	}
 
 	private void drawDendrogram(final Scaling scalingDendro) {
-		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
-		final Clipping clipping = new Clipping(this.cfg.getProximityType(), this.cfg.getAxisMinValue(), 
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
+		final Clipping clipping = new Clipping(this.cfg.getSimilarityType(), this.cfg.getAxisMinValue(), 
 				this.cfg.getAxisMaxValue());
 		
 		// draw interior of bands
@@ -150,7 +150,7 @@ public class EpsPlot {
 	}
 
 	private void drawBullets(final Scaling scalingBullets, final Scaling scalingDendro) {
-		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
 		
 		if (settingsInfo.getNodeRadius() > 0) {
 			Iterator<Node> iter = this.nodesList.iterator();
@@ -166,7 +166,7 @@ public class EpsPlot {
 	}
 
 	private void drawNodesNames(final Scaling scalingDendro) {
-		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
 		if (settingsInfo.isNodeNameVisible()) {
 			NodeLabel nodeLabel = new NodeLabel(this.nodesList, settingsInfo, scalingDendro);
 			nodeLabel.draw(PlotType.EPS, null);
@@ -174,7 +174,7 @@ public class EpsPlot {
 	}
 
 	private void drawAxis(final Scaling scalingAxis) {
-		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
 		if (settingsInfo.isAxisVisible() && (this.cfg.getAxisTicks() > 0)) {
 			Axis axis = new Axis(settingsInfo, scalingAxis);
 			axis.draw(PlotType.EPS, null);
@@ -182,7 +182,7 @@ public class EpsPlot {
 	}
 
 	private void drawAxisLabels(final Scaling scalingAxisLabels) {
-		final SettingsInfo settingsInfo = this.cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = this.cfg.getConfigMenu();
 		if (settingsInfo.isAxisLabelVisible() && (this.cfg.getAxisTicks() > 0)) {
 			AxisLabel axisLabel = new AxisLabel(settingsInfo, scalingAxisLabels);
 			axisLabel.draw(PlotType.EPS, null);

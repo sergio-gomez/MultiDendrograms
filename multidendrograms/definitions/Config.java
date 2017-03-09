@@ -18,16 +18,15 @@
 
 package multidendrograms.definitions;
 
+import java.util.Hashtable;
+
 import javax.swing.JInternalFrame;
 
-import multidendrograms.core.clusterings.HierarchicalClustering;
-import multidendrograms.core.definitions.Dendrogram;
 import multidendrograms.data.DataFile;
-import multidendrograms.data.ExternalData;
 import multidendrograms.types.DendrogramOrientation;
+import multidendrograms.types.MethodName;
 import multidendrograms.types.LabelOrientation;
-import multidendrograms.types.MethodType;
-import multidendrograms.types.ProximityType;
+import multidendrograms.types.SimilarityType;
 
 /**
  * <p>
@@ -42,30 +41,15 @@ import multidendrograms.types.ProximityType;
  */
 public class Config {
 
-	private HierarchicalClustering clustering = null;
-	private ExternalData externalData;
-	private SettingsInfo settings;
+	private DistancesMatrix distMatrix = null;
+	private Hashtable<Integer, String> names;
+	private final SettingsInfo settings;
 	private JInternalFrame dendroFrame;
 	private DataFile dataFile;
+	private final double radius = 5.0;
 
 	public Config(final SettingsInfo settings) {
 		this.settings = settings;
-	}
-
-	public void setExternalData(ExternalData externalData) {
-		this.externalData = externalData;
-	}
-
-	public ExternalData getExternalData() {
-		return this.externalData;
-	}
-
-	public String[] getNames() {
-		return this.externalData.getNames();
-	}
-
-	public SettingsInfo getSettingsInfo() {
-		return this.settings;
 	}
 
 	public void setDendrogramFrame(final JInternalFrame dendroFrame) {
@@ -76,6 +60,10 @@ public class Config {
 		return this.dendroFrame;
 	}
 
+	public SettingsInfo getConfigMenu() {
+		return this.settings;
+	}
+
 	public void setDataFile(final DataFile dataFile) {
 		this.dataFile = new DataFile(dataFile);
 	}
@@ -84,40 +72,32 @@ public class Config {
 		return this.dataFile;
 	}
 
-	public ProximityType getProximityType() {
-		return this.settings.getProximityType();
+	public SimilarityType getSimilarityType() {
+		return this.settings.getSimilarityType();
 	}
 
 	public boolean isDistance() {
-		return this.settings.getProximityType().equals(ProximityType.DISTANCE);
+		return this.settings.getSimilarityType().equals(SimilarityType.DISTANCE);
+	}
+
+	public MethodName getMethod() {
+		return this.settings.getMethod();
 	}
 
 	public int getPrecision() {
 		return this.settings.getPrecision();
 	}
 
-	public MethodType getMethod() {
-		return this.settings.getMethod();
+	public void setDistancesMatrix(final DistancesMatrix distMatrix) {
+		this.distMatrix = distMatrix;
 	}
 
-	public double getMethodParameter() {
-		return this.settings.getMethodParameter();
+	public DistancesMatrix getDistancesMatrix() {
+		return this.distMatrix;
 	}
 
-	public boolean isWeighted() {
-		return this.settings.isWeighted();
-	}
-
-	public void setHierarchicalClustering(final HierarchicalClustering clustering) {
-		this.clustering = clustering;
-	}
-
-	public HierarchicalClustering getHierarchicalClustering() {
-		return this.clustering;
-	}
-
-	public Dendrogram getRoot() {
-		return this.clustering.getRoot();
+	public Cluster getRoot() {
+		return this.distMatrix.getRoot();
 	}
 
 	public DendrogramOrientation getDendrogramOrientation() {
@@ -133,7 +113,7 @@ public class Config {
 	}
 
 	public double getRadius() {
-		return 5.0;
+		return this.radius;
 	}
 
 	public double getAxisMinValue() {
@@ -154,6 +134,14 @@ public class Config {
 
 	public int getAxisLabelDecimals() {
 		return this.settings.getAxisLabelDecimals();
+	}
+
+	public Hashtable<Integer, String> getNames() {
+		return this.names;
+	}
+
+	public void setNames(final Hashtable<Integer, String> names) {
+		this.names = names;
 	}
 
 }

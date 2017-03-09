@@ -20,13 +20,15 @@ package multidendrograms.dendrogram;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 
-import multidendrograms.core.definitions.Dendrogram;
-import multidendrograms.core.utils.MathUtils;
-import multidendrograms.core.utils.SmartAxis;
-import multidendrograms.utils.NumberUtils;
+import multidendrograms.initial.LogManager;
+import multidendrograms.initial.Language;
+import multidendrograms.types.OriginType;
+import multidendrograms.types.SimilarityType;
+import multidendrograms.utils.MathUtils;
+import multidendrograms.utils.SmartAxis;
+import multidendrograms.definitions.Cluster;
 
 /**
  * <p>
@@ -41,36 +43,59 @@ import multidendrograms.utils.NumberUtils;
  */
 public class ToNewick {
 
-	private Dendrogram root;
-	private boolean isUniformOrigin;
-	private double dendroBottomHeight;
+	private final Cluster root;
+	private final int precision;
+	private final SimilarityType simType;
+	private final OriginType originType;
+	private final double dendroBottomHeight;
 	private PrintWriter printWriter;
 
-	public ToNewick(Dendrogram root, boolean isUniformOrigin) {
+	public ToNewick(final Cluster root, final int precision, final SimilarityType simType, final OriginType originType) {
 		this.root = root;
-		this.isUniformOrigin = isUniformOrigin;
-		SmartAxis smartAxis = new SmartAxis(root, isUniformOrigin);
-		this.dendroBottomHeight = root.isDistanceBased ? 
-				smartAxis.smartMin() : smartAxis.smartMax();
+		this.precision = precision;
+		this.simType = simType;
+		this.originType = originType;
+		SmartAxis smartAxis = new SmartAxis(simType, precision, originType, root);
+		if (simType.equals(SimilarityType.DISTANCE)) {
+			this.dendroBottomHeight = smartAxis.smartMin();
+		} else {// (simType.equals(SimilarityType.SIMILARITY))
+			this.dendroBottomHeight = smartAxis.smartMax();
+		}
 	}
 
-	public void saveAsNewick(String path) throws IOException {
-		File file = new File(path);
-		FileWriter fileWriter = new FileWriter(file);
-		this.printWriter = new PrintWriter(fileWriter);
-		showCluster(this.root, this.root.getRootBottomHeight());
-		this.printWriter.print(";");
-		this.printWriter.close();
+	public void saveAsNewick(String path) throws Exception {
+		try {
+			File file = new File(path);
+			FileWriter fileWriter = new FileWriter(file);
+			saveAsNewick(new PrintWriter(fileWriter));
+		} catch (Exception e) {
+			String errMsg = Language.getLabel(83);
+			LogManager.LOG.throwing("ToNewick.java", "saveAsNewick()", e);
+			throw new Exception(errMsg);
+		}
 	}
 
-	private void showCluster(Dendrogram cluster, double parentHeight) {
-		int numSubclusters = cluster.numberOfSubclusters();
-		double clusterBottomHeight = cluster.getRootBottomHeight();
+  public void saveAsNewick(PrintWriter printWriter) throws Exception {
+    try {
+      this.printWriter = new PrintWriter(printWriter);
+      showCluster(this.root, this.root.getRootBottomHeight());
+      this.printWriter.print(";");
+      this.printWriter.close();
+    } catch (Exception e) {
+      String errMsg = Language.getLabel(83);
+      LogManager.LOG.throwing("ToNewick.java", "saveAsNewick()", e);
+      throw new Exception(errMsg);
+    }
+  }
+
+	private void showCluster(final Cluster cluster, final double parentHeight) throws Exception {
+		final int numSubclusters = cluster.getNumSubclusters();
+		final double clusterBottomHeight = cluster.getRootBottomHeight();
 		double clusterHeight;
 		if (numSubclusters == 1) {
-			String name = adaptName(cluster.getLabel());
+			String name = adaptName(cluster.getName());
 			this.printWriter.print(name);
-			if (Double.isNaN(clusterBottomHeight) || this.isUniformOrigin) {
+			if (Double.isNaN(clusterBottomHeight) || this.originType.equals(OriginType.UNIFORM_ORIGIN)) {
 				clusterHeight = this.dendroBottomHeight;
 			} else {
 				clusterHeight = clusterBottomHeight;
@@ -89,7 +114,7 @@ public class ToNewick {
 		printClusterLength(parentHeight, clusterHeight);
 	}
 
-	private String adaptName(String originalName) {
+	private String adaptName(final String originalName) {
 		String newName = new String(originalName);
 		newName = newName.replace(' ', '_');
 		newName = newName.replace('\'', '"');
@@ -103,19 +128,16 @@ public class ToNewick {
 		return newName;
 	}
 
-	private void printClusterLength(double parentHeight, double clusterHeight) {
-		int precision = this.root.precision;
+	private void printClusterLength(final double parentHeight, final double clusterHeight) {
 		double length;
-		if (this.root.isDistanceBased) {
-			length = MathUtils.round(parentHeight, precision) - 
-					 MathUtils.round(clusterHeight, precision);
+		if (this.simType.equals(SimilarityType.DISTANCE)) {
+			length = MathUtils.round(parentHeight, precision) - MathUtils.round(clusterHeight, precision);
 		} else {
-			length = MathUtils.round(clusterHeight, precision) - 
-					 MathUtils.round(parentHeight, precision);
+			length = MathUtils.round(clusterHeight, precision) - MathUtils.round(parentHeight, precision);
 		}
  		length = MathUtils.round(length, precision);
 		if (length > 0.0) {
-			String sLength = NumberUtils.format(length, precision);
+			String sLength = MathUtils.format(length, precision);
 			this.printWriter.print(":" + sLength);
 		}
 	}

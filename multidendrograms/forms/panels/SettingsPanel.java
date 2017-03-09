@@ -43,21 +43,22 @@ import javax.swing.JTextField;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-import multidendrograms.core.definitions.Dendrogram;
-import multidendrograms.core.utils.SmartAxis;
+import multidendrograms.initial.LogManager;
+import multidendrograms.initial.Language;
+import multidendrograms.initial.InitialProperties;
+import multidendrograms.forms.PrincipalDesk;
+import multidendrograms.forms.DendrogramParameters;
+import multidendrograms.forms.children.FontSelection;
+import multidendrograms.types.DendrogramOrientation;
+import multidendrograms.types.MethodName;
+import multidendrograms.types.LabelOrientation;
+import multidendrograms.types.OriginType;
+import multidendrograms.types.SimilarityType;
+import multidendrograms.utils.SmartAxis;
+import multidendrograms.definitions.Cluster;
+import multidendrograms.definitions.SettingsInfo;
 import multidendrograms.definitions.Config;
 import multidendrograms.definitions.Formats;
-import multidendrograms.definitions.SettingsInfo;
-import multidendrograms.initial.InitialProperties;
-import multidendrograms.initial.Language;
-import multidendrograms.initial.LogManager;
-import multidendrograms.forms.children.FontSelection;
-import multidendrograms.forms.DendrogramParameters;
-import multidendrograms.types.DendrogramOrientation;
-import multidendrograms.types.LabelOrientation;
-import multidendrograms.types.MethodType;
-import multidendrograms.types.OriginType;
-import multidendrograms.types.ProximityType;
 
 /**
  * <p>
@@ -76,7 +77,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 	private static final long serialVersionUID = 1L;
 
 	// Labels to identify the components of the JPanel
-	private static JLabel lblTypeMeasure, lblPrecision, lblMethod, lblMethodParameter;
+	private static JLabel lblTypeMeasure, lblMethod, lblPrecision;
 	private static JLabel lblTreeTitle, lblTreeOrientation;
 	private static JLabel lblNodesTitle, lblNodesOrientation, lblNodesSize;
 	private static JLabel lblAxisTitle, lblAxisMin, lblAxisMax,
@@ -85,14 +86,11 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 	// Type of measure
 	private static JRadioButton rbDistances, rbSimilarities;
 
-	// Text box for the precision
-	private static JTextField txtPrecision;
-
 	// Clustering algorithm
 	private static JComboBox cbMethod;
 
-	// Text box for the method parameter
-	private static JTextField txtMethodParameter;
+	// Text box for the precision
+	private static JTextField txtPrecision;
 
 	// Orientation of the tree
 	private static JComboBox cbTreeOrientation;
@@ -104,10 +102,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 	private static JComboBox cbNodesOrientation;
 
 	// To decide the visibility of components
-	private static JCheckBox chkBands, chkNodesLabels, chkAxis, chkAxisLabels;
-
-	// Other check boxes
-	private static JCheckBox chkWeighted, chkUniformOrigin;
+	private static JCheckBox chkBands, chkNodesLabels, chkUniformOrigin, chkAxis, chkAxisLabels;
 
 	// Text boxes for user inputs
 	private static JTextField txtAxisMin, txtAxisMax, txtAxisSeparation,
@@ -122,7 +117,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 
 	private TreeOrientationPanel pOrientationImg;
 
-	public SettingsPanel() {
+	public SettingsPanel(final PrincipalDesk fr) {
 		super();
 		createComponents();
 		fillPanel();
@@ -130,51 +125,26 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 
 	private void createComponents() {
 		lblTypeMeasure = Formats.getFormattedLabel(Language.getLabel(114) + " ");// Type of measure
-		rbDistances = Formats.getFormattedRadioButton(Language.getLabel(27), true);// Distance
-		rbSimilarities = Formats.getFormattedRadioButton(Language.getLabel(28), false);// Similarity
-
-		lblPrecision = Formats.getFormattedLabel(Language.getLabel(51) + " ");// Precision
-		txtPrecision = Formats.getFormattedTextField("", 4, getLocale());
+		rbDistances = Formats.getFormattedRadioButton(Language.getLabel(27), true);// Distances
+		rbSimilarities = Formats.getFormattedRadioButton(Language.getLabel(28), false);// Similarities
 
 		lblMethod = Formats.getFormattedLabel(Language.getLabel(24) + " ");// Clustering algorithm
-		final String strMethod[] = {
-        "Versatile Linkage",
-        "Single Linkage",
-        "Complete Linkage",
-        "Arithmetic Linkage",
-        "Geometric Linkage",
-        "Harmonic Linkage",
-        "Centroid",
-        "Ward",
-        "Beta Flexible"
-			};
+		final String strMethod[] = { "Single Linkage", "Complete Linkage",
+				"Unweighted Average", "Weighted Average",
+				"Unweighted Centroid", "Weighted Centroid",
+				"Ward" };
 		cbMethod = Formats.getFormattedComboBox(strMethod);
-		cbMethod.setMaximumRowCount(strMethod.length);
-		cbMethod.setSelectedItem("Arithmetic Linkage");
-		final String strToolTip =
-        "<html><b>"
-        + Language.getLabel(133)
-        + ":</b><br>&nbsp;&nbsp;Arithmetic Linkage " + Language.getLabel(63) + " = UPGMA = unweighted average<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param 1.0) = Complete Linkage<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param 0.1) = Arithmetic Linkage<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param 0.0) = Geometric Linkage<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param -0.1) = Harmonic Linkage<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param -1.0) = Single Linkage<br>"
-        + "&nbsp;&nbsp;Beta Flexible (param 0.0) = Arithmetic Linkage</html>";
-		cbMethod.setToolTipText(strToolTip);
+		cbMethod.setSelectedItem("Unweighted Average");
 
-		lblMethodParameter = Formats.getFormattedLabel(Language.getLabel(53) + " ");// Algorithm parameter
-		txtMethodParameter = Formats.getFormattedTextField("", 4, getLocale());
-		txtMethodParameter.setEnabled(false);
+		lblPrecision = Formats.getFormattedLabel(Language.getLabel(51) + " ");// Precision
+		txtPrecision = Formats.getformattedTextField("", 4, getLocale());
 
-		chkWeighted = Formats.getFormattedCheckBox(Language.getLabel(63));// Weighted
-		chkWeighted.setSelected(InitialProperties.getWeighted());
-
-		lblTreeTitle = Formats.getFormattedShadedTitleLabel(" " + Language.getLabel(29));// Tree
+		lblTreeTitle = Formats.getFormattedShadedTitleLabel(" " + Language.getLabel(29));// TREE
 
 		lblTreeOrientation = Formats.getFormattedLabel(Language.getLabel(26) + " ");// Tree orientation
 		final String strTreeOrientation[] = { Language.getLabel(88),
-				Language.getLabel(89), Language.getLabel(90), Language.getLabel(91) };
+				Language.getLabel(89), Language.getLabel(90),
+				Language.getLabel(91) };
 		cbTreeOrientation = Formats.getFormattedComboBox(strTreeOrientation);
 		cbTreeOrientation.setSelectedItem(Language.getLabel(88));// North (by default)
 
@@ -210,13 +180,13 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		colorAxis = InitialProperties.getColorDendroAxis();
 
 		lblAxisMin = Formats.getFormattedLabel(Language.getLabel(41) + " ");// Minimum value
-		txtAxisMin = Formats.getFormattedTextField("", 4, getLocale());
+		txtAxisMin = Formats.getformattedTextField("", 4, getLocale());
 
 		lblAxisMax = Formats.getFormattedLabel(Language.getLabel(42) + " ");// Maximum value
-		txtAxisMax = Formats.getFormattedTextField("", 4, getLocale());
+		txtAxisMax = Formats.getformattedTextField("", 4, getLocale());
 
 		lblAxisSeparation = Formats.getFormattedLabel(Language.getLabel(43) + " ");// Tick separation
-		txtAxisSeparation = Formats.getFormattedTextField("", 4, getLocale());
+		txtAxisSeparation = Formats.getformattedTextField("", 4, getLocale());
 
 		chkAxisLabels = Formats.getFormattedCheckBox(Language.getLabel(39));// Show labels (axis)
 		chkAxisLabels.setSelected(InitialProperties.getShowAxisLabels());
@@ -224,11 +194,11 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		colorAxisLabels = InitialProperties.getColorDendroLabels();
 
 		lblAxisEvery = Formats.getFormattedLabel(Language.getLabel(44));// Labels every
-		txtAxisEvery = Formats.getFormattedTextField("", 4, getLocale());
+		txtAxisEvery = Formats.getformattedTextField("", 4, getLocale());
 		lblAxisTicks = Formats.getFormattedLabel(" " + Language.getLabel(115));// ticks
 
 		lblAxisDecimals = Formats.getFormattedLabel(Language.getLabel(49) + " ");// Labels decimals
-		txtAxisDecimals = Formats.getFormattedTextField("", 4, getLocale());
+		txtAxisDecimals = Formats.getformattedTextField("", 4, getLocale());
 	}
 
 	private void fillPanel() {
@@ -269,6 +239,24 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		add(rbSimilarities, c);
 		gridy++;
 
+		// lbl method
+		c.gridx = 0;
+		c.gridy = gridy;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(1, 3, 1, 1);
+		add(lblMethod, c);
+		// cb method
+		c.gridx = 1;
+		c.gridy = gridy;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.gridheight = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(1, 1, 1, 3);
+		add(cbMethod, c);
+		gridy++;
+
 		// lbl precision
 		c.gridx = 0;
 		c.gridy = gridy;
@@ -287,54 +275,6 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		txtPrecision.setName("precision");
 		txtPrecision.addFocusListener(this);
 		add(txtPrecision, c);
-		gridy++;
-
-		// lbl method
-		c.gridx = 0;
-		c.gridy = gridy;
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
-		add(lblMethod, c);
-		// cb method
-		c.gridx = 1;
-		c.gridy = gridy;
-		c.gridwidth = GridBagConstraints.REMAINDER;
-		c.gridheight = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 3);
-		cbMethod.setActionCommand("method");
-		cbMethod.addActionListener(this);
-		add(cbMethod, c);
-		gridy++;
-
-		// lbl method parameter
-		c.gridx = 0;
-		c.gridy = gridy;
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
-		add(lblMethodParameter, c);
-		// txt method parameter
-		c.gridx = 1;
-		c.gridy = gridy;
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 3);
-		txtMethodParameter.setName("method_parameter");
-		txtMethodParameter.addFocusListener(this);
-		add(txtMethodParameter, c);
-		// chk weighted
-		c.gridx = 2;
-		c.gridy = gridy;
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
-		add(chkWeighted, c);
 		gridy++;
 
 		// empty space
@@ -374,7 +314,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(1, 1, 1, 1);
-		cbTreeOrientation.setActionCommand("dendro_orientation");
+		cbTreeOrientation.setActionCommand("orientacio_dendo");
 		cbTreeOrientation.addActionListener(this);
 		add(cbTreeOrientation, c);
 		// tree drawing
@@ -404,7 +344,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(1, 1, 1, 1);
 		btnColorBands = Formats.getFormattedButton(Language.getLabel(35));// Color (bands)
-		btnColorBands.setActionCommand("color_bands");
+		btnColorBands.setActionCommand("color_marge");
 		btnColorBands.addActionListener(this);
 		add(btnColorBands, c);
 		gridy++;
@@ -465,7 +405,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(1, 1, 1, 1);
 		btnFontNodes = Formats.getFormattedButton(Language.getLabel(34));// Font (nodes)
-		btnFontNodes.setActionCommand("font_nodes");
+		btnFontNodes.setActionCommand("font_noms");
 		btnFontNodes.addActionListener(this);
 		add(btnFontNodes, c);
 		// btn color nodes
@@ -476,7 +416,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(1, 1, 1, 3);
 		btnColorNodes = Formats.getFormattedButton(Language.getLabel(35));// Color (nodes)
-		btnColorNodes.setActionCommand("color_nodes");
+		btnColorNodes.setActionCommand("color_noms");
 		btnColorNodes.addActionListener(this);
 		add(btnColorNodes, c);
 		gridy++;
@@ -701,7 +641,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		gridy++;
 	}
 
-	private Color changeColorFont(Color c) {
+	private Color changeColorFont(final Color c) {
 		Color color = JColorChooser.showDialog(null, Language.getLabel(1), c);// Color selection
 		if (color == null) {
 			color = c;
@@ -709,18 +649,26 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		return color;
 	}
 
-	public static ProximityType getProximityType() {
+	public static SimilarityType getSimilarityType() {
 		if (rbDistances.isSelected()) {
-			return ProximityType.DISTANCE;
+			return SimilarityType.DISTANCE;
 		} else {
-			return ProximityType.SIMILARITY;
+			return SimilarityType.SIMILARITY;
 		}
+	}
+
+	public static MethodName getMethod() {
+		return MethodName.values()[cbMethod.getSelectedIndex()];
 	}
 
 	public static int getPrecision() {
 		int precision = -1;
-		String str = txtPrecision.getText().trim();
-		if (!str.equals("")) {
+		String str;
+
+		str = txtPrecision.getText().trim();
+		if (str.equals("")) {
+			precision = -1;
+		} else {
 			try {
 				precision = Integer.parseInt(str);
 				if (precision < 0) {
@@ -733,117 +681,88 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		return precision;
 	}
 
-	public static void setPrecision(int precision) {
+	public static void setPrecision(final int precision) {
 		txtPrecision.setText(String.valueOf(precision));
 		LoadUpdatePanel.precisionCorrect = true;
 	}
 
-	public static MethodType getMethod() {
-		return MethodType.values()[cbMethod.getSelectedIndex()];
-	}
-
-	public static double getMethodParameter() {
-		double methodParameter = 0.0;
-		String str = txtMethodParameter.getText().trim();
-		if (!str.equals("")) {
-			try {
-				methodParameter = Double.parseDouble(str);
-				if (methodParameter < -1.0) {
-					methodParameter = -1.0;
-				} else if (methodParameter > +1.0) {
-					methodParameter = +1.0;
-				}
-			} catch (NumberFormatException e) {
-				methodParameter = 0.0;
-			}
-		}
-		return methodParameter;
-	}
-
-	private static void setMethodParameter(MethodType methodType,
-			double methodParameter) {
-		if (methodType.equals(MethodType.VERSATILE_LINKAGE) ||
-			methodType.equals(MethodType.BETA_FLEXIBLE)) {
-			Locale locale = new Locale("en");
-			NumberFormat numberFormat = NumberFormat.getInstance(locale);
-			numberFormat.setGroupingUsed(false);
-			txtMethodParameter.setEnabled(true);
-			txtMethodParameter.setText(numberFormat.format(methodParameter));
-		} else {
-			txtMethodParameter.setText("");
-			txtMethodParameter.setEnabled(false);
-		}
-		LoadUpdatePanel.methodParameterCorrect = true;
-	}
-
-	public static boolean isWeighted() {
-		return chkWeighted.isSelected();
-	}
-
 	private static double getMinValue() {
-		double minValue = -1.0;
-		String str = txtAxisMin.getText().trim();
-		if (!str.equals("")) {
+		double minValue = -1;
+		String str;
+
+		str = txtAxisMin.getText().trim();
+		if (str.equals("")) {
+			minValue = -1;
+		} else {
 			try {
 				minValue = Double.parseDouble(str);
 			} catch (NumberFormatException e) {
-				minValue = -1.0;
+				minValue = -1;
 			}
 		}
 		return minValue;
 	}
 
-	private static void setMinValue(double minValue) {
+	private static void setMinValue(final double minValue) {
 		txtAxisMin.setText(String.valueOf(minValue));
 		LoadUpdatePanel.axisMinCorrect = true;
 	}
 
 	private static double getMaxValue() {
-		double maxValue = -1.0;
-		String str = txtAxisMax.getText().trim();
-		if (!str.equals("")) {
+		double maxValue = -1;
+		String str;
+
+		str = txtAxisMax.getText().trim();
+		if (str.equals("")) {
+			maxValue = -1;
+		} else {
 			try {
 				maxValue = Double.parseDouble(str);
 			} catch (NumberFormatException e) {
-				maxValue = -1.0;
+				maxValue = -1;
 			}
 		}
 		return maxValue;
 	}
 
-	private static void setMaxValue(double maxValue) {
+	private static void setMaxValue(final double maxValue) {
 		txtAxisMax.setText(String.valueOf(maxValue));
 		LoadUpdatePanel.axisMaxCorrect = true;
 	}
 
 	private static double getTicksSeparation() {
-		double ticksSeparation = -1.0;
-		String str = txtAxisSeparation.getText().trim();
-		if (!str.equals("")) {
+		double ticksSeparation = -1;
+		String str;
+
+		str = txtAxisSeparation.getText().trim();
+		if (str.equals("")) {
+			ticksSeparation = -1;
+		} else {
 			try {
 				ticksSeparation = Double.parseDouble(str);
-				if (ticksSeparation <= 0.0) {
-					ticksSeparation = -1.0;
+				if (ticksSeparation <= 0) {
+					ticksSeparation = -1;
 				}
 			} catch (NumberFormatException e) {
-				ticksSeparation = -1.0;
+				ticksSeparation = -1;
 			}
 		}
 		return ticksSeparation;
 	}
 
-	private static void setTicksSeparation(double ticksSeparation) {
-		Locale locale = new Locale("en");
-		NumberFormat numberFormat = NumberFormat.getInstance(locale);
-		numberFormat.setGroupingUsed(false);
-		txtAxisSeparation.setText(numberFormat.format(ticksSeparation));
+	private static void setTicksSeparation(final double ticksSeparation) {
+		txtAxisSeparation.setText(String.valueOf(ticksSeparation));
 		LoadUpdatePanel.axisSeparationCorrect = true;
 	}
 
 	private static int getLabelsEvery() {
 		int labelsEvery = -1;
-		String str = txtAxisEvery.getText().trim();
-		if (!str.equals("")) {
+		String str;
+
+		str = txtAxisEvery.getText().trim();
+		if (str.equals("")) {
+			labelsEvery = -1;
+		} else {
 			try {
 				labelsEvery = Integer.parseInt(str);
 				if (labelsEvery < 0) {
@@ -856,15 +775,19 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		return labelsEvery;
 	}
 
-	private static void setLabelsEvery(int labelsEvery) {
+	private static void setLabelsEvery(final int labelsEvery) {
 		txtAxisEvery.setText(String.valueOf(labelsEvery));
 		LoadUpdatePanel.axisTicksCorrect = true;
 	}
 
 	private static int getLabelsDecimals() {
 		int labelsDecimals = -1;
-		String str = txtAxisDecimals.getText().trim();
-		if (!str.equals("")) {
+		String str;
+
+		str = txtAxisDecimals.getText().trim();
+		if (str.equals("")) {
+			labelsDecimals = -1;
+		} else {
 			try {
 				labelsDecimals = Integer.parseInt(str);
 				if (labelsDecimals < 0) {
@@ -877,7 +800,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		return labelsDecimals;
 	}
 
-	private static void setLabelsDecimals(int labelsDecimals) {
+	private static void setLabelsDecimals(final int labelsDecimals) {
 		txtAxisDecimals.setText(String.valueOf(labelsDecimals));
 		LoadUpdatePanel.axisDecimalsCorrect = true;
 	}
@@ -887,18 +810,16 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 
 		// DATA
 		if (rbDistances.isSelected()) {
-			settings.setSimilarityType(ProximityType.DISTANCE);
+			settings.setSimilarityType(SimilarityType.DISTANCE);
 		} else {
-			settings.setSimilarityType(ProximityType.SIMILARITY);
+			settings.setSimilarityType(SimilarityType.SIMILARITY);
 		}
+
+		// METHOD
+		settings.setMethod(MethodName.values()[cbMethod.getSelectedIndex()]);
 
 		// PRECISION
 		settings.setPrecision(getPrecision());
-
-		// METHOD
-		settings.setMethod(MethodType.values()[cbMethod.getSelectedIndex()]);
-		settings.setMethodParameter(getMethodParameter());
-		settings.setWeighted(chkWeighted.isSelected());
 
 		// TREE
 		settings.setDendrogramOrientation(DendrogramOrientation.values()[cbTreeOrientation.getSelectedIndex()]);
@@ -947,18 +868,16 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 	public static void getConfigPanel(DendrogramParameters dendroParams) {
 		// TYPE OF DATA
 		if (rbDistances.isSelected()) {
-			dendroParams.setProximityType(ProximityType.DISTANCE);
+			dendroParams.setSimilarityType(SimilarityType.DISTANCE);
 		} else {
-			dendroParams.setProximityType(ProximityType.SIMILARITY);
+			dendroParams.setSimilarityType(SimilarityType.SIMILARITY);
 		}
+
+		// METHOD
+		dendroParams.setMethod(MethodName.values()[cbMethod.getSelectedIndex()]);
 
 		// PRECISION
 		dendroParams.setPrecision(getPrecision());
-
-		// METHOD
-		dendroParams.setMethod(MethodType.values()[cbMethod.getSelectedIndex()]);
-		dendroParams.setMethodParameter(getMethodParameter());
-		dendroParams.setWeighted(chkWeighted.isSelected());
 
 		// TREE
 		dendroParams.setDendrogramOrientation(DendrogramOrientation.values()[cbTreeOrientation
@@ -1000,19 +919,16 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		dendroParams.setAxisLabelDecimals(getLabelsDecimals());
 	}
 
-	public static void setConfigPanel(DendrogramParameters dendroParams) {
+	public static void setConfigPanel(final DendrogramParameters dendroParams) {
 		// Type of measure
-		rbDistances.setSelected(dendroParams.getProximityType().equals(ProximityType.DISTANCE));
-		rbSimilarities.setSelected(dendroParams.getProximityType().equals(ProximityType.SIMILARITY));
+		rbDistances.setSelected(dendroParams.getSimilarityType().equals(SimilarityType.DISTANCE));
+		rbSimilarities.setSelected(dendroParams.getSimilarityType().equals(SimilarityType.SIMILARITY));
+
+		// Clustering algorithm
+		cbMethod.setSelectedIndex(dendroParams.getMethod().ordinal());
 
 		// Precision
 		setPrecision(dendroParams.getPrecision());
-
-		// Clustering algorithm
-		MethodType methodType = dendroParams.getMethod();
-		cbMethod.setSelectedIndex(methodType.ordinal());
-		setMethodParameter(methodType, dendroParams.getMethodParameter());
-		chkWeighted.setSelected(dendroParams.isWeighted());
 
 		// DendrogramOrientation of the tree
 		cbTreeOrientation.setSelectedIndex(dendroParams.getDendrogramOrientation()
@@ -1058,9 +974,6 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 	public static void clearConfigPanel() {
 		txtPrecision.setText("");
 		LoadUpdatePanel.precisionCorrect = false;
-		MethodType methodType =
-				MethodType.values()[cbMethod.getSelectedIndex()];
-		setMethodParameter(methodType, 0.0);
 		txtAxisMin.setText("");
 		LoadUpdatePanel.axisMinCorrect = false;
 		txtAxisMax.setText("");
@@ -1073,14 +986,14 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		LoadUpdatePanel.axisDecimalsCorrect = false;
 	}
 
-	public static void adjustValues(Config cfg) {
+	public static void adjustValues(final Config cfg) {
+		SimilarityType simType = cfg.getSimilarityType();
 		int precision = cfg.getPrecision();
 		setPrecision(precision);
-		SettingsInfo settings = cfg.getSettingsInfo();
+		SettingsInfo settings = cfg.getConfigMenu();
 		OriginType originType = settings.getOriginType();
-		boolean isUniformOrigin = originType.equals(OriginType.UNIFORM_ORIGIN) ? true : false;
-		Dendrogram root = cfg.getRoot();
-		SmartAxis smartAxis = new SmartAxis(root, isUniformOrigin);
+		Cluster root = cfg.getRoot();
+		SmartAxis smartAxis = new SmartAxis(simType, precision, originType, root);
 		double min = smartAxis.smartMin();
 		double max = smartAxis.smartMax();
 		settings.setAxisMinValue(min);
@@ -1102,20 +1015,16 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
-		if (evt.getActionCommand().equals("method")) {
-			MethodType methodType =
-					MethodType.values()[cbMethod.getSelectedIndex()];
-			setMethodParameter(methodType, 0.0);
-		} else if (evt.getActionCommand().equals("dendro_orientation")) {
-			pOrientationImg.setImage(
-					DendrogramOrientation.values()[cbTreeOrientation.getSelectedIndex()]);
-		} else if (evt.getActionCommand().equals("color_bands")) {
+		if (evt.getActionCommand().equals("orientacio_dendo")) {
+			pOrientationImg.setImage(DendrogramOrientation.values()[cbTreeOrientation
+					.getSelectedIndex()]);
+		} else if (evt.getActionCommand().equals("color_marge")) {
 			colorBands = this.changeColorFont(colorBands);
-		} else if (evt.getActionCommand().equals("font_nodes")) {
+		} else if (evt.getActionCommand().equals("font_noms")) {
 			final FontSelection f = new FontSelection(fontNodesLabels);
 			f.setVisible(true);
 			fontNodesLabels = f.getNewFont();
-		} else if (evt.getActionCommand().equals("color_nodes")) {
+		} else if (evt.getActionCommand().equals("color_noms")) {
 			colorNodesLabels = this.changeColorFont(colorNodesLabels);
 		} else if (evt.getActionCommand().equals("color_axis")) {
 			colorAxis = this.changeColorFont(colorAxis);
@@ -1141,8 +1050,6 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		if (!evt.isTemporary()) {
 			if (evt.getComponent().getName().equals("precision")) {
 				LoadUpdatePanel.precisionCorrect = checkPrecision();
-			} else if (evt.getComponent().getName().equals("method_parameter")) {
-				LoadUpdatePanel.methodParameterCorrect = checkMethodParameter();
 			} else if (evt.getComponent().getName().equals("axis_min")) {
 				LoadUpdatePanel.axisMinCorrect = checkMinValue();
 			} else if (evt.getComponent().getName().equals("axis_max")) {
@@ -1174,27 +1081,6 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 			} catch (NumberFormatException e) {
 				correct = false;
 				showError(Language.getLabel(2));
-			}
-		}
-		return correct;
-	}
-
-	private boolean checkMethodParameter() {
-		boolean correct = true;
-		String str = txtMethodParameter.getText().trim();
-		if (str.equals("")) {
-			correct = false;
-			showError(Language.getLabel(68));
-		} else {
-			try {
-				double methodParameter = Double.parseDouble(str);
-				if ((methodParameter < -1.0) || (+1.0 < methodParameter)) {
-					correct = false;
-					showError(Language.getLabel(68));
-				}
-			} catch (NumberFormatException e) {
-				correct = false;
-				showError(Language.getLabel(68));
 			}
 		}
 		return correct;

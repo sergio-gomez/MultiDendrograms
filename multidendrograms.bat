@@ -8,7 +8,7 @@ start http://java.com/en/download/index.jsp
 exit
 )
 
-echo MultiDendrograms 5.0.0
+echo MultiDendrograms 4.1.0
 echo Copyright (c) 2016 Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres
 echo This program comes with ABSOLUTELY NO WARRANTY.
 echo This is free software, and you are welcome to redistribute it under certain conditions.

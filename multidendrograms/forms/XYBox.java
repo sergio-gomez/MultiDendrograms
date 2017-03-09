@@ -18,6 +18,8 @@
 
 package multidendrograms.forms;
 
+import java.util.Enumeration;
+
 import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.types.LabelOrientation;
 import multidendrograms.utils.TextBoxSize;
@@ -48,7 +50,7 @@ public class XYBox {
 
 	public XYBox(final Config cfg, final double worldWidth, final double worldHeight) {
 		final double margin = InitialProperties.getSizeDendroMargin();
-		final SettingsInfo settingsInfo = cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
 		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
 		final double radius = cfg.getRadius();
 
@@ -96,9 +98,9 @@ public class XYBox {
 	}
 
 	private Dimensions<Double> getDimensionsBullets(final Config cfg) {
-		final SettingsInfo settingsInfo = cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
 		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
-		final int numNodes = cfg.getHierarchicalClustering().getRoot().numberOfLeaves();
+		final int numNodes = cfg.getDistancesMatrix().getRoot().getNumLeaves();
 		final double radius = cfg.getRadius();
 		
 		double nodesRadius = settingsInfo.getNodeRadius();
@@ -118,7 +120,7 @@ public class XYBox {
 	}
 
 	private Dimensions<Double> getDimensionsNodesNames(final Config cfg) {
-		final SettingsInfo settingsInfo = cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
 		
 		double width = 0.0;
 		double height = 0.0;
@@ -133,9 +135,10 @@ public class XYBox {
 				alf = -90;
 			}
 			final TextBoxSize box = new TextBoxSize(settingsInfo.getNodeNameFont());
-			String[] names = cfg.getNames();
-			for (int i = 0; i < names.length; i ++) {
-				Dimensions<Double> nameDim = box.getBox(alf, names[i]);
+			final Enumeration<String> names = cfg.getNames().elements();
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				Dimensions<Double> nameDim = box.getBox(alf, name);
 				width = Math.max(width, nameDim.getWidth());
 				height = Math.max(height, nameDim.getHeight());
 			}
@@ -145,7 +148,7 @@ public class XYBox {
 	}
 
 	private Dimensions<Double> getDimensionsAxis(final Config cfg) {
-		final SettingsInfo settingsInfo = cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
 		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
 		final double radius = cfg.getRadius();
 		final double axisLength = cfg.getAxisMaxValue() - cfg.getAxisMinValue();
@@ -167,7 +170,7 @@ public class XYBox {
 	}
 
 	private Dimensions<Double> getDimensionsAxisLabels(final Config cfg) {
-		final SettingsInfo settingsInfo = cfg.getSettingsInfo();
+		final SettingsInfo settingsInfo = cfg.getConfigMenu();
 		final DendrogramOrientation dendroOrientation = cfg.getDendrogramOrientation();
 		
 		Dimensions<Double> dim = new Dimensions<Double>(0.0, 0.0);
@@ -199,7 +202,7 @@ public class XYBox {
 			final Dimensions<Double> dimNodesNames, final double usedWidth, final double usedHeight, 
 			final double freeWidth, final double freeHeight) {
 		final double margin = InitialProperties.getSizeDendroMargin();
-		final int numNodes = cfg.getHierarchicalClustering().getRoot().numberOfLeaves();
+		final int numNodes = cfg.getDistancesMatrix().getRoot().getNumLeaves();
 		final double radius = cfg.getRadius();
 		final double axisMinValue = cfg.getAxisMinValue();
 		final double axisMaxValue = cfg.getAxisMaxValue();
@@ -231,7 +234,7 @@ public class XYBox {
 
 	private BoxContainer getBoxBullets(final Config cfg, final DendrogramOrientation adaptedOrientation, 
 			final Dimensions<Double> dimBullets, final double freeWidth, final double freeHeight, final BoxContainer boxDendro) {
-		final int numNodes = cfg.getHierarchicalClustering().getRoot().numberOfLeaves();
+		final int numNodes = cfg.getDistancesMatrix().getRoot().getNumLeaves();
 		final double radius = cfg.getRadius();
 
 		double x, y;

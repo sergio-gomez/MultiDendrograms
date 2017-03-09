@@ -33,7 +33,7 @@ import multidendrograms.dendrogram.Scaling;
 import multidendrograms.dendrogram.eps.EpsUtils;
 import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.types.PlotType;
-import multidendrograms.types.ProximityType;
+import multidendrograms.types.SimilarityType;
 
 /**
  * <p>
@@ -49,7 +49,7 @@ import multidendrograms.types.ProximityType;
 public class AxisLabel {
 
 	private Color color;
-	private ProximityType proximityType;
+	private SimilarityType simType;
 	private DendrogramOrientation dendroOrientation;
 	private double minValue;
 	private double maxValue;
@@ -68,7 +68,7 @@ public class AxisLabel {
 
 	public AxisLabel(final SettingsInfo settingsInfo, final Scaling scaling) {
 		this.color = settingsInfo.getAxisLabelColor();
-		this.proximityType = settingsInfo.getProximityType();
+		this.simType = settingsInfo.getSimilarityType();
 		this.dendroOrientation = settingsInfo.getDendrogramOrientation();
 		this.minValue = settingsInfo.getAxisMinValue();
 		this.maxValue = settingsInfo.getAxisMaxValue();
@@ -104,7 +104,7 @@ public class AxisLabel {
 	private void setLabelsMaximumWidth() {
 		labelsMaxWidth = 0.0;
 		double height;
-		if (proximityType.equals(ProximityType.DISTANCE)) {
+		if (simType.equals(SimilarityType.DISTANCE)) {
 			height = minValue;
 		} else {
 			height = maxValue;
@@ -118,7 +118,7 @@ public class AxisLabel {
 			} else {// (dendroOrientation.equals(DendrogramOrientation.EAST) || dendroOrientation.equals(DendrogramOrientation.WEST))
 				labelsMaxWidth = Math.max(labelsMaxWidth, rectangle.getHeight());
 			}
-			if (proximityType.equals(ProximityType.DISTANCE)) {
+			if (simType.equals(SimilarityType.DISTANCE)) {
 				height += (ticksGroup * increment);
 			} else {
 				height -= (ticksGroup * increment);
@@ -145,7 +145,7 @@ public class AxisLabel {
 		}
 
 		double height;
-		if (proximityType.equals(ProximityType.DISTANCE)) {
+		if (simType.equals(SimilarityType.DISTANCE)) {
 			height = minValue;
 		} else {
 			height = maxValue;
@@ -177,7 +177,7 @@ public class AxisLabel {
 				EpsUtils.writeLine(EpsUtils.bottomLeftTextRotated((EpsUtils.xmin + screenX), (EpsUtils.ymax + screenY), 
 						(float) (rotationAngle), heightLabel));
 			}
-			if (proximityType.equals(ProximityType.DISTANCE)) {
+			if (simType.equals(SimilarityType.DISTANCE)) {
 				height += (ticksGroup * increment);
 			} else {
 				height -= (ticksGroup * increment);

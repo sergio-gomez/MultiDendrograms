@@ -24,7 +24,7 @@ import java.util.LinkedList;
 
 import multidendrograms.dendrogram.figures.Band;
 import multidendrograms.dendrogram.figures.Line;
-import multidendrograms.types.ProximityType;
+import multidendrograms.types.SimilarityType;
 
 /**
  * <p>
@@ -39,10 +39,10 @@ import multidendrograms.types.ProximityType;
  */
 public class Clipping {
 
-	private final ProximityType simType;
+	private final SimilarityType simType;
 	private final double minValue, maxValue;
 
-	public Clipping(final ProximityType simType, final double minValue, final double maxValue) {
+	public Clipping(final SimilarityType simType, final double minValue, final double maxValue) {
 		this.simType = simType;
 		this.minValue = minValue;
 		this.maxValue = maxValue;
@@ -93,7 +93,7 @@ public class Clipping {
 			height = rect.getHeight();
 			width = rect.getWidth();
 			color = rect.getColor();
-			if (simType.equals(ProximityType.DISTANCE)) {
+			if (simType.equals(SimilarityType.DISTANCE)) {
 				posYinf = y;
 				posYsup = y + height;
 			} else {

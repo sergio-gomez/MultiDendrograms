@@ -29,12 +29,13 @@ import javax.swing.JOptionPane;
 import multidendrograms.initial.LogManager.LogType;
 import multidendrograms.utils.VersionNumber;
 import multidendrograms.direct.DirectClustering;
-import multidendrograms.errors.MethodError;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.children.UpgradeBox;
-import multidendrograms.types.MethodType;
 import multidendrograms.types.OriginType;
-import multidendrograms.types.ProximityType;
+import multidendrograms.types.SimilarityType;
+import multidendrograms.types.MethodName;
+import multidendrograms.methods.Method;
+import multidendrograms.errors.MethodError;
 
 /**
  * <p>
@@ -50,8 +51,8 @@ import multidendrograms.types.ProximityType;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "5.0.0";
-	public static final String VERSION_SHORT = "5.0";
+	public static final String VERSION = "4.1.0";
+	public static final String VERSION_SHORT = "4.1";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
 	public static final String AFFILIATION = "Universitat Rovira i Virgili, Tarragona (Spain)";
@@ -81,11 +82,9 @@ public class Main {
 	public static void main(final String[] args) throws Exception {
 		Level logLevel = Level.WARNING;
 		String fileName = "";
-		ProximityType proximityType = ProximityType.DISTANCE;
+		SimilarityType simType = SimilarityType.DISTANCE;
+		MethodName method = MethodName.UNWEIGHTED_AVERAGE;
 		int precision = DirectClustering.AUTO_PRECISION;
-		MethodType methodType = MethodType.ARITHMETIC_LINKAGE;
-		double methodParameter = 0.0;
-		boolean isWeighted = false;
 		OriginType originType = OriginType.UNIFORM_ORIGIN;
 
 		int i = 0;
@@ -134,49 +133,30 @@ public class Main {
 					i++;
 					arg = args[i].toUpperCase();
 					if (arg.equals("D") || arg.equals("DIST") || arg.equals("DISTANCE") || arg.equals("DISTANCES")) {
-						proximityType = ProximityType.DISTANCE;
+						simType = SimilarityType.DISTANCE;
 					} else if (arg.equals("S") || arg.equals("SIM") || arg.equals("SIMILARITY") || arg.equals("SIMILARITIES")) {
-						proximityType = ProximityType.SIMILARITY;
+						simType = SimilarityType.SIMILARITY;
 					} else {
 						System.out.println("Error: unknown proximity type '" + args[i] + "'");
 						showSyntax();
 						return;
 					}
-					// precision and method type
+					// agglomeration type
 					i++;
 					try {
-						precision = Integer.parseInt(args[i]);
-						i++;
-					} catch (NumberFormatException e) {}
-					try {
-						methodType = MethodName.toMethodType(args[i]);
+						method = Method.toMethod(args[i]);
 					} catch (MethodError e) {
 						System.out.println("Error: unknown method name '" + args[i] + "'");
 						showSyntax();
 						return;
 					}
-					// method parameter, weighted and origin type
+					// precision and/or origin type
 					i++;
 					if (i < args.length) {
 						try {
-							methodParameter = Double.parseDouble(args[i]);
-							if ((methodParameter < -1.0) || (+1.0 < methodParameter)) {
-								System.out.println(Language.getLabel(68));
-								showSyntax();
-								return;
-							}
+							precision = Integer.parseInt(args[i]);
 							i++;
 						} catch (NumberFormatException e) {}
-						if (i < args.length) {
-							arg = args[i].toUpperCase();
-							if (arg.equals("W") || arg.equals("WEIGHTED")) {
-								isWeighted = true;
-								i++;
-							} else if (arg.equals("UW") || arg.equals("UNWEIGHTED")) {
-								isWeighted = false;
-								i++;
-							}
-						}
 						if (i < args.length) {
 							arg = args[i].toUpperCase();
 							if (arg.equals("UO") || arg.equals("UNIFORM_ORIGIN")) {
@@ -184,7 +164,7 @@ public class Main {
 							} else if (arg.equals("NUO") || arg.equals("NON_UNIFORM_ORIGIN")) {
 								originType = OriginType.NON_UNIFORM_ORIGIN;
 							} else {
-								System.out.println("Error: unknown parameter '" + args[i] + "'");
+								System.out.println("Error: unknown origin type '" + args[i] + "'");
 								showSyntax();
 								return;
 							}
@@ -228,8 +208,8 @@ public class Main {
 			}
 		}
 
-		Thread checkVersion = new Thread() {
-			public void run() {
+    Thread checkVersion = new Thread() {
+	    public void run() {
 				if (hasUpgrade()) {
 					if (isDirect) {
 						String str = Language.getLabel(129) + " " + Main.PROGRAM + " " + vnWeb.getVersion() + " "
@@ -241,32 +221,22 @@ public class Main {
 						upgr.setVisible(true);
 					}
 				}
-			}
-		};
-		checkVersion.start();
+		  }
+  	};
+  	checkVersion.start();
 
 		if (isDirect) {
 			try {
-				DirectClustering dirClus = new DirectClustering(fileName, proximityType, precision,
-						methodType, methodParameter, isWeighted, originType);
-				dirClus.printMeasures();
-				dirClus.saveMeasures();
-				dirClus.saveUltrametric();
+				DirectClustering dirClus = new DirectClustering(fileName, simType, method, precision, originType);
 				dirClus.saveAsTxt();
 				dirClus.saveAsNewick();
 				dirClus.saveAsJson();
+				dirClus.saveUltrametric();
+				dirClus.printDeviationMeasures();
 			} catch (Exception e) {
-				String parameters = "Parameters: -direct " + fileName + " " + proximityType;
+				String parameters = "Parameters: -direct " + fileName + " " + simType + " " + method;
 				if (precision != DirectClustering.AUTO_PRECISION) {
 					parameters += " " + precision;
-				}
-				if (isWeighted) {
-					parameters += " WEIGHTED";
-				}
-				parameters += " " + methodType;
-				if (methodType.equals(MethodType.VERSATILE_LINKAGE) ||
-					methodType.equals(MethodType.BETA_FLEXIBLE)) {
-					parameters += " " + methodParameter;
 				}
 				System.out.println(parameters);
 				LogManager.LOG.severe(e.getMessage());
@@ -292,59 +262,36 @@ public class Main {
 		System.out.println("        Sets de verbosity level of the logger");
 		System.out.println("        LEVEL     : verbosity level, one of");
 		System.out.println("                      OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL");
-		System.out.println("                      Default value for LEVEL: WARNING");
+		System.out.println("        Default value of LEVEL: WARNING");
 		System.out.println("");
-		System.out.println("    -direct  FILE_NAME  PROX_TYPE  [ PRECISION ]  METHOD  [ METHOD_P ]  [ WEIGHTED ]  [ ORIGIN ]");
+		System.out.println("    -direct  FILE_NAME  PROX_TYPE  METHOD  [ PRECISION ]  [ ORIGIN ]");
 		System.out.println("        Direct calculation of the multidendrogram without graphic interface");
 		System.out.println("        FILE_NAME : name of the data file");
 		System.out.println("        PROX_TYPE : proximity type, one of");
 		System.out.println("                      D, DIST, DISTANCE, DISTANCES");
 		System.out.println("                      S, SIM, SIMILARITY, SIMILARITIES");
-		System.out.println("        PRECISION : number of decimal significant digits, auto if missing value");
 		System.out.println("        METHOD    : agglomeration type, one of");
-		System.out.println("                      VL, VERSATILE_LINKAGE");
 		System.out.println("                      SL, SINGLE_LINKAGE");
 		System.out.println("                      CL, COMPLETE_LINKAGE");
-		System.out.println("                      AL, ARITHMETIC_LINKAGE");
-		System.out.println("                      GL, GEOMETRIC_LINKAGE");
-		System.out.println("                      HL, HARMONIC_LINKAGE");
-		System.out.println("                      CD, CENTROID");
+		System.out.println("                      UA, UNWEIGHTED_AVERAGE");
+		System.out.println("                      WA, WEIGHTED_AVERAGE");
+		System.out.println("                      UC, UNWEIGHTED_CENTROID");
+		System.out.println("                      WC, WEIGHTED_CENTROID");
 		System.out.println("                      WD, WARD");
-		System.out.println("                      BF, BETA_FLEXIBLE");
-		System.out.println("        METHOD_P  : method parameter, between -1 and +1, necessary for");
-		System.out.println("                      VL, VERSATILE_LINKAGE");
-		System.out.println("                      BF, BETA_FLEXIBLE");
-		System.out.println("                      Default value for METHOD_P: 0");
-		System.out.println("        WEIGHTED  : weighted method, one of");
-		System.out.println("                      W, WEIGHTED");
-		System.out.println("                      UW, UNWEIGHTED");
-		System.out.println("                      Default value for WEIGHTED: UNWEIGHTED");
+		System.out.println("        PRECISION : number of decimal significant digits, auto if missing value");
 		System.out.println("        ORIGIN    : origin type, one of");
 		System.out.println("                      UO, UNIFORM_ORIGIN");
 		System.out.println("                      NUO, NON_UNIFORM_ORIGIN");
-		System.out.println("                      Default value for ORIGIN: UNIFORM_ORIGIN");
+		System.out.println("        Default value of ORIGIN: UNIFORM_ORIGIN");
 		System.out.println("");
 		System.out.println("");
-		System.out.println("Equivalences between clustering algorithms:");
-		System.out.println("    Arithmetic Linkage Unweighted  = UPGMA = unweighted average");
-		System.out.println("    Versatile Linkage (param  1.0) = Complete Linkage");
-		System.out.println("    Versatile Linkage (param  0.1) = Arithmetic Linkage");
-		System.out.println("    Versatile Linkage (param  0.0) = Geometric Linkage");
-		System.out.println("    Versatile Linkage (param -0.1) = Harmonic Linkage");
-		System.out.println("    Versatile Linkage (param -1.0) = Single Linkage");
-		System.out.println("    Beta Flexible     (param  0.0) = Arithmetic Linkage");
-		System.out.println("");
-		System.out.println("");
-		System.out.println("Examples:");
-		System.out.println("    java -jar multidendrograms.jar");
-		System.out.println("    java -jar multidendrograms.jar -loglevel OFF");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt DISTANCES 3 Complete_Linkage");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D CL");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 CL");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 Versatile_Linkage +1");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 VL 0.1 W");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D CL UO");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 CL NUO");
+		System.out.println("Examples: java -jar multidendrograms.jar");
+		System.out.println("          java -jar multidendrograms.jar -loglevel OFF");
+		System.out.println("          java -jar multidendrograms.jar -direct data.txt DISTANCES Complete_Linkage 3");
+		System.out.println("          java -jar multidendrograms.jar -direct data.txt D CL");
+		System.out.println("          java -jar multidendrograms.jar -direct data.txt D CL 3");
+		System.out.println("          java -jar multidendrograms.jar -direct data.txt D CL UO");
+		System.out.println("          java -jar multidendrograms.jar -direct data.txt D CL 3 NUO");
 	}
 
 	private static boolean hasUpgrade() {

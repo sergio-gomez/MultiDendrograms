@@ -41,7 +41,7 @@ import multidendrograms.initial.InitialProperties;
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Reads a text file containing a proximity matrix in either list or matrix
+ * Reads a text file containing a distances matrix in either list or matrix
  * format, with and without headers
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
@@ -54,7 +54,7 @@ public class ReadTxt {
 	private final LinkedList<String[]> dataList;
 	private int numElements = 0;
 	private String[] names = null;
-	private LinkedList<ProximityPair<String>> data;
+	private LinkedList<SimilarityStruct<String>> data;
 	private double missingValue = InitialProperties.getMissingValue();
 
 	public ReadTxt(final String filePath) throws Exception {
@@ -73,7 +73,7 @@ public class ReadTxt {
 			} else {
 				// ((numLines == 3) || (numLines == 4))
 				boolean typeL, typeM;
-				LinkedList<ProximityPair<String>> lstL, lstM;
+				LinkedList<SimilarityStruct<String>> lstL, lstM;
 				try {
 					typeL = true;
 					lstL = readList();
@@ -106,8 +106,8 @@ public class ReadTxt {
 
 		if (LogManager.LOG.getLevel().equals(Level.FINER)) {
 			LogManager.LOG.finer("---------- DATA ----------");
-			for (final ProximityPair<?> pair : data) {
-				LogManager.LOG.finer(pair.getElement1() + "\t" + pair.getElement2() + "\t" + pair.getProximity());
+			for (final SimilarityStruct<?> s : data) {
+				LogManager.LOG.finer(s.getC1() + "\t" + s.getC2() + "\t" + s.getValue());
 			}
 		}
 	}
@@ -116,7 +116,7 @@ public class ReadTxt {
 		return numElements;
 	}
 
-	public LinkedList<ProximityPair<String>> getData() {
+	public LinkedList<SimilarityStruct<String>> getData() {
 		return data;
 	}
 
@@ -171,18 +171,18 @@ public class ReadTxt {
 		return dataLine;
 	}
 
-	private LinkedList<ProximityPair<String>> readList() throws Exception {
+	private LinkedList<SimilarityStruct<String>> readList() throws Exception {
 		// Temporary list and hash table
-		LinkedList<ProximityPair<String>> lstTmp = new LinkedList<ProximityPair<String>>();
+		LinkedList<SimilarityStruct<String>> lstTmp = new LinkedList<SimilarityStruct<String>>();
 		final Hashtable<String, Integer> ht = new Hashtable<String, Integer>();
 		int ind = 0;
 		int numLine = 1;
-		Double proximity = null;
+		Double value = null;
 		for (final String[] s : dataList) {
 			String a = s[0];
 			String b = s[1];
 			try {
-				proximity = Double.parseDouble(s[2]);
+				value = Double.parseDouble(s[2]);
 			} catch (final NumberFormatException e) {
 				// Data type error in third column
 				throw new IncompatibleFileError(Language.getLabel(13)+ " " + numLine + ". "
@@ -194,7 +194,7 @@ public class ReadTxt {
 			if (!ht.containsKey(b)) {
 				ht.put(b, ind ++);
 			}
-			lstTmp.add(new ProximityPair<String>(a, b, proximity));
+			lstTmp.add(new SimilarityStruct<String>(a, b, value));
 			numLine ++;
 		}
 
@@ -215,26 +215,26 @@ public class ReadTxt {
 			}
 		}
 
-		LinkedList<ProximityPair<String>> lst = new LinkedList<ProximityPair<String>>();
-		for (final ProximityPair<?> pair : lstTmp) {
-			int i = ht.get(pair.getElement1());
-			int j = ht.get(pair.getElement2());
-			proximity = pair.getProximity();
+		LinkedList<SimilarityStruct<String>> lst = new LinkedList<SimilarityStruct<String>>();
+		for (final SimilarityStruct<?> s : lstTmp) {
+			int i = ht.get(s.getC1());
+			int j = ht.get(s.getC2());
+			value = s.getValue();
 			if (i > j) {
 				int aux = i;
 				i = j;
 				j = aux;
 			}
 			if (Double.isNaN(table[i][j])) {
-				table[i][j] = proximity;
-				lst.add(new ProximityPair<String>(names[i], names[j], proximity));
+				table[i][j] = value;
+				lst.add(new SimilarityStruct<String>(names[i], names[j], value));
 			}
 		}
 
 		boolean first = true;
 		for (int i = 0; i < numElements; i ++) {
 			if (Double.isNaN(table[i][i])) {
-				lst.add(new ProximityPair<String>(names[i], names[i], Double.NaN));
+				lst.add(new SimilarityStruct<String>(names[i], names[i], Double.NaN));
 			}
 			for (int j = i + 1; j < numElements; j ++) {
 				// Unassigned distances
@@ -245,7 +245,7 @@ public class ReadTxt {
 						first = false;
 					}
 					table[i][j] = missingValue;
-					lst.add(new ProximityPair<String>(names[i], names[j], missingValue));
+					lst.add(new SimilarityStruct<String>(names[i], names[j], missingValue));
 				}
 			}
 		}
@@ -253,8 +253,8 @@ public class ReadTxt {
 		return lst;
 	}
 
-	private LinkedList<ProximityPair<String>> readMatrix() throws Exception {
-		LinkedList<ProximityPair<String>> lst = null;
+	private LinkedList<SimilarityStruct<String>> readMatrix() throws Exception {
+		LinkedList<SimilarityStruct<String>> lst = null;
 		boolean columnHeaders;
 		boolean lowerTriangular;
 
@@ -305,7 +305,7 @@ public class ReadTxt {
 		return lst;
 	}
 
-	private LinkedList<ProximityPair<String>> readTable(boolean columnHeaders, boolean lowerTriangular, int numCols,
+	private LinkedList<SimilarityStruct<String>> readTable(boolean columnHeaders, boolean lowerTriangular, int numCols,
 			int numLine, Iterator<String[]> iter) throws IncompatibleFileError {
 		double[][] table = new double[numElements][numElements];
 		int row = 0;
@@ -344,12 +344,12 @@ public class ReadTxt {
 		}
 
 		// Check symmetry
-		LinkedList<ProximityPair<String>> lst = new LinkedList<ProximityPair<String>>();
+		LinkedList<SimilarityStruct<String>> lst = new LinkedList<SimilarityStruct<String>>();
 		for (int i = 0; i < numElements; i ++) {
-			lst.add(new ProximityPair<String>(names[i], names[i], table[i][i]));
+			lst.add(new SimilarityStruct<String>(names[i], names[i], table[i][i]));
 			for (int j = i + 1; j < numElements; j ++) {
 				if (table[i][j] == table[j][i]) {
-					lst.add(new ProximityPair<String>(names[i], names[j], table[i][j]));
+					lst.add(new SimilarityStruct<String>(names[i], names[j], table[i][j]));
 				} else {
 					// Non-symmetric matrix error
 					throw new IncompatibleFileError(Language.getLabel(12));

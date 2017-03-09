@@ -51,7 +51,7 @@ Nachkommastellen Etiketten
 Falscher Wert im Eingabefeld 'Nachkommastellen Etiketten'
 Genauigkeit
 Info
-Algorithmusparameter
+
 Fett
 Kursiv
 Normal
@@ -61,12 +61,12 @@ Schriftschnitt
 Akzeptieren
 Ablehnen
 Wurzel
-Gewichtete
+
 Die Figur konnte nicht verarbeitet werden
 Die Konfigurationsdatei wurde nicht gefunden, die standardmäßig eingestellten Werten werden geladen werden
 Die Eigenschaft wurde nicht gefunden
 Die Eigenschaftendatei konnte nicht erstellt werden
-'Algorithmusparameter' muss zwischen -1 und +1 liegen
+
 Unbekannter Fehler
 Der Cluster konnte nicht zurückgewonnen werden
 Der Abstand konnte nicht gespeichert werden
@@ -78,7 +78,7 @@ Das Bild wurde nicht richtig gespeichert
 Leeres Bild
 Der hierarchische Baum konnte nicht konstruiert werden
 Dendrogramm speichern als JSON
-Clustering-Algorithmus inkompatibel mit negativen Daten
+Speichern unter
 Die Datei konnte nicht erstellt werden
 Vorhandene Datei. Möchten Sie es überschreiben?
 In der Datei konnte nicht geschrieben werden
@@ -93,7 +93,7 @@ Westen
 Waagerecht
 Schief
 Senkerecht
-Baumstruktur vom Dendrogramm zeigen
+Details von Dendrogramm zeigen
 Dendrogramm speichern als JPG
 Dendrogramm speichern als PNG
 Dendrogramm speichern als TXT
@@ -109,19 +109,19 @@ Es kannt in dieser Datei nicht gelesen/geschrieben werden
 Es kannt in dieser Datei nicht geschrieben werden
 Es kannt in dieser Datei nicht gelesen werden
 Update
-Maße des Dendrogramms speichern
+
 Keine geladene Datei
 Knotengröße
 Maßtyp
 Ticks
-Ultrametrische matrix speichern
-Maßen des Dendrogramms zeigen
+Ultrametrische matrix speichern als TXT
+Maßen der utrametrischen Abweichung zeigen
 Version
 Autoren
 Aufseher
 GNU Lesser Public License
 Webseite des Projekts
-Maßen des Dendrogramms
+Maßen der utrametrischen Abweichung
 Online Handbuch
 Es wurde ein nicht numerisches Zeichen in einer Zeile oder Spalte, die nicht die erste ist
 Nachfolgende Warnungen werden nicht mehr gezeigt
@@ -131,4 +131,3 @@ Neu
 verfügbar in
 Die actuelle Version
 Einheitlicher Ursprung
-Equivalenzen zwischen Clustering-Algorithmen

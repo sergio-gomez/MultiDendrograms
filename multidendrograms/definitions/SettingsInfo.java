@@ -21,12 +21,12 @@ package multidendrograms.definitions;
 import java.awt.Color;
 import java.awt.Font;
 
-import multidendrograms.core.utils.MathUtils;
 import multidendrograms.types.DendrogramOrientation;
+import multidendrograms.types.MethodName;
 import multidendrograms.types.LabelOrientation;
-import multidendrograms.types.MethodType;
 import multidendrograms.types.OriginType;
-import multidendrograms.types.ProximityType;
+import multidendrograms.types.SimilarityType;
+import multidendrograms.utils.MathUtils;
 
 /**
  * <p>
@@ -42,15 +42,13 @@ import multidendrograms.types.ProximityType;
 public class SettingsInfo {
 
 	// DATA
-	private ProximityType proximityType = ProximityType.DISTANCE;
+	private SimilarityType simType = SimilarityType.DISTANCE;
+
+	// METHOD
+	private MethodName method = MethodName.UNWEIGHTED_AVERAGE;
 
 	// PRECISION
 	private int precision = 0;
-
-	// METHOD
-	private MethodType method = MethodType.ARITHMETIC_LINKAGE;
-	private double methodParameter = 0.0;
-	private boolean weighted = false;
 
 	// TREE
 	private DendrogramOrientation dendroOrientation = DendrogramOrientation.NORTH;
@@ -77,59 +75,43 @@ public class SettingsInfo {
 	private Color axisLabelColor = Color.BLACK;
 	private int axisLabelDecimals = 0;
 
-	public ProximityType getProximityType() {
-		return this.proximityType;
+	public SimilarityType getSimilarityType() {
+		return simType;
 	}
 
-	public void setSimilarityType(ProximityType proximityType) {
-		this.proximityType = proximityType;
+	public void setSimilarityType(final SimilarityType simType) {
+		this.simType = simType;
 	}
 
-	public int getPrecision() {
-		return this.precision;
+	public MethodName getMethod() {
+		return method;
 	}
 
-	public void setPrecision(int precision) {
-		this.precision = precision;
-	}
-
-	public MethodType getMethod() {
-		return this.method;
-	}
-
-	public void setMethod(MethodType method) {
+	public void setMethod(final MethodName method) {
 		this.method = method;
 	}
 
-	public double getMethodParameter() {
-		return this.methodParameter;
+	public int getPrecision() {
+		return precision;
 	}
 
-	public void setMethodParameter(double methodParameter) {
-		this.methodParameter = methodParameter;
-	}
-
-	public boolean isWeighted() {
-		return this.weighted;
-	}
-
-	public void setWeighted(boolean weighted) {
-		this.weighted = weighted;
+	public void setPrecision(final int precision) {
+		this.precision = precision;
 	}
 
 	public DendrogramOrientation getDendrogramOrientation() {
-		return this.dendroOrientation;
+		return dendroOrientation;
 	}
 
 	public DendrogramOrientation getDendrogramAdaptedOrientation() {
-		if (this.proximityType.equals(ProximityType.DISTANCE)) {
-			return this.dendroOrientation;
-		} else {// (this.proximityType.equals(ProximityType.SIMILARITY))
-			if (this.dendroOrientation.equals(DendrogramOrientation.NORTH)) {
+		if (simType.equals(SimilarityType.DISTANCE)) {
+			return dendroOrientation;
+		} else {// (simType.equals(SimilarityType.SIMILARITY))
+			if (dendroOrientation.equals(DendrogramOrientation.NORTH)) {
 				return DendrogramOrientation.SOUTH;
-			} else if (this.dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
+			} else if (dendroOrientation.equals(DendrogramOrientation.SOUTH)) {
 				return DendrogramOrientation.NORTH;
-			} else if (this.dendroOrientation.equals(DendrogramOrientation.EAST)) {
+			} else if (dendroOrientation.equals(DendrogramOrientation.EAST)) {
 				return DendrogramOrientation.WEST;
 			} else {// (dendroOrientation.equals(DendrogramOrientation.WEST))
 				return DendrogramOrientation.EAST;
@@ -137,7 +119,7 @@ public class SettingsInfo {
 		}
 	}
 
-	public void setDendrogramOrientation(DendrogramOrientation dendroOrientation) {
+	public void setDendrogramOrientation(final DendrogramOrientation dendroOrientation) {
 		this.dendroOrientation = dendroOrientation;
 	}
 
@@ -145,7 +127,7 @@ public class SettingsInfo {
 		return this.bandVisible;
 	}
 
-	public void setBandVisible(boolean bandVisible) {
+	public void setBandVisible(final boolean bandVisible) {
 		this.bandVisible = bandVisible;
 	}
 
@@ -166,128 +148,128 @@ public class SettingsInfo {
 	}
 
 	public boolean isNodeNameVisible() {
-		return this.nodeNameVisible;
+		return nodeNameVisible;
 	}
 
-	public void setNodeNameVisible(boolean nodeNameVisible) {
+	public void setNodeNameVisible(final boolean nodeNameVisible) {
 		this.nodeNameVisible = nodeNameVisible;
 	}
 
 	public Font getNodeNameFont() {
-		return this.nodeNameFont;
+		return nodeNameFont;
 	}
 
-	public void setNodeNameFont(Font nodeNameFont) {
+	public void setNodeNameFont(final Font nodeNameFont) {
 		this.nodeNameFont = nodeNameFont;
 	}
 
 	public Color getNodeNameColor() {
-		return this.nodeNameColor;
+		return nodeNameColor;
 	}
 
-	public void setNodeNameColor(Color nodeNameColor) {
+	public void setNodeNameColor(final Color nodeNameColor) {
 		this.nodeNameColor = nodeNameColor;
 	}
 
 	public LabelOrientation getNodeNameOrientation() {
-		return this.nodeNameOrientation;
+		return nodeNameOrientation;
 	}
 
-	public void setNodeNameOrientation(LabelOrientation nodeNameOrientation) {
+	public void setNodeNameOrientation(final LabelOrientation nodeNameOrientation) {
 		this.nodeNameOrientation = nodeNameOrientation;
 	}
 
 	public OriginType getOriginType() {
-		return this.originType;
+		return originType;
 	}
 
-	public void setOriginType(OriginType originType) {
+	public void setOriginType(final OriginType originType) {
 		this.originType = originType;
 	}
 
 	public boolean isAxisVisible() {
-		return this.axisVisible;
+		return axisVisible;
 	}
 
-	public void setAxisVisible(boolean axisVisible) {
+	public void setAxisVisible(final boolean axisVisible) {
 		this.axisVisible = axisVisible;
 	}
 
 	public Color getAxisColor() {
-		return this.axisColor;
+		return axisColor;
 	}
 
-	public void setAxisColor(Color axisColor) {
+	public void setAxisColor(final Color axisColor) {
 		this.axisColor = axisColor;
 	}
 
 	public double getAxisMinValue() {
-		return this.axisMinValue;
+		return axisMinValue;
 	}
 
-	public void setAxisMinValue(double axisMinValue) {
+	public void setAxisMinValue(final double axisMinValue) {
 		this.axisMinValue = axisMinValue;
 	}
 
 	public double getAxisMaxValue() {
-		return this.axisMaxValue;
+		return axisMaxValue;
 	}
 
-	public void setAxisMaxValue(double axisMaxValue) {
+	public void setAxisMaxValue(final double axisMaxValue) {
 		this.axisMaxValue = axisMaxValue;
 	}
 
 	public double getAxisIncrement() {
-		return this.axisIncrement;
+		return axisIncrement;
 	}
 
-	public void setAxisIncrement(double axisIncrement) {
+	public void setAxisIncrement(final double axisIncrement) {
 		this.axisIncrement = axisIncrement;
 	}
 
 	public int getAxisNumberOfTicks() {
-		double axisNumTicks = (this.axisMaxValue - this.axisMinValue) / this.axisIncrement;
+		double axisNumTicks = (axisMaxValue - axisMinValue) / axisIncrement;
 		axisNumTicks = MathUtils.round(axisNumTicks, 6);
-		return (1 + (int)(axisNumTicks));
+		return (1 + (int) (axisNumTicks));
 	}
 
 	public int getAxisTicks() {
-		return this.axisTicks;
+		return axisTicks;
 	}
 
-	public void setAxisTicks(int ticks) {
+	public void setAxisTicks(final int ticks) {
 		this.axisTicks = ticks;
 	}
 
 	public boolean isAxisLabelVisible() {
-		return this.axisLabelVisible;
+		return axisLabelVisible;
 	}
 
-	public void setAxisLabelVisible(boolean axisLabelVisible) {
+	public void setAxisLabelVisible(final boolean axisLabelVisible) {
 		this.axisLabelVisible = axisLabelVisible;
 	}
 
 	public Font getAxisLabelFont() {
-		return this.axisLabelFont;
+		return axisLabelFont;
 	}
 
-	public void setAxisLabelFont(Font axisLabelFont) {
+	public void setAxisLabelFont(final Font axisLabelFont) {
 		this.axisLabelFont = axisLabelFont;
 	}
 
 	public Color getAxisLabelColor() {
-		return this.axisLabelColor;
+		return axisLabelColor;
 	}
 
-	public void setAxisLabelColor(Color axisLabelColor) {
+	public void setAxisLabelColor(final Color axisLabelColor) {
 		this.axisLabelColor = axisLabelColor;
 	}
 
 	public int getAxisLabelDecimals() {
-		return this.axisLabelDecimals;
+		return axisLabelDecimals;
 	}
 
-	public void setAxisLabelDecimals(int axisLabelDecimals) {
+	public void setAxisLabelDecimals(final int axisLabelDecimals) {
 		this.axisLabelDecimals = axisLabelDecimals;
 	}
 
@@ -296,30 +278,29 @@ public class SettingsInfo {
 		String str;
 		try {
 			str = "/// DATA  ///\n";
-			str += "Data type: " + getProximityType();
-			str += "\nPrecision: " + getPrecision();
-			str += "\nMethod: " + getMethod();
-			str += "\nWeighted: " + isWeighted();
+			str += "Data type: " + this.getSimilarityType();
+			str += "\nMethod: " + this.getMethod();
+			str += "\nPrecision: " + this.getPrecision();
 			str += "\n\n/// TREE  ///\n";
-			str += "\nDendrogram orientation: " + getDendrogramOrientation();
-			str += "\nBand: " + isBandVisible();
+			str += "\nDendrogram orientation: " + this.getDendrogramOrientation();
+			str += "\nBand: " + this.isBandVisible();
 			str += "\n\n/// NAMES ///\n";
-			str += "\nNode name: " + isNodeNameVisible();
-			str += "\nNode radius: " + getNodeRadius();
-			str += "\nNode name orientation: " + getNodeNameOrientation();
-			str += "\nNode name font: " + getNodeNameFont();
-			str += "\nNode name color: " + getNodeNameColor();
+			str += "\nNode name: " + this.isNodeNameVisible();
+			str += "\nNode radius: " + this.getNodeRadius();
+			str += "\nNode name orientation: " + this.getNodeNameOrientation();
+			str += "\nNode name font: " + this.getNodeNameFont();
+			str += "\nNode name color: " + this.getNodeNameColor();
 			str += "\n\n/// AXIS  ///\n";
-			str += "\nAxis: " + isAxisVisible();
-			str += "\nAxis color" + getAxisColor();
-			str += "\nAxis minimum value: " + Double.toString(getAxisMinValue());
-			str += "\nAxis maximum value: " + Double.toString(getAxisMaxValue());
-			str += "\nAxis increment: " + Double.toString(getAxisIncrement());
-			str += "\nAxis ticks: " + Double.toString(getAxisTicks());
-			str += "\nAxis label: " + isAxisLabelVisible();
-			str += "\nAxis label font: " + getAxisLabelFont();
-			str += "\nAxis label color" + getAxisLabelColor();
-			str += "\nAxis label decimals: " + Integer.toString(getAxisLabelDecimals());
+			str += "\nAxis: " + this.isAxisVisible();
+			str += "\nAxis color" + this.getAxisColor();
+			str += "\nAxis minimum value: " + Double.toString(this.getAxisMinValue());
+			str += "\nAxis maximum value: " + Double.toString(this.getAxisMaxValue());
+			str += "\nAxis increment: " + Double.toString(this.getAxisIncrement());
+			str += "\nAxis ticks: " + Double.toString(this.getAxisTicks());
+			str += "\nAxis label: " + this.isAxisLabelVisible();
+			str += "\nAxis label font: " + this.getAxisLabelFont();
+			str += "\nAxis label color" + this.getAxisLabelColor();
+			str += "\nAxis label decimals: " + Integer.toString(this.getAxisLabelDecimals());
 		} catch (Exception e) {
 			str = "";
 		}
