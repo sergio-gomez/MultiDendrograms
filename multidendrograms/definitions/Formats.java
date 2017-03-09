@@ -140,7 +140,7 @@ public class Formats {
 		return opt;
 	}
 
-	public static JTextField getformattedTextField(final String caption, final int size, Locale loc) {
+	public static JTextField getFormattedTextField(final String caption, final int size, Locale loc) {
 		final JTextField txt = new JTextField(caption, size);
 		txt.setFont(InitialProperties.getFontTextField());
 		txt.setForeground(InitialProperties.getColorTextField());
@@ -149,7 +149,7 @@ public class Formats {
 		return txt;
 	}
 
-	public static JTextField getformattedTextField() {
+	public static JTextField getFormattedTextField() {
 		final JTextField txt = new JTextField();
 		txt.setFont(InitialProperties.getFontTextField());
 		txt.setForeground(InitialProperties.getColorTextField());

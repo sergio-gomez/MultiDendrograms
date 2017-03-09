@@ -18,22 +18,20 @@
 
 package multidendrograms.data;
 
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import multidendrograms.core.definitions.SymmetricMatrix;
 import multidendrograms.initial.LogManager;
-import multidendrograms.definitions.Cluster;
-import multidendrograms.definitions.DistancesMatrix;
 
 /**
  * <p>
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Given a text file representing a distances matrix between elements,
- * gets all the distances between elements and stores them into a list
+ * Given a text file representing a proximity matrix between elements,
+ * gets all the proximity values between elements and stores them into a list
  *
  * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
  *
@@ -41,88 +39,79 @@ import multidendrograms.definitions.DistancesMatrix;
  */
 public class ExternalData {
 
-	private final DataFile df;
-	LinkedList<SimilarityStruct<String>> data;
-	private int numClusters = 0;
-	private DistancesMatrix distMatrix;
-	private int precision = 0;
-	private Hashtable<Integer, String> names;
+	private final DataFile dataFile;
+	LinkedList<ProximityPair<String>> proximityPairs;
+	private int numElements = 0;
+	private SymmetricMatrix proximityMatrix;
+	private Hashtable<String, Integer> hashNames;
+	private LinkedList<String> names;
 
-	public ExternalData(final DataFile df) throws Exception {
-		this.df = new DataFile(df);
+	public ExternalData(final DataFile dataFile) throws Exception {
+		this.dataFile = new DataFile(dataFile);
 
-		ReadTxt txt = new ReadTxt(df.getPathName());
-		this.data = txt.getData();
-		this.numClusters = txt.getNumElements();
+		ReadTxt txt = new ReadTxt(dataFile.getPathName());
+		this.proximityPairs = txt.getData();
+		this.numElements = txt.getNumElements();
 
-		LogManager.LOG.config("Creating a matrix for " + this.numClusters + " clusters");
+		LogManager.LOG.config("Creating a matrix for " + this.numElements + " elements");
 
-		final Hashtable<String, Cluster> ht = new Hashtable<String, Cluster>();
-		final CountDecimals countDecimals = new CountDecimals();
-		this.distMatrix = new DistancesMatrix(this.numClusters);
-		Cluster.resetId();
-		Iterator<SimilarityStruct<String>> it = this.data.iterator();
-		while (it.hasNext()) {
-			SimilarityStruct<String> pair = it.next();
+		this.proximityMatrix = new SymmetricMatrix(this.numElements);
+		this.hashNames = new Hashtable<String, Integer>();
+		this.names = new LinkedList<String>();
+		int nextId = 0;
+		Iterator<ProximityPair<String>> iterPairs = this.proximityPairs.iterator();
+		while (iterPairs.hasNext()) {
+			ProximityPair<String> pair = iterPairs.next();
 
-			Cluster cluster1;
-			String key1 = pair.getC1();
-			if (ht.containsKey(key1))
-				cluster1 = ht.get(key1);
-			else {
-				cluster1 = new Cluster();
-				cluster1.setName(key1);
-				ht.put(key1, cluster1);
+			int id1;
+			String name1 = pair.getElement1();
+			if (this.hashNames.containsKey(name1)) {
+				id1 = this.hashNames.get(name1);
+			} else {
+				id1 = nextId;
+				nextId ++;
+				this.hashNames.put(name1, id1);
+				this.names.add(name1);
 			}
-
-			Cluster cluster2;
-			String key2 = pair.getC2();
-			if (ht.containsKey(key2))
-				cluster2 = ht.get(key2);
-			else {
-				cluster2 = new Cluster();
-				cluster2.setName(key2);
-				ht.put(key2, cluster2);
+			
+			int id2;
+			String name2 = pair.getElement2();
+			if (this.hashNames.containsKey(name2)) {
+				id2 = this.hashNames.get(name2);
+			} else {
+				id2 = nextId;
+				nextId ++;
+				this.hashNames.put(name2, id2);
+				this.names.add(name2);
 			}
-
-			double dist = pair.getValue();
-			this.distMatrix.setDistance(cluster1, cluster2, dist);
-			if (!Double.isNaN(dist)) {
-				countDecimals.inValue(dist);
-				if (key1.equals(key2)) {
-					cluster1.setRootHeights(dist);
-					cluster1.setNodesHeights(dist);
-				}
-			}
-		}
-		this.precision = countDecimals.getPrecision();
-
-		this.names = new Hashtable<Integer, String>();
-		Enumeration<String> e = ht.keys();
-		while (e.hasMoreElements()) {
-			String s = e.nextElement();
-			this.names.put(ht.get(s).getId(), s);
+			
+			double proximity = pair.getProximity();
+			this.proximityMatrix.setElement(id1, id2, proximity);
 		}
 	}
 
 	public DataFile getDataFile() {
-		return this.df;
+		return this.dataFile;
 	}
 
-	public Hashtable<Integer, String> getNames() {
-		return this.names;
+	public String[] getNames() {
+		return this.names.toArray(new String[this.names.size()]);
 	}
 
-	public DistancesMatrix getDistancesMatrix() {
-		return this.distMatrix;
+	public int getNumberOfElements() {
+		return this.numElements;
 	}
 
-	public LinkedList<SimilarityStruct<String>> getData() {
-		return this.data;
+	public SymmetricMatrix getProximityMatrix() {
+		return this.proximityMatrix;
+	}
+
+	public LinkedList<ProximityPair<String>> getData() {
+		return this.proximityPairs;
 	}
 
 	public int getPrecision() {
-		return this.precision;
+		return this.proximityMatrix.getPrecision();
 	}
 
 }

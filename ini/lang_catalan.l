@@ -51,7 +51,7 @@ Decimals etiquetes
 Valor incorrecte al camp 'Decimals etiquetes'
 Precisió
 Info
-
+Paràmetre d'algorisme
 Negreta
 Cursiva
 Normal
@@ -61,12 +61,12 @@ Font
 Accepta
 Cancel·la
 Arrel
-
+Pesat
 No s'ha pogut processar la figura
 No s'ha trobat l'arxiu de configuració, es carregaran els valors per defecte
 No s'ha trobat la propietat
 No s'ha pogut crear l'arxiu de propietats
-
+'Paràmetre d'algorisme' ha d'estar entre -1 i +1
 Error desconegut
 No s'ha pogut recuperar el cluster
 No s'ha pogut desar la distància
@@ -74,11 +74,11 @@ No s'ha pogut recuperar la matriu
 No s'ha pogut inicialitzar la matriu
 No s'han pogut carregar les propietats del dendrograma
 Desar com
-La imatge no s'ha desat correctament
+No s'ha pogut desar la imatge
 Imatge nul·la
 No s'ha pogut construir l'arbre jeràrquic
 Desar dendrograma en format JSON
-Desa com
+Algorisme clustering incompatible amb dades negatives
 No s'ha pogut crear l'arxiu
 L'arxiu existeix. Vol sobreescriure'l?
 No s'ha pogut escriure a l'arxiu
@@ -93,7 +93,7 @@ Oest
 Horitzontal
 Obliqua
 Vertical
-Mostrar detalls del dendrograma
+Mostrar estructura en arbre del dendrograma
 Desar dendrograma en format JPG
 Desar dendrograma en format PNG
 Desar dendrograma en format TXT
@@ -109,19 +109,19 @@ No es pot llegir/escriure a l'arxiu
 No es pot escriure a l'arxiu
 No es pot llegir l'arxiu
 Actualitzar
-
+Desar mesures del dendrograma
 Cap arxiu carregat
 Mida nodes
 Tipus de mesura
 tics
-Desar matriu ultramètrica en format TXT
-Mostrar mesures de desviació ultramètrica
+Desar matriu ultramètrica
+Mostrar mesures del dendrograma
 Versió
 Autors
 Supervisors
 GNU Lesser Public License
 Web del projecte
-Mesures desviació ultramètrica
+Mesures del dendrograma
 Manual online
 S'ha trobat un caracter no numèric a una filera o columna diferent de la primera
 Descartats els avisos subsegüents
@@ -131,3 +131,4 @@ Nou
 disponible a
 La versió actual és
 Origen uniforme
+Equivalències entre algorismes de clustering

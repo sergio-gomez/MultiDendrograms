@@ -32,10 +32,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import multidendrograms.initial.Language;
+import multidendrograms.initial.MethodName;
+import multidendrograms.utils.NumberUtils;
 import multidendrograms.initial.InitialProperties;
-import multidendrograms.methods.Method;
-import multidendrograms.utils.MathUtils;
-import multidendrograms.definitions.Cluster;
+import multidendrograms.core.definitions.Dendrogram;
+import multidendrograms.core.utils.MathUtils;
 import multidendrograms.definitions.Config;
 
 /**
@@ -52,7 +53,7 @@ import multidendrograms.definitions.Config;
 public class DendrogramTree extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private final Cluster branch;
+	private final Dendrogram branch;
 	private final JTextArea txt;
 	private final DefaultMutableTreeNode root;
 	private final int precision;
@@ -60,10 +61,10 @@ public class DendrogramTree extends JDialog {
 	private String numPrefix, numPostfix;
 	private String bandPrefix, bandPostfix;
 
-	public DendrogramTree(final Cluster c, final Config cfg) throws Exception {
+	public DendrogramTree(Config cfg) throws Exception {
 		super();
 
-		this.branch = c;
+		this.branch = cfg.getRoot();
 		this.precision = cfg.getPrecision();
 
 		this.root = new DefaultMutableTreeNode(Language.getLabel(62));
@@ -103,7 +104,7 @@ public class DendrogramTree extends JDialog {
 
 		this.txt.setSize(frmWidth, frmHeight);
 		setVisible(true);
-		setTitle(cfg.getDataFile().getName() + " - " + Method.toName(cfg.getMethod()));
+		setTitle(cfg.getDataFile().getName() + " - " + MethodName.toName(cfg.getMethod()));
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		pack();
 
@@ -113,10 +114,10 @@ public class DendrogramTree extends JDialog {
 				(screenSize.height - windowSize.height) / 2);
 	}
 
-	private void showBranch(final Cluster cluster, final DefaultMutableTreeNode branch) throws Exception {
+	private void showBranch(final Dendrogram cluster, final DefaultMutableTreeNode branch) throws Exception {
 		DefaultMutableTreeNode full;
-		if (cluster.getNumSubclusters() == 1) {
-			full = new DefaultMutableTreeNode("<html>" + leafPrefix + cluster.getName() + leafPostfix + "</html>");
+		if (cluster.numberOfSubclusters() == 1) {
+			full = new DefaultMutableTreeNode("<html>" + leafPrefix + cluster.getLabel() + leafPostfix + "</html>");
 		} else {
 			double pmin = cluster.getRootBottomHeight();
 			double pmax = cluster.getRootTopHeight();
@@ -127,20 +128,20 @@ public class DendrogramTree extends JDialog {
 			}
 			pmin = MathUtils.round(pmin, precision);
 			pmax = MathUtils.round(pmax, precision);
-			String spmin = MathUtils.format(pmin, precision);
-			String spmax = MathUtils.format(pmax, precision);
+			String spmin = NumberUtils.format(pmin, precision);
+			String spmax = NumberUtils.format(pmax, precision);
 			full = new DefaultMutableTreeNode(
 					"<html>"
-					+ numPrefix + cluster.getNumSubclusters() + numPostfix
+					+ numPrefix + cluster.numberOfSubclusters() + numPostfix
 					+ " &nbsp;&nbsp; "
 					+ bandPrefix + " [" + spmin + ", " + spmax + "] " + bandPostfix
 					+ " &nbsp;&nbsp; "
-					+ numPrefix + " <i>" + cluster.getNumLeaves() + "</i> " + numPostfix
+					+ numPrefix + " <i>" + cluster.numberOfLeaves() + "</i> " + numPostfix
 					+ "</html>");
 		}
 		branch.add(full);
-		if (cluster.getNumSubclusters() > 1) {
-			for (int n = 0; n < cluster.getNumSubclusters(); n ++) {
+		if (cluster.numberOfSubclusters() > 1) {
+			for (int n = 0; n < cluster.numberOfSubclusters(); n ++) {
 				showBranch(cluster.getSubcluster(n), full);
 			}
 		}

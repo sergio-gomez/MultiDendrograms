@@ -20,15 +20,13 @@ package multidendrograms.dendrogram;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 
-import multidendrograms.initial.LogManager;
-import multidendrograms.initial.Language;
-import multidendrograms.types.OriginType;
-import multidendrograms.types.SimilarityType;
-import multidendrograms.utils.MathUtils;
-import multidendrograms.utils.SmartAxis;
-import multidendrograms.definitions.Cluster;
+import multidendrograms.core.definitions.Dendrogram;
+import multidendrograms.core.utils.MathUtils;
+import multidendrograms.core.utils.SmartAxis;
+import multidendrograms.utils.NumberUtils;
 
 /**
  * <p>
@@ -43,113 +41,98 @@ import multidendrograms.definitions.Cluster;
  */
 public class ToJson {
 
-	private final Cluster root;
-	private final int precision;
-	private final SimilarityType simType;
-	private final OriginType originType;
-	private final double dendroBottomHeight;
+	private Dendrogram root;
+	private boolean isUniformOrigin;
+	private double dendroBottomHeight;
 	private PrintWriter printWriter;
 
-	public ToJson(Cluster root, int precision, final SimilarityType simType, final OriginType originType) {
+	public ToJson(Dendrogram root, boolean isUniformOrigin) {
 		this.root = root;
-		this.precision = precision;
-		this.simType = simType;
-		this.originType = originType;
-		SmartAxis smartAxis = new SmartAxis(simType, precision, originType, root);
-		if (simType.equals(SimilarityType.DISTANCE)) {
-			this.dendroBottomHeight = smartAxis.smartMin();
-		} else {// (simType.equals(SimilarityType.SIMILARITY))
-			this.dendroBottomHeight = smartAxis.smartMax();
-		}
+		this.isUniformOrigin = isUniformOrigin;
+		SmartAxis smartAxis = new SmartAxis(root, isUniformOrigin);
+		this.dendroBottomHeight = root.isDistanceBased ? 
+				smartAxis.smartMin() : smartAxis.smartMax();
 	}
 
-	public void saveAsJson(String sPath) throws Exception {
+	public void saveAsJson(String sPath) throws IOException {
 		File file = new File(sPath);
-		try {
-			FileWriter fileWriter = new FileWriter(file);
-			printWriter = new PrintWriter(fileWriter);
-			showCluster(this.root, this.root.getRootBottomHeight(), 0);
-			printWriter.println("");
-			printWriter.close();
-		} catch (Exception e) {
-			String errMsg = Language.getLabel(83);
-			LogManager.LOG.throwing("ToTxt.java", "saveFile()", e);
-			throw new Exception(errMsg);
-		}
+		FileWriter fileWriter = new FileWriter(file);
+		printWriter = new PrintWriter(fileWriter);
+		showCluster(this.root, this.root.getRootBottomHeight(), "");
+		printWriter.println("");
+		printWriter.close();
 	}
 
-	private void showCluster(final Cluster cluster, final double parentHeight, final int level) throws Exception {
-		final int numSubclusters = cluster.getNumSubclusters();
-		final double clusterBottomHeight = cluster.getRootBottomHeight();
-		double clusterHeight, topHeight, bottomHeight;
-		String indent = getIndentation(level);
+	private void showCluster(Dendrogram cluster, double parentHeight, 
+			String blanks) {
+		int numSubclusters = cluster.numberOfSubclusters();
+		double clusterBottomHeight = cluster.getRootBottomHeight();
 		if (numSubclusters == 1) {
-			if (Double.isNaN(clusterBottomHeight) || this.originType.equals(OriginType.UNIFORM_ORIGIN)) {
+			double clusterHeight;
+			if (Double.isNaN(clusterBottomHeight) || this.isUniformOrigin) {
 				clusterHeight = this.dendroBottomHeight;
 			} else {
 				clusterHeight = clusterBottomHeight;
 			}
-			topHeight = clusterHeight;
-			bottomHeight = clusterHeight;
-			String str = indent + "{\"name\": \"" + cluster.getName() + "\", ";
+			double topHeight = clusterHeight;
+			double bottomHeight = clusterHeight;
+			String str = blanks + "{\"name\": \"" + cluster.getLabel() + "\", ";
 			str += getClusterHeight(clusterHeight) + ", ";
 			str += getClusterMargin(topHeight, bottomHeight) + ", ";
 			str += getClusterLength(parentHeight, clusterHeight) + ", ";
 			str += "\"size\": 1}";
-			printWriter.print(str);
+			this.printWriter.print(str);
 		} else {
-			clusterHeight = clusterBottomHeight;
-			topHeight = cluster.getRootTopHeight();
-			bottomHeight = cluster.getRootBottomHeight();
-			printWriter.println(indent + "{");
-			String str = indent + " \"name\": \"\", ";
+			double clusterHeight = clusterBottomHeight;
+			double topHeight = cluster.getRootTopHeight();
+			double bottomHeight = cluster.getRootBottomHeight();
+			this.printWriter.println(blanks + "{");
+			String str = blanks + " \"name\": \"\", ";
 			str += getClusterHeight(clusterHeight) + ", ";
 			str += getClusterMargin(topHeight, bottomHeight) + ", ";
 			str += getClusterLength(parentHeight, clusterHeight) + ",";
-			printWriter.println(str);
-			str = indent + " \"children\": [";
-			printWriter.println(str);
-			for (int n = 0; n < numSubclusters; n++) {
-				showCluster(cluster.getSubcluster(n), clusterHeight, level + 1);
+			this.printWriter.println(str);
+			str = blanks + " \"children\": [";
+			this.printWriter.println(str);
+			for (int n = 0; n < numSubclusters; n ++) {
+				showCluster(cluster.getSubcluster(n), clusterHeight, 
+						blanks + "  ");
 				if (n < numSubclusters - 1) {
-  				printWriter.print(",");
-  			}
-  			printWriter.println("");
+					this.printWriter.print(",");
+				}
+				this.printWriter.println("");
 			}
-			printWriter.println(indent + " ]");
-			printWriter.print(indent + "}");
+			this.printWriter.println(blanks + " ]");
+			this.printWriter.print(blanks + "}");
 		}
 	}
 
-	private String getClusterHeight(final double clusterHeight) {
-		String sHeight = MathUtils.format(clusterHeight, precision);
+	private String getClusterHeight(double clusterHeight) {
+		int precision = this.root.precision;
+		String sHeight = NumberUtils.format(clusterHeight, precision);
 		return "\"height\": " + sHeight;
 	}
 
-	private String getClusterMargin(final double topHeight, final double bottomHeight) {
+	private String getClusterMargin(double topHeight, double bottomHeight) {
+		int precision = this.root.precision;
 		double margin = Math.abs(topHeight - bottomHeight);
-		String sMargin = MathUtils.format(margin, precision);
+		String sMargin = NumberUtils.format(margin, precision);
 		return "\"margin\": " + sMargin;
 	}
 
-	private String getClusterLength(final double parentHeight, final double clusterHeight) {
+	private String getClusterLength(double parentHeight, double clusterHeight) {
+		int precision = this.root.precision;
 		double length;
-		if (this.simType.equals(SimilarityType.DISTANCE)) {
-			length = MathUtils.round(parentHeight, precision) - MathUtils.round(clusterHeight, precision);
+		if (this.root.isDistanceBased) {
+			length = MathUtils.round(parentHeight, precision) - 
+					 MathUtils.round(clusterHeight, precision);
 		} else {
-			length = MathUtils.round(clusterHeight, precision) - MathUtils.round(parentHeight, precision);
+			length = MathUtils.round(clusterHeight, precision) - 
+					 MathUtils.round(parentHeight, precision);
 		}
  		length = MathUtils.round(length, precision);
-		String sLength = MathUtils.format(length, precision);
+		String sLength = NumberUtils.format(length, precision);
 		return "\"length\": " + sLength;
-	}
-
-	private String getIndentation(final int level) {
-		String str = "";
-		for (int n = 0; n < level; n ++) {
-			str += "  ";
-		}
-		return str;
 	}
 
 }

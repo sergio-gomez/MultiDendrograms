@@ -51,7 +51,7 @@ Labels decimals
 Invalid value in 'Labels decimals' field
 Precision
 Info
-
+Algorithm parameter
 Bold
 Italic
 Plain
@@ -61,12 +61,12 @@ Font
 OK
 Cancel
 Root
-
+Weighted
 Unable to process the dendrogram figure
 File header not found, default values will be loaded
 Property not found
 Unable to create the properties file
-
+'Algorithm parameter' must lay between -1 and +1
 Unknown error
 Unable to recover the cluster
 Unable to save the distance
@@ -78,7 +78,7 @@ Unable to save the image
 Null image
 Unable to build the hierarchical tree
 Save dendrogram as JSON tree
-Save as
+Clustering algorithm incompatible with negative data
 Unable to create the file
 Existing file. Do you want to overwrite it?
 Cannot write
@@ -93,7 +93,7 @@ West
 Horizontal
 Oblique
 Vertical
-Show dendrogram details
+Show dendrogram tree structure
 Save dendrogram as JPG
 Save dendrogram as PNG
 Save dendrogram as TXT
@@ -109,19 +109,19 @@ Cannot read/write to file
 Cannot write to file
 Cannot read from file
 Update
-
+Save dendrogram measures
 No file loaded
 Nodes size
 Type of measure
 ticks
-Save ultrametric matrix as TXT
-Show ultrametric deviation measures
+Save ultrametric matrix
+Show dendrogram measures
 Version
 Developers
 Advisors
 GNU Lesser Public License
 Project website
-Ultrametric deviation measures
+Dendrogram measures
 Manual online
 A non-numeric character has been found in a row or column larger than 1
 Additional warning messages skipped
@@ -131,3 +131,4 @@ New
 available at
 Current version is
 Uniform origin
+Equivalences between clustering algorithms

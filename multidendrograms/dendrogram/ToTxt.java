@@ -20,12 +20,12 @@ package multidendrograms.dendrogram;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 
-import multidendrograms.definitions.Cluster;
-import multidendrograms.initial.Language;
-import multidendrograms.initial.LogManager;
-import multidendrograms.utils.MathUtils;
+import multidendrograms.core.definitions.Dendrogram;
+import multidendrograms.core.utils.MathUtils;
+import multidendrograms.utils.NumberUtils;
 
 /**
  * <p>
@@ -39,34 +39,26 @@ import multidendrograms.utils.MathUtils;
  * @since JDK 6.0
  */
 public class ToTxt {
-	private final Cluster root;
-	private final int precision;
+
+	private Dendrogram root;
 	private PrintWriter printWriter;
 
-	public ToTxt(Cluster root, int precision) {
+	public ToTxt(Dendrogram root) {
 		this.root = root;
-		this.precision = precision;
 	}
 
-	public void saveAsTxt(String sPath) throws Exception {
-		File file = new File(sPath);
-		try {
-			FileWriter fileWriter = new FileWriter(file);
-			this.printWriter = new PrintWriter(fileWriter);
-			showCluster(this.root, 0);
-			this.printWriter.close();
-		} catch (Exception e) {
-			String errMsg = Language.getLabel(83);
-			LogManager.LOG.throwing("ToTxt.java", "saveFile()", e);
-			throw new Exception(errMsg);
-		}
+	public void saveAsTxt(String path) throws IOException {
+		File file = new File(path);
+		FileWriter fileWriter = new FileWriter(file);
+		this.printWriter = new PrintWriter(fileWriter);
+		showCluster(this.root, "");
+		this.printWriter.close();
 	}
 
-	private void showCluster(final Cluster cluster, final int level)
-			throws Exception {
-		String str = getIndentation(level);
-		if (cluster.getNumSubclusters() == 1) {
-			str += "*  " + cluster.getName();
+	private void showCluster(Dendrogram cluster, String blanks) {
+		String str = blanks;
+		if (cluster.numberOfSubclusters() == 1) {
+			str += "*  " + cluster.getLabel();
 		} else {
 			double pmin = cluster.getRootBottomHeight();
 			double pmax = cluster.getRootTopHeight();
@@ -75,26 +67,20 @@ public class ToTxt {
 				pmin = pmax;
 				pmax = tmp;
 			}
+			int precision = this.root.precision;
 			pmin = MathUtils.round(pmin, precision);
 			pmax = MathUtils.round(pmax, precision);
-			String spmin = MathUtils.format(pmin, precision);
-			String spmax = MathUtils.format(pmax, precision);
-			str += "+ " + cluster.getNumSubclusters() + "  [" + spmin + ", " + spmax + "]  " + cluster.getNumLeaves();
+			String spmin = NumberUtils.format(pmin, precision);
+			String spmax = NumberUtils.format(pmax, precision);
+			str += "+ " + cluster.numberOfSubclusters() + "  [" + spmin + 
+					", " + spmax + "]  " + cluster.numberOfLeaves();
 		}
-		printWriter.println(str);
-		if (cluster.getNumSubclusters() > 1) {
-			for (int n = 0; n < cluster.getNumSubclusters(); n ++) {
-				showCluster(cluster.getSubcluster(n), level + 1);
+		this.printWriter.println(str);
+		if (cluster.numberOfSubclusters() > 1) {
+			for (int n = 0; n < cluster.numberOfSubclusters(); n ++) {
+				showCluster(cluster.getSubcluster(n), blanks + "  ");
 			}
 		}
-	}
-
-	private String getIndentation(final int level) {
-		String str = "";
-		for (int n = 0; n < level; n ++) {
-			str += "  ";
-		}
-		return str;
 	}
 
 }

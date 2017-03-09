@@ -42,10 +42,10 @@ public class InitialProperties {
 	private static double missingValue = 0.0;
 
 	// Windows
-	private static int widthMainWindow = 800;
-	private static int heightMainWindow = 690;
-	private static int widthDendroWindow = 400;
-	private static int heightDendroWindow = 400;
+	private static int heightMainWindow = 800;
+	private static int widthMainWindow = 1000;
+	private static int heightDendroWindow = 500;
+	private static int widthDendroWindow = 600;
 
 	// Dendrograms
 	private static Font fontDendroNames = new Font("Arial", Font.PLAIN, 10);
@@ -57,6 +57,7 @@ public class InitialProperties {
 	private static double sizeDendroMargin = 15.0;
 
 	// Settings
+	private static boolean weighted = false;
 	private static boolean showBands = true;
 	private static boolean showNodeLabels = true;
 	private static boolean uniformOrigin = true;
@@ -198,6 +199,10 @@ public class InitialProperties {
 
 	public static double getSizeDendroMargin() {
 		return InitialProperties.sizeDendroMargin;
+	}
+
+	public static boolean getWeighted() {
+		return InitialProperties.weighted;
 	}
 
 	public static boolean getShowBands() {
@@ -433,75 +438,76 @@ public class InitialProperties {
 
 	public void setProperties() {
 		// Language
-		InitialProperties.language = this.getString("language", InitialProperties.language);
+		InitialProperties.language = getString("language", InitialProperties.language);
 
 		// Data
-		InitialProperties.missingValue = this.getDouble("missingValue", InitialProperties.missingValue);
+		InitialProperties.missingValue = getDouble("missingValue", InitialProperties.missingValue);
 
 		// Windows
-		InitialProperties.heightMainWindow = this.getInteger("heightMainWindow", InitialProperties.heightMainWindow);
-		InitialProperties.widthMainWindow = this.getInteger("widthMainWindow", InitialProperties.widthMainWindow);
-		InitialProperties.heightDendroWindow = this.getInteger("heightDendroWindow", InitialProperties.heightDendroWindow);
-		InitialProperties.widthDendroWindow = this.getInteger("widthDendroWindow", InitialProperties.widthDendroWindow);
+		InitialProperties.heightMainWindow = getInteger("heightMainWindow", InitialProperties.heightMainWindow);
+		InitialProperties.widthMainWindow = getInteger("widthMainWindow", InitialProperties.widthMainWindow);
+		InitialProperties.heightDendroWindow = getInteger("heightDendroWindow", InitialProperties.heightDendroWindow);
+		InitialProperties.widthDendroWindow = getInteger("widthDendroWindow", InitialProperties.widthDendroWindow);
 
 		// Dendrograms
-		InitialProperties.fontDendroNames = this.getFont("fontDendroNames", InitialProperties.fontDendroNames);
-		InitialProperties.colorDendroNames = this.getColor("colorDendroNames", InitialProperties.colorDendroNames);
-		InitialProperties.fontDendroLabels = this.getFont("fontDendroLabels", InitialProperties.fontDendroLabels);
-		InitialProperties.colorDendroLabels = this.getColor("colorDendroLabels", InitialProperties.colorDendroLabels);
-		InitialProperties.colorDendroAxis = this.getColor("colorDendroAxis", InitialProperties.colorDendroAxis);
-		InitialProperties.colorDendroBand = this.getColor("colorDendroBand", InitialProperties.colorDendroBand);
-		InitialProperties.sizeDendroMargin = this.getDouble("sizeDendroMargin", InitialProperties.sizeDendroMargin);
+		InitialProperties.fontDendroNames = getFont("fontDendroNames", InitialProperties.fontDendroNames);
+		InitialProperties.colorDendroNames = getColor("colorDendroNames", InitialProperties.colorDendroNames);
+		InitialProperties.fontDendroLabels = getFont("fontDendroLabels", InitialProperties.fontDendroLabels);
+		InitialProperties.colorDendroLabels = getColor("colorDendroLabels", InitialProperties.colorDendroLabels);
+		InitialProperties.colorDendroAxis = getColor("colorDendroAxis", InitialProperties.colorDendroAxis);
+		InitialProperties.colorDendroBand = getColor("colorDendroBand", InitialProperties.colorDendroBand);
+		InitialProperties.sizeDendroMargin = getDouble("sizeDendroMargin", InitialProperties.sizeDendroMargin);
 
 		// Settings
-		InitialProperties.showBands = this.getBoolean("showBands", InitialProperties.showBands);
-		InitialProperties.showNodeLabels = this.getBoolean("showNodeLabels", InitialProperties.showNodeLabels);
-		InitialProperties.uniformOrigin = this.getBoolean("uniformOrigin", InitialProperties.uniformOrigin);
-		InitialProperties.showAxis = this.getBoolean("showAxis", InitialProperties.showAxis);
-		InitialProperties.showAxisLabels = this.getBoolean("showAxisLabels", InitialProperties.showAxisLabels);
+		InitialProperties.weighted = getBoolean("weighted", InitialProperties.weighted);
+		InitialProperties.showBands = getBoolean("showBands", InitialProperties.showBands);
+		InitialProperties.showNodeLabels = getBoolean("showNodeLabels", InitialProperties.showNodeLabels);
+		InitialProperties.uniformOrigin = getBoolean("uniformOrigin", InitialProperties.uniformOrigin);
+		InitialProperties.showAxis = getBoolean("showAxis", InitialProperties.showAxis);
+		InitialProperties.showAxisLabels = getBoolean("showAxisLabels", InitialProperties.showAxisLabels);
 
 		// Label
-		InitialProperties.fontLabel = this.getFont("fontLabel", InitialProperties.fontLabel);
-		InitialProperties.colorLabel = this.getColor("colorLabel", InitialProperties.colorLabel);
+		InitialProperties.fontLabel = getFont("fontLabel", InitialProperties.fontLabel);
+		InitialProperties.colorLabel = getColor("colorLabel", InitialProperties.colorLabel);
 
 		// Title label
-		InitialProperties.fontTitle = this.getFont("fontTitle", InitialProperties.fontTitle);
-		InitialProperties.colorTitle = this.getColor("colorTitle", InitialProperties.colorTitle);
-		InitialProperties.colorTitleBackground = this.getColor("colorTitleBackground", InitialProperties.colorTitleBackground);
+		InitialProperties.fontTitle = getFont("fontTitle", InitialProperties.fontTitle);
+		InitialProperties.colorTitle = getColor("colorTitle", InitialProperties.colorTitle);
+		InitialProperties.colorTitleBackground = getColor("colorTitleBackground", InitialProperties.colorTitleBackground);
 
 		// TextField
-		InitialProperties.fontTextField = this.getFont("fontTextField", InitialProperties.fontTextField);
-		InitialProperties.colorTextField = this.getColor("colorTextField", InitialProperties.colorTextField);
-		InitialProperties.colorTextFieldBackground = this.getColor("colorTextFieldBackground", InitialProperties.colorTextFieldBackground);
+		InitialProperties.fontTextField = getFont("fontTextField", InitialProperties.fontTextField);
+		InitialProperties.colorTextField = getColor("colorTextField", InitialProperties.colorTextField);
+		InitialProperties.colorTextFieldBackground = getColor("colorTextFieldBackground", InitialProperties.colorTextFieldBackground);
 
 		// MenuItem
-		InitialProperties.fontMenuItem = this.getFont("fontMenuItem", InitialProperties.fontMenuItem);
-		InitialProperties.colorMenuItem = this.getColor("colorMenuItem", InitialProperties.colorMenuItem);
+		InitialProperties.fontMenuItem = getFont("fontMenuItem", InitialProperties.fontMenuItem);
+		InitialProperties.colorMenuItem = getColor("colorMenuItem", InitialProperties.colorMenuItem);
 
 		// Button
-		InitialProperties.fontButton = this.getFont("fontButton", InitialProperties.fontButton);
-		InitialProperties.colorButton = this.getColor("colorButton", InitialProperties.colorButton);
+		InitialProperties.fontButton = getFont("fontButton", InitialProperties.fontButton);
+		InitialProperties.colorButton = getColor("colorButton", InitialProperties.colorButton);
 
 		// ComboBox
-		InitialProperties.fontComboBox = this.getFont("fontComboBox", InitialProperties.fontComboBox);
-		InitialProperties.colorComboBox = this.getColor("colorComboBox", InitialProperties.colorComboBox);
-		InitialProperties.colorComboBoxBackground = this.getColor("colorComboBoxBackground", InitialProperties.colorComboBoxBackground);
+		InitialProperties.fontComboBox = getFont("fontComboBox", InitialProperties.fontComboBox);
+		InitialProperties.colorComboBox = getColor("colorComboBox", InitialProperties.colorComboBox);
+		InitialProperties.colorComboBoxBackground = getColor("colorComboBoxBackground", InitialProperties.colorComboBoxBackground);
 
 		// CheckBox
-		InitialProperties.fontCheckBox = this.getFont("fontCheckBox", InitialProperties.fontCheckBox);
-		InitialProperties.colorCheckBox = this.getColor("colorCheckBox", InitialProperties.colorCheckBox);
+		InitialProperties.fontCheckBox = getFont("fontCheckBox", InitialProperties.fontCheckBox);
+		InitialProperties.colorCheckBox = getColor("colorCheckBox", InitialProperties.colorCheckBox);
 
 		// RadioButton
-		InitialProperties.fontRadioButton = this.getFont("fontRadioButton", InitialProperties.fontRadioButton);
-		InitialProperties.colorRadioButton = this.getColor("colorRadioButton", InitialProperties.colorRadioButton);
+		InitialProperties.fontRadioButton = getFont("fontRadioButton", InitialProperties.fontRadioButton);
+		InitialProperties.colorRadioButton = getColor("colorRadioButton", InitialProperties.colorRadioButton);
 
 		// Tree
-		InitialProperties.fontTreeLeaf = this.getFont("fontTreeLeaf", InitialProperties.fontTreeLeaf);
-		InitialProperties.colorTreeLeaf = this.getColor("colorTreeLeaf", InitialProperties.colorTreeLeaf);
-		InitialProperties.fontTreeNum = this.getFont("fontTreeNum", InitialProperties.fontTreeNum);
-		InitialProperties.colorTreeNum = this.getColor("colorTreeNum", InitialProperties.colorTreeNum);
-		InitialProperties.fontTreeBand = this.getFont("fontTreeBand", InitialProperties.fontTreeBand);
-		InitialProperties.colorTreeBand = this.getColor("colorTreeBand", InitialProperties.colorTreeBand);
+		InitialProperties.fontTreeLeaf = getFont("fontTreeLeaf", InitialProperties.fontTreeLeaf);
+		InitialProperties.colorTreeLeaf = getColor("colorTreeLeaf", InitialProperties.colorTreeLeaf);
+		InitialProperties.fontTreeNum = getFont("fontTreeNum", InitialProperties.fontTreeNum);
+		InitialProperties.colorTreeNum = getColor("colorTreeNum", InitialProperties.colorTreeNum);
+		InitialProperties.fontTreeBand = getFont("fontTreeBand", InitialProperties.fontTreeBand);
+		InitialProperties.colorTreeBand = getColor("colorTreeBand", InitialProperties.colorTreeBand);
 	}
 
 	private String getString(final String label, String defaultString) {

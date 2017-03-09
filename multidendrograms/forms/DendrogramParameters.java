@@ -22,15 +22,15 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JOptionPane;
 
-import multidendrograms.initial.Language;
-import multidendrograms.forms.panels.SettingsPanel;
-import multidendrograms.types.DendrogramOrientation;
-import multidendrograms.types.MethodName;
-import multidendrograms.types.LabelOrientation;
-import multidendrograms.types.SimilarityType;
+import multidendrograms.core.clusterings.HierarchicalClustering;
 import multidendrograms.data.ExternalData;
-import multidendrograms.definitions.DistancesMatrix;
 import multidendrograms.dendrogram.UltrametricMatrix;
+import multidendrograms.forms.panels.SettingsPanel;
+import multidendrograms.initial.Language;
+import multidendrograms.types.DendrogramOrientation;
+import multidendrograms.types.LabelOrientation;
+import multidendrograms.types.MethodType;
+import multidendrograms.types.ProximityType;
 
 /**
  * <p>
@@ -49,13 +49,15 @@ public class DendrogramParameters {
 	private ExternalData externalData;
 
 	// MultiDendrogram
-	private DistancesMatrix distMatrix = null;
+	private HierarchicalClustering clustering = null;
 	private UltrametricMatrix ultraMatrix = null;
 
-	// Settings on type of data, method, and precision
-	private SimilarityType simType;
-	private MethodName method;
+	// Settings on type of proximity, precision and method
+	private ProximityType proximityType;
 	private int precision;
+	private MethodType method;
+	private double methodParameter;
+	private boolean weighted = false;
 
 	// TREE
 	private DendrogramOrientation dendroOrientation = DendrogramOrientation.NORTH;
@@ -82,18 +84,18 @@ public class DendrogramParameters {
 	private Color axisLabelColor = Color.BLACK;
 	private int axisLabelDecimals = 0;
 
-	public DendrogramParameters(final ExternalData externalData, final DistancesMatrix distMatrix) {
+	public DendrogramParameters(ExternalData externalData, HierarchicalClustering clustering) {
 		try {
 			this.externalData = externalData;
-			this.distMatrix = distMatrix;
+			this.clustering = clustering;
 			SettingsPanel.getConfigPanel(this);
 		} catch (Exception e) {
 			showError("Error: \n" + e.toString());
 		}
 	}
 
-	public DistancesMatrix getDistancesMatrix() {
-		return this.distMatrix;
+	public HierarchicalClustering getHierarchicalClustering() {
+		return this.clustering;
 	}
 
 	public UltrametricMatrix getUltrametricMatrix() {
@@ -113,35 +115,51 @@ public class DendrogramParameters {
 		return this.externalData;
 	}
 
-	public SimilarityType getSimilarityType() {
-		return this.simType;
+	public ProximityType getProximityType() {
+		return this.proximityType;
 	}
 
-	public void setSimilarityType(final SimilarityType simType) {
-		this.simType = simType;
-	}
-
-	public MethodName getMethod() {
-		return this.method;
-	}
-
-	public void setMethod(final MethodName method) {
-		this.method = method;
+	public void setProximityType(ProximityType proximityType) {
+		this.proximityType = proximityType;
 	}
 
 	public int getPrecision() {
 		return this.precision;
 	}
 
-	public void setPrecision(final int precision) {
+	public void setPrecision(int precision) {
 		this.precision = precision;
+	}
+
+	public MethodType getMethod() {
+		return this.method;
+	}
+
+	public void setMethod(MethodType method) {
+		this.method = method;
+	}
+
+	public double getMethodParameter() {
+		return this.methodParameter;
+	}
+
+	public void setMethodParameter(double methodParameter) {
+		this.methodParameter = methodParameter;
+	}
+
+	public boolean isWeighted() {
+		return this.weighted;
+	}
+
+	public void setWeighted(boolean weighted) {
+		this.weighted = weighted;
 	}
 
 	public DendrogramOrientation getDendrogramOrientation() {
 		return this.dendroOrientation;
 	}
 
-	public void setDendrogramOrientation(final DendrogramOrientation dendroOrientation) {
+	public void setDendrogramOrientation(DendrogramOrientation dendroOrientation) {
 		this.dendroOrientation = dendroOrientation;
 	}
 
@@ -149,7 +167,7 @@ public class DendrogramParameters {
 		return this.bandVisible;
 	}
 
-	public void setBandVisible(final boolean bandVisible) {
+	public void setBandVisible(boolean bandVisible) {
 		this.bandVisible = bandVisible;
 	}
 
@@ -157,7 +175,7 @@ public class DendrogramParameters {
 		return this.bandColor;
 	}
 
-	public void setBandColor(final Color bandColor) {
+	public void setBandColor(Color bandColor) {
 		this.bandColor = bandColor;
 	}
 
@@ -165,7 +183,7 @@ public class DendrogramParameters {
 		return this.nodeRadius;
 	}
 
-	public void setNodeRadius(final int nodeRadius) {
+	public void setNodeRadius(int nodeRadius) {
 		this.nodeRadius = nodeRadius;
 	}
 
@@ -173,7 +191,7 @@ public class DendrogramParameters {
 		return this.nodeNameVisible;
 	}
 
-	public void setNodeNameVisible(final boolean nodeNameVisible) {
+	public void setNodeNameVisible(boolean nodeNameVisible) {
 		this.nodeNameVisible = nodeNameVisible;
 	}
 
@@ -181,7 +199,7 @@ public class DendrogramParameters {
 		return this.nodeNameFont;
 	}
 
-	public void setNodeNameFont(final Font nodeNameFont) {
+	public void setNodeNameFont(Font nodeNameFont) {
 		this.nodeNameFont = nodeNameFont;
 	}
 
@@ -189,7 +207,7 @@ public class DendrogramParameters {
 		return this.nodeNameColor;
 	}
 
-	public void setNodeNameColor(final Color nodeNameColor) {
+	public void setNodeNameColor(Color nodeNameColor) {
 		this.nodeNameColor = nodeNameColor;
 	}
 
@@ -197,7 +215,7 @@ public class DendrogramParameters {
 		return this.nodeNameOrientation;
 	}
 
-	public void setNodeNameOrientation(final LabelOrientation nodeNameOrientation) {
+	public void setNodeNameOrientation(LabelOrientation nodeNameOrientation) {
 		this.nodeNameOrientation = nodeNameOrientation;
 	}
 
@@ -205,7 +223,7 @@ public class DendrogramParameters {
 		return this.uniformOrigin;
 	}
 
-	public void setUniformOrigin(final boolean uniformOrigin) {
+	public void setUniformOrigin(boolean uniformOrigin) {
 		this.uniformOrigin = uniformOrigin;
 	}
 
@@ -213,7 +231,7 @@ public class DendrogramParameters {
 		return this.axisVisible;
 	}
 
-	public void setAxisVisible(final boolean axisVisible) {
+	public void setAxisVisible(boolean axisVisible) {
 		this.axisVisible = axisVisible;
 	}
 
@@ -221,7 +239,7 @@ public class DendrogramParameters {
 		return this.axisColor;
 	}
 
-	public void setAxisColor(final Color axisColor) {
+	public void setAxisColor(Color axisColor) {
 		this.axisColor = axisColor;
 	}
 
@@ -229,7 +247,7 @@ public class DendrogramParameters {
 		return this.axisMinVal;
 	}
 
-	public void setAxisMinVal(final double axisMinVal) {
+	public void setAxisMinVal(double axisMinVal) {
 		this.axisMinVal = axisMinVal;
 	}
 
@@ -237,7 +255,7 @@ public class DendrogramParameters {
 		return this.axisMaxVal;
 	}
 
-	public void setAxisMaxVal(final double axisMaxVal) {
+	public void setAxisMaxVal(double axisMaxVal) {
 		this.axisMaxVal = axisMaxVal;
 	}
 
@@ -245,7 +263,7 @@ public class DendrogramParameters {
 		return this.axisIncrement;
 	}
 
-	public void setAxisIncrement(final double axisIncrement) {
+	public void setAxisIncrement(double axisIncrement) {
 		this.axisIncrement = axisIncrement;
 	}
 
@@ -253,7 +271,7 @@ public class DendrogramParameters {
 		return this.axisTicks;
 	}
 
-	public void setAxisTicks(final int axisTicks) {
+	public void setAxisTicks(int axisTicks) {
 		this.axisTicks = axisTicks;
 	}
 
@@ -261,7 +279,7 @@ public class DendrogramParameters {
 		return this.axisLabelVisible;
 	}
 
-	public void setAxisLabelVisible(final boolean axisLabelVisible) {
+	public void setAxisLabelVisible(boolean axisLabelVisible) {
 		this.axisLabelVisible = axisLabelVisible;
 	}
 
@@ -269,7 +287,7 @@ public class DendrogramParameters {
 		return this.axisLabelFont;
 	}
 
-	public void setAxisLabelFont(final Font axisLabelFont) {
+	public void setAxisLabelFont(Font axisLabelFont) {
 		this.axisLabelFont = axisLabelFont;
 	}
 
@@ -277,7 +295,7 @@ public class DendrogramParameters {
 		return this.axisLabelColor;
 	}
 
-	public void setAxisLabelColor(final Color axisLabelColor) {
+	public void setAxisLabelColor(Color axisLabelColor) {
 		this.axisLabelColor = axisLabelColor;
 	}
 
@@ -285,7 +303,7 @@ public class DendrogramParameters {
 		return this.axisLabelDecimals;
 	}
 
-	public void setAxisLabelDecimals(final int axisLabelDecimals) {
+	public void setAxisLabelDecimals(int axisLabelDecimals) {
 		this.axisLabelDecimals = axisLabelDecimals;
 	}
 

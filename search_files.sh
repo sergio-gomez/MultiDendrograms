@@ -1,5 +1,5 @@
 for i in  */*/*.java */*/*/*.java */*.l */*.ini */*.mf ; do
   echo $i
-  grep -i "openFrameCount" $i
+  grep -i "Versatile" $i
   echo "--------"
 done
