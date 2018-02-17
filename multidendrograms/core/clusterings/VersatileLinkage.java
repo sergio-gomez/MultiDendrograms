@@ -42,7 +42,11 @@ public class VersatileLinkage extends HierarchicalClustering {
 			double power) {
 		super(proximityMatrix, labels, isDistanceBased, precision);
 		this.isWeighted = isWeighted;
-		this.power = power;
+		if (this.isDistanceBased) {
+			this.power = +power;
+		} else {
+			this.power = -power;
+		}
 	}
 
 	@Override

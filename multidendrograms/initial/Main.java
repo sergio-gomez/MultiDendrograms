@@ -50,7 +50,7 @@ import multidendrograms.types.ProximityType;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "5.0.0";
+	public static final String VERSION = "5.0.1";
 	public static final String VERSION_SHORT = "5.0";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";

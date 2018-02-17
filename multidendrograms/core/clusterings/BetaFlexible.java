@@ -42,7 +42,11 @@ public class BetaFlexible extends LanceWilliams {
 			double beta) {
 		super(proximityMatrix, labels, isDistanceBased, precision);
 		this.isWeighted = isWeighted;
-		this.beta = beta;
+		if (this.isDistanceBased) {
+			this.beta = +beta;
+		} else {
+			this.beta = -beta;
+		}
 	}
 
 	@Override
