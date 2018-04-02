@@ -93,9 +93,10 @@ public class DendrogramPlot {
 			}
 			this.nodesList.add(new Node(position.getX(), position.getY(), this.radius, cluster.getLabel()));
 		} else {// (numSubclusters > 1)
+			rootTopHeight = MathUtils.round(rootTopHeight, precision);
+			rootBottomHeight = MathUtils.round(rootBottomHeight, precision);
 			double rootIncrHeight = this.bandVisible ? Math.abs(rootTopHeight - rootBottomHeight) : 0.0;
 			rootIncrHeight = MathUtils.round(rootIncrHeight, precision);
-			rootBottomHeight = MathUtils.round(rootBottomHeight, precision);
 			double xMin = Double.MAX_VALUE;
 			double xMax = Double.MIN_VALUE;
 			for (int n = 0; n < numSubclusters; n ++) {

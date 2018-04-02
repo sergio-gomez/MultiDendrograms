@@ -351,16 +351,19 @@ public class Main {
 	}
 
 	private static boolean hasUpgrade() {
+  	final boolean check = true;
 		boolean upgradeable = false;
 		try {
-			URL url = new URL(Main.LAST_VERSION_URL);
-			InputStreamReader istream = new InputStreamReader(url.openStream());
-			BufferedReader in = new BufferedReader(istream);
-			String verWeb = in.readLine();
-			vn = new VersionNumber(Main.VERSION);
-			vnWeb = new VersionNumber(verWeb);
-			if (vnWeb.newerThan(vn)) {
-				upgradeable = true;
+  		if (check) {
+				URL url = new URL(Main.LAST_VERSION_URL);
+				InputStreamReader istream = new InputStreamReader(url.openStream());
+				BufferedReader in = new BufferedReader(istream);
+				String verWeb = in.readLine();
+				vn = new VersionNumber(Main.VERSION);
+				vnWeb = new VersionNumber(verWeb);
+				if (vnWeb.newerThan(vn)) {
+					upgradeable = true;
+				}
 			}
 		} catch (Exception e) {
 			upgradeable = false;
