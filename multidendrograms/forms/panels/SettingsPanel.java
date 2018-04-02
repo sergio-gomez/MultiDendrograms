@@ -154,7 +154,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		final String strToolTip =
         "<html><b>"
         + Language.getLabel(133)
-        + ":</b><br>&nbsp;&nbsp;Arithmetic Linkage " + Language.getLabel(63) + " = UPGMA = unweighted average<br>"
+        + ":</b><br>&nbsp;&nbsp;Arithmetic Linkage Unweighted = UPGMA = unweighted average<br>"
         + "&nbsp;&nbsp;Versatile Linkage (param 1.0) = Complete Linkage<br>"
         + "&nbsp;&nbsp;Versatile Linkage (param 0.1) = Arithmetic Linkage<br>"
         + "&nbsp;&nbsp;Versatile Linkage (param 0.0) = Geometric Linkage<br>"

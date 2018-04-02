@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.logging.Level;
 import javax.swing.JOptionPane;
+import javax.swing.ToolTipManager;
 
 import multidendrograms.initial.LogManager.LogType;
 import multidendrograms.utils.VersionNumber;
@@ -50,7 +51,7 @@ import multidendrograms.types.ProximityType;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "5.0.1";
+	public static final String VERSION = "5.0.2";
 	public static final String VERSION_SHORT = "5.0";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
@@ -64,6 +65,7 @@ public class Main {
 	private static final LogType LOG_XML = LogType.XML;
 	private static final String LOG_FILE = "logs/md_log.xml";
 	private static final String CONFIGURATION_FILE = "ini/md.ini";
+	private static final int TOOLTIP_DISMISS_DELAY = 20000;
 
 	private static VersionNumber vn, vnWeb;
 	private static Boolean isDirect = false;
@@ -73,6 +75,7 @@ public class Main {
 		PrincipalDesk desk = new PrincipalDesk(title);
 		Dimension pantalla = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension ventana = desk.getSize();
+		ToolTipManager.sharedInstance().setDismissDelay(TOOLTIP_DISMISS_DELAY);
 		desk.setLocation((pantalla.width - ventana.width) / 2,
 				(pantalla.height - ventana.height) / 2);
 		desk.setVisible(true);
