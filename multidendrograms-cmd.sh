@@ -12,7 +12,7 @@ if [ $VERSION ]
 then
 	if [ $VERSION -ge $REQUIRED_VERSION_NUM ]
 	then
-		echo MultiDendrograms 5.0.2
+		echo MultiDendrograms 5.0.3
 		echo Copyright \(c\) 2018 Sergio Gomez, Alberto Fernandez
 		echo This program comes with ABSOLUTELY NO WARRANTY.
 		echo This is free software, and you are welcome to redistribute it under certain conditions.

@@ -25,7 +25,7 @@ package multidendrograms.types;
  *
  * Type of origin
  *
- * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
+ * @author Justo Montiel, David Torres, Sergio Gomez, Alberto Fernandez
  *
  * @since JDK 6.0
  */

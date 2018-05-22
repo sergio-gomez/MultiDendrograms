@@ -37,6 +37,7 @@ public class Dendrogram {
 	private int identifier;
 	private String label;
 	private double rootBottomHeight = Double.NaN;
+	private double rootInternalHeight = Double.NaN;
 	private double rootTopHeight = Double.NaN;
 
 	// Parameters used to build the dendrogram
@@ -76,11 +77,20 @@ public class Dendrogram {
 
 	public void setRootHeights(final double height) {
 		this.rootBottomHeight = height;
+		this.rootInternalHeight = height;
 		this.rootTopHeight = height;
 	}
 
 	public double getRootBottomHeight() {
 		return this.rootBottomHeight;
+	}
+
+	public void setRootInternalHeight(final double rootInternalHeight) {
+		this.rootInternalHeight = rootInternalHeight;
+	}
+
+	public double getRootInternalHeight() {
+		return this.rootInternalHeight;
 	}
 
 	public void setRootTopHeight(final double rootTopHeight) {

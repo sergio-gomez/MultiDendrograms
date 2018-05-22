@@ -48,4 +48,12 @@ public class SingleLinkage extends HierarchicalClustering {
 		}
 	}
 
+	protected double calculateInternalProximity(Dendrogram c) {
+		if (this.isDistanceBased) {
+			return minimumInternalProximity(c);
+		} else {
+			return maximumInternalProximity(c);
+		}
+	}
+
 }

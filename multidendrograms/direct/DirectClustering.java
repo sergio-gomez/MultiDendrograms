@@ -31,6 +31,7 @@ import multidendrograms.core.definitions.Dendrogram;
 import multidendrograms.core.definitions.SymmetricMatrix;
 import multidendrograms.data.DataFile;
 import multidendrograms.data.ExternalData;
+import multidendrograms.dendrogram.ConnectedGraph;
 import multidendrograms.dendrogram.DendrogramMeasures;
 import multidendrograms.dendrogram.ToJson;
 import multidendrograms.dendrogram.ToNewick;
@@ -38,6 +39,7 @@ import multidendrograms.dendrogram.ToTxt;
 import multidendrograms.dendrogram.UltrametricMatrix;
 import multidendrograms.initial.Language;
 import multidendrograms.initial.MethodName;
+import multidendrograms.types.BandHeight;
 import multidendrograms.types.MethodType;
 import multidendrograms.types.OriginType;
 import multidendrograms.types.ProximityType;
@@ -49,7 +51,7 @@ import multidendrograms.types.ProximityType;
  *
  * Calculates and exports the hierarchical clustering without GUI interaction
  *
- * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
+ * @author Justo Montiel, David Torres, Sergio Gomez, Alberto Fernandez
  *
  * @since JDK 6.0
  */
@@ -58,21 +60,26 @@ public class DirectClustering {
 	public static final int AUTO_PRECISION = Integer.MIN_VALUE;
 	public static final String MEASURES_SUFIX = "-measures.txt";
 	public static final String ULTRAMETRIC_SUFIX = "-ultrametric.txt";
+	public static final String GRAPH_SUFIX = "-graph.net";
 	public static final String TXT_TREE_SUFIX = "-tree.txt";
 	public static final String NEWICK_TREE_SUFIX = "-newick.txt";
 	public static final String JSON_TREE_SUFIX = ".json";
 
 	private DataFile dataFile;
 	private ExternalData externalData;
+	private ProximityType proximityType;
+	private int precision;
 	private String filePrefix;
 	private OriginType originType;
+	private BandHeight bandHeight;
 	private HierarchicalClustering clustering;
 	private UltrametricMatrix ultraMatrix = null;
 	private DendrogramMeasures dendroMeasures = null;
 
 	public DirectClustering(String filename, ProximityType proximityType, 
-			int initialPrecision, MethodType methodType, double methodParameter, 
-			boolean isWeighted, OriginType originType) 
+			int initialPrecision, MethodType methodType, 
+			double methodParameter, boolean isWeighted, OriginType originType, 
+			BandHeight bandHeight) 
 	throws Exception {
 		this.dataFile = new DataFile(filename);
 		try {
@@ -80,14 +87,18 @@ public class DirectClustering {
 		} catch (Exception e) {
 			throw e;
 		}
-		SymmetricMatrix proximityMatrix = this.externalData.getProximityMatrix();
-		int precision = initialPrecision;
-		if (precision == DirectClustering.AUTO_PRECISION) {
-			precision = this.externalData.getPrecision();
+		this.proximityType = proximityType;
+		SymmetricMatrix proximityMatrix = 
+				this.externalData.getProximityMatrix();
+		this.precision = initialPrecision;
+		if (this.precision == DirectClustering.AUTO_PRECISION) {
+			this.precision = this.externalData.getPrecision();
 		}
-		this.filePrefix = getFilePrefix(this.dataFile.getPathNameNoExt(), proximityType, precision, 
-				methodType, methodParameter, isWeighted);
+		this.filePrefix = getFilePrefix(this.dataFile.getPathNameNoExt(), 
+				proximityType, this.precision, methodType, methodParameter, 
+				isWeighted);
 		this.originType = originType;
+		this.bandHeight = bandHeight;
 		
 		if ((proximityMatrix.minimumValue() < 0.0) && 
 				(methodType.equals(MethodType.VERSATILE_LINKAGE) || 
@@ -96,16 +107,20 @@ public class DirectClustering {
 		}
 		
 		System.out.println("Data file        : " + filename);
-		System.out.println("Proximity type   : " + proximityType.toString().toLowerCase());
-		System.out.println("Precision        : " + precision);
-		System.out.println("Method name      : " + methodType.toString().toLowerCase());
+		System.out.println("Proximity type   : " 
+				+ proximityType.toString().toLowerCase());
+		System.out.println("Precision        : " + this.precision);
+		System.out.println("Method name      : " 
+				+ methodType.toString().toLowerCase());
 		System.out.println("Method parameter : " + methodParameter);
 		System.out.println("Weighted         : " + isWeighted);
-		System.out.println("Origin           : " + this.originType.toString().toLowerCase());
+		System.out.println("Origin           : " 
+				+ this.originType.toString().toLowerCase());
 		System.out.println("---");
 		
-		this.clustering = newClustering(methodType, proximityMatrix, this.externalData.getNames(), 
-				proximityType, precision, isWeighted, methodParameter);
+		this.clustering = newClustering(methodType, proximityMatrix, 
+				this.externalData.getNames(), proximityType, this.precision, 
+				isWeighted, methodParameter);
 		this.clustering.build();
 	}
 
@@ -137,29 +152,36 @@ public class DirectClustering {
 	public void printMeasures() {
 		if (this.ultraMatrix == null) {
 			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), this.originType);
+					this.externalData.getNames(), this.originType, 
+					this.bandHeight);
 		}
 		if (this.dendroMeasures == null) {
-			this.dendroMeasures = new DendrogramMeasures(this.externalData.getProximityMatrix(), 
+			this.dendroMeasures = new DendrogramMeasures(
+					this.externalData.getProximityMatrix(), 
 					this.clustering.getRoot(), this.ultraMatrix.getMatrix());
 		}
-		System.out.println(DendrogramMeasures.TREE_BALANCE_LABEL + "            : " 
-				+ this.dendroMeasures.getTreeBalance());
-		System.out.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL + " : " 
-				+ this.dendroMeasures.getCopheneticCorrelation());
+		System.out.println(DendrogramMeasures.TREE_BALANCE_LABEL 
+				+ "            : " + this.dendroMeasures.getTreeBalance());
+		System.out.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL 
+				+ " : " + this.dendroMeasures.getCopheneticCorrelation());
 		System.out.println(DendrogramMeasures.SQUARED_ERROR_LABEL + "      : " 
 				+ this.dendroMeasures.getSquaredError());
 		System.out.println(DendrogramMeasures.ABSOLUTE_ERROR_LABEL + "     : " 
 				+ this.dendroMeasures.getAbsoluteError());
-		System.out.println(DendrogramMeasures.SPACE_DISTORTION_LABEL + "                   : " 
+		System.out.println(DendrogramMeasures.SPACE_DISTORTION_LABEL 
+				+ "                   : " 
 				+ this.dendroMeasures.getSpaceDistortion());
+//		System.out.println(DendrogramMeasures.DEGREE_CONNECTIVITY_LABEL 
+//				+ "             : " 
+//				+ this.dendroMeasures.getDegreeOfConnectivity());
 		System.out.println("---");
 	}
 
 	public void saveMeasures() {
 		if (this.ultraMatrix == null) {
 			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), this.originType);
+					this.externalData.getNames(), this.originType, 
+					this.bandHeight);
 		}
 		if (this.dendroMeasures == null) {
 			this.dendroMeasures = new DendrogramMeasures(this.externalData.getProximityMatrix(), 
@@ -176,11 +198,30 @@ public class DirectClustering {
 	public void saveUltrametric() {
 		if (this.ultraMatrix == null) {
 			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), this.originType);
+					this.externalData.getNames(), this.originType, 
+					this.bandHeight);
 		}
 		String filename = this.filePrefix + DirectClustering.ULTRAMETRIC_SUFIX;
 		try {
 			this.ultraMatrix.saveAsTxt(filename);
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public void saveGraph() {
+		if (this.ultraMatrix == null) {
+			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
+					this.externalData.getNames(), this.originType, 
+					this.bandHeight);
+		}
+		String filename = this.filePrefix + DirectClustering.GRAPH_SUFIX;
+		ConnectedGraph connectedGraph = 
+				new ConnectedGraph(this.externalData.getProximityMatrix(), 
+				this.externalData.getNames(), this.proximityType, 
+				this.precision, this.ultraMatrix.getMatrix());
+		try {
+			connectedGraph.saveAsNet(filename);
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}

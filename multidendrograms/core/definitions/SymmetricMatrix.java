@@ -57,6 +57,10 @@ public class SymmetricMatrix {
 		}
 	}
 
+	public SymmetricMatrix(double lowerTriangle) {
+		this(new double[] {lowerTriangle});
+	}
+
 	public SymmetricMatrix(int numRows) {
 		this.diagonal = new double[numRows];
 		Arrays.fill(this.diagonal, Double.NaN);

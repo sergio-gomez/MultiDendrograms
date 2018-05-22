@@ -53,6 +53,7 @@ import multidendrograms.forms.DendrogramParameters;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.scrollabledesktop.DesktopConstants;
 import multidendrograms.initial.Language;
+import multidendrograms.types.BandHeight;
 import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.types.MethodType;
 
@@ -378,7 +379,8 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			dendroFrame.getAssociatedButton().setText(title);
 			dendroFrame.getAssociatedButton().setToolTipText(title);
 			// Load the window to show the dendrogram
-			DendrogramPanel dendroPanel = new DendrogramPanel(this.principalDesk);
+			DendrogramPanel dendroPanel = 
+					new DendrogramPanel(this.principalDesk);
 			dendroFrame.add(dendroPanel);
 			// Call SettingsPanel -> internalFrameActivated()
 			dendroFrame.setVisible(true);
@@ -387,9 +389,12 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			}
 			this.principalDesk.setCurrentFrame(dendroFrame);
 			// Convert tree into figures
-			DendrogramPlot dendroPlot = new DendrogramPlot(this.clustering.getRoot(), cfg);
-			UltrametricMatrix ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), settingsInfo.getOriginType());
+			DendrogramPlot dendroPlot = 
+					new DendrogramPlot(this.clustering.getRoot(), cfg);
+			UltrametricMatrix ultraMatrix = 
+					new UltrametricMatrix(this.clustering.getRoot(), 
+					this.externalData.getNames(), settingsInfo.getOriginType(), 
+					BandHeight.BAND_BOTTOM);
 			dendroParams.setUltrametricMatrix(ultraMatrix);
 			// Pass figures to the window
 			dendroPanel.setNodesList(dendroPlot.getNodesList());

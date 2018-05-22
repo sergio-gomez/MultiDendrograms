@@ -32,7 +32,7 @@ import multidendrograms.core.definitions.SymmetricMatrix;
  *
  * @since JDK 6.0
  ******************************************************************************/
-public class Ward extends LanceWilliams {
+public class Ward extends HierarchicalClustering {
 
 	public Ward(SymmetricMatrix proximityMatrix, String[] labels, 
 			boolean isDistanceBased, int precision) {
@@ -40,14 +40,45 @@ public class Ward extends LanceWilliams {
 	}
 
 	@Override
-	protected double getAlpha(Dendrogram cI, Dendrogram subcI, Dendrogram cJ,
+	protected double calculateProximity(Dendrogram cI, Dendrogram cJ) {
+		return Math.sqrt(alphaTerm(cI, cJ) + betaTerm(cI, cJ) + betaTerm(cJ, cI));
+	}
+
+	private double alphaTerm(Dendrogram cI, Dendrogram cJ) {
+		double proximity = 0.0;
+		for (int i = 0; i < cI.numberOfSubroots(); i ++) {
+			Dendrogram subcI = cI.getSubroot(i);
+			for (int j = 0; j < cJ.numberOfSubroots(); j ++) {
+				Dendrogram subcJ = cJ.getSubroot(j);
+				double alpha = getAlpha(cI, subcI, cJ, subcJ);
+				double prox = rootsProximity(subcI, subcJ);
+				proximity += alpha * prox * prox;
+			}
+		}
+		return proximity;
+	}
+
+	private double betaTerm(Dendrogram cI, Dendrogram cJ) {
+		double proximity = 0.0;
+		for (int i = 0; i < cI.numberOfSubroots() - 1; i ++) {
+			Dendrogram subcI = cI.getSubroot(i);
+			for (int k = i + 1; k < cI.numberOfSubroots(); k ++) {
+				Dendrogram subcK = cI.getSubroot(k);
+				double beta = getBeta(cI, subcI, subcK, cJ);
+				double prox = rootsProximity(subcI, subcK);
+				proximity += beta * prox * prox;
+			}
+		}
+		return proximity;
+	}
+
+	private double getAlpha(Dendrogram cI, Dendrogram subcI, Dendrogram cJ,
 			Dendrogram subcJ) {
 		return (double)(subcI.numberOfLeaves() + subcJ.numberOfLeaves()) 
 				/ (double)(cI.numberOfLeaves() + cJ.numberOfLeaves());
 	}
 
-	@Override
-	protected double getBeta(Dendrogram cI, Dendrogram subcI, Dendrogram subcK,
+	private double getBeta(Dendrogram cI, Dendrogram subcI, Dendrogram subcK,
 			Dendrogram cJ) {
 		return -((double)cJ.numberOfLeaves() / (double)cI.numberOfLeaves()) 
 				* (double)(subcI.numberOfLeaves() + subcK.numberOfLeaves())

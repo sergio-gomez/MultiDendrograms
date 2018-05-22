@@ -35,25 +35,32 @@ import multidendrograms.core.definitions.SymmetricMatrix;
  *
  * Calculates and exports dendrogram measures
  *
- * @author Justo Montiel, David Torres, Sergio G&oacute;mez, Alberto Fern&aacute;ndez
+ * @author Justo Montiel, David Torres, Sergio Gomez, Alberto Fernandez
  *
  * @since JDK 6.0
  */
 public class DendrogramMeasures {
 
 	public static final String TREE_BALANCE_LABEL = "Normalized Tree Balance";
-	public static final String COPHENETIC_CORRELATION_LABEL = "Cophenetic Correlation Coefficient";
-	public static final String SQUARED_ERROR_LABEL = "Normalized Mean Squared Error";
-	public static final String ABSOLUTE_ERROR_LABEL = "Normalized Mean Absolute Error";
+	public static final String COPHENETIC_CORRELATION_LABEL = 
+			"Cophenetic Correlation Coefficient";
+	public static final String SQUARED_ERROR_LABEL = 
+			"Normalized Mean Squared Error";
+	public static final String ABSOLUTE_ERROR_LABEL = 
+			"Normalized Mean Absolute Error";
 	public static final String SPACE_DISTORTION_LABEL = "Space Distortion";
+	public static final String DEGREE_CONNECTIVITY_LABEL = 
+			"Degree of Connectivity";
 
 	private String treeBalance;
 	private String copheneticCorrelation;
 	private String squaredError;
 	private String absoluteError;
 	private String spaceDistortion;
+	private String degreeConnectivity;
 
-	public DendrogramMeasures(SymmetricMatrix proxMatrix, Dendrogram root, SymmetricMatrix ultraMatrix) {
+	public DendrogramMeasures(SymmetricMatrix proxMatrix, Dendrogram root, 
+			SymmetricMatrix ultraMatrix) {
 		NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
 		nf.setMinimumFractionDigits(6);
 		nf.setMaximumFractionDigits(6);
@@ -61,9 +68,14 @@ public class DendrogramMeasures {
 		this.treeBalance = nf.format(root.normalizedTreeBalance());
 		double ccc = copheneticCorrelationCoefficient(proxMatrix, ultraMatrix);
 		this.copheneticCorrelation = Double.isNaN(ccc)? "NaN" : nf.format(ccc);
-		this.squaredError = nf.format(normalizedMeanError(2, proxMatrix, ultraMatrix));
-		this.absoluteError = nf.format(normalizedMeanError(1, proxMatrix, ultraMatrix));
-		this.spaceDistortion = nf.format(spaceDistortion(proxMatrix, ultraMatrix));
+		this.squaredError = 
+				nf.format(normalizedMeanError(2, proxMatrix, ultraMatrix));
+		this.absoluteError = 
+				nf.format(normalizedMeanError(1, proxMatrix, ultraMatrix));
+		this.spaceDistortion = 
+				nf.format(spaceDistortion(proxMatrix, ultraMatrix));
+		this.degreeConnectivity = nf.format(degreeOfConnectivity(proxMatrix, 
+				root.isDistanceBased, ultraMatrix));
 	}
 
 	public String getTreeBalance() {
@@ -86,15 +98,24 @@ public class DendrogramMeasures {
 		return this.spaceDistortion;
 	}
 
+	public String getDegreeOfConnectivity() {
+		return this.degreeConnectivity;
+	}
+
 	public void save(String path) throws IOException {
 		File file = new File(path);
 		FileWriter fileWriter = new FileWriter(file);
 		PrintWriter printWriter = new PrintWriter(fileWriter);
-		printWriter.println(DendrogramMeasures.TREE_BALANCE_LABEL + "            : " + this.treeBalance);
-		printWriter.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL + " : " + this.copheneticCorrelation);
-		printWriter.println(DendrogramMeasures.SQUARED_ERROR_LABEL + "      : " + this.squaredError);
-		printWriter.println(DendrogramMeasures.ABSOLUTE_ERROR_LABEL + "     : " + this.absoluteError);
-		printWriter.println(DendrogramMeasures.SPACE_DISTORTION_LABEL + "                   : " + this.spaceDistortion);
+		printWriter.println(DendrogramMeasures.TREE_BALANCE_LABEL 
+				+ "            : " + this.treeBalance);
+		printWriter.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL 
+				+ " : " + this.copheneticCorrelation);
+		printWriter.println(DendrogramMeasures.SQUARED_ERROR_LABEL + "      : " 
+				+ this.squaredError);
+		printWriter.println(DendrogramMeasures.ABSOLUTE_ERROR_LABEL + "     : " 
+				+ this.absoluteError);
+		printWriter.println(DendrogramMeasures.SPACE_DISTORTION_LABEL 
+				+ "                   : " + this.spaceDistortion);
 		printWriter.close();
 	}
 
@@ -155,6 +176,24 @@ public class DendrogramMeasures {
 			SymmetricMatrix ultraMatrix) {
 		return (ultraMatrix.maximumValue() - ultraMatrix.minimumValue()) / 
 				(proxMatrix.maximumValue() - proxMatrix.minimumValue());
+	}
+
+	private double degreeOfConnectivity(SymmetricMatrix proxMatrix, 
+			boolean isDistanceBased, SymmetricMatrix ultraMatrix) {
+		int maxEdges = 0;
+		int numEdges = 0;
+		for (int i = 0; i < proxMatrix.numberOfRows(); i ++) {
+			for (int j = i + 1; j < proxMatrix.numberOfRows(); j ++) {
+				maxEdges ++;
+				double proxIJ = proxMatrix.getElement(i, j);
+				double ultraIJ = ultraMatrix.getElement(i, j);
+				if (( isDistanceBased && (proxIJ <= ultraIJ)) || 
+					(!isDistanceBased && (proxIJ >= ultraIJ))) {
+					numEdges ++;
+				}
+			}
+		}
+		return (double)numEdges / (double)maxEdges;
 	}
 
 }

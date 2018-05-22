@@ -33,6 +33,7 @@ import multidendrograms.direct.DirectClustering;
 import multidendrograms.errors.MethodError;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.children.UpgradeBox;
+import multidendrograms.types.BandHeight;
 import multidendrograms.types.MethodType;
 import multidendrograms.types.OriginType;
 import multidendrograms.types.ProximityType;
@@ -51,7 +52,7 @@ import multidendrograms.types.ProximityType;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "5.0.2";
+	public static final String VERSION = "5.0.3";
 	public static final String VERSION_SHORT = "5.0";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
@@ -250,8 +251,9 @@ public class Main {
 
 		if (isDirect) {
 			try {
-				DirectClustering dirClus = new DirectClustering(fileName, proximityType, precision,
-						methodType, methodParameter, isWeighted, originType);
+				DirectClustering dirClus = new DirectClustering(fileName,
+						proximityType, precision, methodType, methodParameter,
+						isWeighted, originType, BandHeight.BAND_BOTTOM);
 				dirClus.printMeasures();
 				dirClus.saveMeasures();
 				dirClus.saveUltrametric();

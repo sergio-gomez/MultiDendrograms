@@ -204,6 +204,8 @@ public abstract class HierarchicalClustering {
 					}
 				}
 				root.setRootTopHeight(rootTopHeight);
+				double rootInternalHeight = calculateInternalProximity(root);
+				root.setRootInternalHeight(rootInternalHeight);
 			}
 		}
 	}
@@ -265,6 +267,38 @@ public abstract class HierarchicalClustering {
 			Dendrogram subcI = cI.getSubroot(i);
 			for (int j = 0; j < cJ.numberOfSubroots(); j ++) {
 				Dendrogram subcJ = cJ.getSubroot(j);
+				double proximity = rootsProximity(subcI, subcJ);
+				maximum = Math.max(maximum, proximity);
+			}
+		}
+		return maximum;
+	}
+
+	protected double calculateInternalProximity(Dendrogram c) {
+		return c.getRootBottomHeight();
+	}
+
+	protected double minimumInternalProximity(Dendrogram c) {
+		double minimum = Double.POSITIVE_INFINITY;
+		int numSubroots = c.numberOfSubroots();
+		for (int i = 0; i < numSubroots - 1; i ++) {
+			Dendrogram subcI = c.getSubroot(i);
+			for (int j = i + 1; j < numSubroots; j ++) {
+				Dendrogram subcJ = c.getSubroot(j);
+				double proximity = rootsProximity(subcI, subcJ);
+				minimum = Math.min(minimum, proximity);
+			}
+		}
+		return minimum;
+	}
+
+	protected double maximumInternalProximity(Dendrogram c) {
+		double maximum = Double.NEGATIVE_INFINITY;
+		int numSubroots = c.numberOfSubroots();
+		for (int i = 0; i < numSubroots - 1; i ++) {
+			Dendrogram subcI = c.getSubroot(i);
+			for (int j = i + 1; j < numSubroots; j ++) {
+				Dendrogram subcJ = c.getSubroot(j);
 				double proximity = rootsProximity(subcI, subcJ);
 				maximum = Math.max(maximum, proximity);
 			}

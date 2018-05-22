@@ -109,4 +109,62 @@ public class VersatileLinkage extends HierarchicalClustering {
 		return proximity;
 	}
 
+	protected double calculateInternalProximity(Dendrogram c) {
+		if (this.power == Double.NEGATIVE_INFINITY) {
+			return minimumInternalProximity(c);
+		} else if (this.power == Double.POSITIVE_INFINITY) {
+			return maximumInternalProximity(c);
+		} else if (this.power == 0.0) {
+			return geometricInternalMean(c);
+		} else {
+			return generalizedInternalMean(c);
+		}
+	}
+
+	private double geometricInternalMean(Dendrogram c) {
+		double proximity = 1.0;
+		int numSubroots = c.numberOfSubroots();
+		int numLeaves = c.numberOfLeaves();
+		for (int i = 0; i < numSubroots - 1; i ++) {
+			Dendrogram subcI = c.getSubroot(i);
+			double wI = this.isWeighted ? 
+					1.0 : (double)subcI.numberOfLeaves();
+			for (int j = i + 1; j < numSubroots; j ++) {
+				Dendrogram subcJ = c.getSubroot(j);
+				double wJ = this.isWeighted ? 
+						1.0 : (double)subcJ.numberOfLeaves();
+				double prox = rootsProximity(subcI, subcJ);
+				proximity *= Math.pow(prox, wI * wJ);
+			}
+		}
+		double w = this.isWeighted ? 
+				2.0 / (double)(numSubroots * (numSubroots - 1)) : 
+				2.0 / (double)(numLeaves * (numLeaves - 1));
+		proximity = Math.pow(proximity, w);
+		return proximity;
+	}
+
+	private double generalizedInternalMean(Dendrogram c) {
+		double proximity = 0.0;
+		int numSubroots = c.numberOfSubroots();
+		int numLeaves = c.numberOfLeaves();
+		for (int i = 0; i < numSubroots - 1; i ++) {
+			Dendrogram subcI = c.getSubroot(i);
+			double wI = this.isWeighted ? 
+					1.0 : (double)subcI.numberOfLeaves();
+			for (int j = i + 1; j < numSubroots; j ++) {
+				Dendrogram subcJ = c.getSubroot(j);
+				double wJ = this.isWeighted ? 
+						1.0 : (double)subcJ.numberOfLeaves();
+				double prox = rootsProximity(subcI, subcJ);
+				proximity += wI * wJ * Math.pow(prox, this.power);
+			}
+		}
+		double w = this.isWeighted ? 
+				2.0 / (double)(numSubroots * (numSubroots - 1)) : 
+				2.0 / (double)(numLeaves * (numLeaves - 1));
+		proximity = Math.pow(w * proximity, 1.0 / this.power);
+		return proximity;
+	}
+
 }

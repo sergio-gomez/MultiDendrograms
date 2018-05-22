@@ -48,4 +48,12 @@ public class CompleteLinkage extends HierarchicalClustering {
 		}
 	}
 
+	protected double calculateInternalProximity(Dendrogram c) {
+		if (this.isDistanceBased) {
+			return maximumInternalProximity(c);
+		} else {
+			return minimumInternalProximity(c);
+		}
+	}
+
 }
