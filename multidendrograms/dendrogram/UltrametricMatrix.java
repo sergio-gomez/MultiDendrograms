@@ -50,21 +50,17 @@ public class UltrametricMatrix {
 	private Hashtable<String, Integer> hashLabels;
 	private SymmetricMatrix ultraMatrix;
 
-	public UltrametricMatrix(Dendrogram root, String[] externLabels, 
+	public UltrametricMatrix(Dendrogram root, String[] externLabels,
 			OriginType originType, BandHeight bandHeight) {
 		this.precision = root.precision;
 		this.labels = externLabels;
 		this.hashLabels = getSorting(externLabels);
-		boolean isUniformOrigin = 
-				originType.equals(OriginType.UNIFORM_ORIGIN)? true : false;
-		boolean useBandBottom = 
-				bandHeight.equals(BandHeight.BAND_BOTTOM)? true : false;
+		boolean isUniformOrigin = originType.equals(OriginType.UNIFORM_ORIGIN) ? true : false;
+		boolean useBandBottom = bandHeight.equals(BandHeight.BAND_BOTTOM) ? true : false;
 		SmartAxis smartAxis = new SmartAxis(root, isUniformOrigin);
-		double dendroBottomHeight = root.isDistanceBased? 
-				smartAxis.smartMin() : smartAxis.smartMax();
+		double dendroBottomHeight = root.isDistanceBased ? smartAxis.smartMin() : smartAxis.smartMax();
 		this.ultraMatrix = new SymmetricMatrix(root.numberOfLeaves());
-		calculateUltrametricMatrix(root, dendroBottomHeight, isUniformOrigin, 
-				useBandBottom);
+		calculateUltrametricMatrix(root, dendroBottomHeight, isUniformOrigin, useBandBottom);
 	}
 
 	private Hashtable<String, Integer> getSorting(String[] externLabels) {
@@ -75,21 +71,20 @@ public class UltrametricMatrix {
 		return sorting;
 	}
 
-	private void calculateUltrametricMatrix(Dendrogram cluster, 
-			double dendroBottomHeight, boolean isUniformOrigin, 
-			boolean useBandBottom) {
+	private void calculateUltrametricMatrix(Dendrogram cluster,
+			double dendroBottomHeight, boolean isUniformOrigin, boolean useBandBottom) {
 		int numSubclusters = cluster.numberOfSubclusters();
 		if (numSubclusters == 1) {
 			double clusterBottomHeight = cluster.getRootBottomHeight();
-			double clusterHeight = 
-					(Double.isNaN(clusterBottomHeight) || isUniformOrigin) ? 
-					MathUtils.round(dendroBottomHeight, this.precision) : 
+			double clusterHeight =
+					(Double.isNaN(clusterBottomHeight) || isUniformOrigin) ?
+					MathUtils.round(dendroBottomHeight, this.precision) :
 					MathUtils.round(clusterBottomHeight, this.precision);
 			int i = this.hashLabels.get(cluster.getLabel());
 			this.ultraMatrix.setElement(i, i, clusterHeight);
 		} else {// (numSubclusters > 1)
-			double clusterHeight = useBandBottom ? 
-					cluster.getRootBottomHeight() : 
+			double clusterHeight = useBandBottom ?
+					cluster.getRootBottomHeight() :
 					cluster.getRootInternalHeight();
 			clusterHeight = MathUtils.round(clusterHeight, this.precision);
 			int numLeaves = cluster.numberOfLeaves();
@@ -103,7 +98,7 @@ public class UltrametricMatrix {
 				}
 			}
 			for (int n = 0; n < numSubclusters; n ++) {
-				calculateUltrametricMatrix(cluster.getSubcluster(n), 
+				calculateUltrametricMatrix(cluster.getSubcluster(n),
 						dendroBottomHeight, isUniformOrigin, useBandBottom);
 			}
 		}

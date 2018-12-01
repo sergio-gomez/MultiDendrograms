@@ -76,10 +76,9 @@ public class DirectClustering {
 	private UltrametricMatrix ultraMatrix = null;
 	private DendrogramMeasures dendroMeasures = null;
 
-	public DirectClustering(String filename, ProximityType proximityType, 
-			int initialPrecision, MethodType methodType, 
-			double methodParameter, boolean isWeighted, OriginType originType, 
-			BandHeight bandHeight) 
+	public DirectClustering(String filename, ProximityType proximityType,
+			int initialPrecision, MethodType methodType, double methodParameter,
+			boolean isWeighted, OriginType originType, BandHeight bandHeight)
 	throws Exception {
 		this.dataFile = new DataFile(filename);
 		try {
@@ -88,44 +87,38 @@ public class DirectClustering {
 			throw e;
 		}
 		this.proximityType = proximityType;
-		SymmetricMatrix proximityMatrix = 
-				this.externalData.getProximityMatrix();
+		SymmetricMatrix proximityMatrix = this.externalData.getProximityMatrix();
 		this.precision = initialPrecision;
 		if (this.precision == DirectClustering.AUTO_PRECISION) {
 			this.precision = this.externalData.getPrecision();
 		}
-		this.filePrefix = getFilePrefix(this.dataFile.getPathNameNoExt(), 
-				proximityType, this.precision, methodType, methodParameter, 
-				isWeighted);
+		this.filePrefix = getFilePrefix(this.dataFile.getPathNameNoExt(),proximityType, this.precision,
+		    methodType, methodParameter, isWeighted);
 		this.originType = originType;
 		this.bandHeight = bandHeight;
-		
-		if ((proximityMatrix.minimumValue() < 0.0) && 
-				(methodType.equals(MethodType.VERSATILE_LINKAGE) || 
+
+		if ((proximityMatrix.minimumValue() < 0.0) &&
+				(methodType.equals(MethodType.VERSATILE_LINKAGE) ||
 				 methodType.equals(MethodType.GEOMETRIC_LINKAGE))) {
 			throw new Exception(Language.getLabel(80));
 		}
-		
+
 		System.out.println("Data file        : " + filename);
-		System.out.println("Proximity type   : " 
-				+ proximityType.toString().toLowerCase());
+		System.out.println("Proximity type   : " + proximityType.toString().toLowerCase());
 		System.out.println("Precision        : " + this.precision);
-		System.out.println("Method name      : " 
-				+ methodType.toString().toLowerCase());
+		System.out.println("Method name      : " + methodType.toString().toLowerCase());
 		System.out.println("Method parameter : " + methodParameter);
 		System.out.println("Weighted         : " + isWeighted);
-		System.out.println("Origin           : " 
-				+ this.originType.toString().toLowerCase());
+		System.out.println("Origin           : " + this.originType.toString().toLowerCase());
 		System.out.println("---");
-		
-		this.clustering = newClustering(methodType, proximityMatrix, 
-				this.externalData.getNames(), proximityType, this.precision, 
-				isWeighted, methodParameter);
+
+		this.clustering = newClustering(methodType, proximityMatrix, this.externalData.getNames(),
+		    proximityType, this.precision, isWeighted, methodParameter);
 		this.clustering.build();
 	}
 
-	public static String getFilePrefix(String pathNameNoExt, 
-			ProximityType proximityType, int precision, MethodType methodType, 
+	public static String getFilePrefix(String pathNameNoExt,
+			ProximityType proximityType, int precision, MethodType methodType,
 			double methodParameter, boolean isWeighted) {
 		String prefix = pathNameNoExt;
 		if (proximityType.equals(ProximityType.DISTANCE)) {
@@ -133,16 +126,16 @@ public class DirectClustering {
 		} else {
 			prefix += "-s" + precision + "-";
 		}
-		if (isWeighted && (methodType.equals(MethodType.VERSATILE_LINKAGE) || 
-						   methodType.equals(MethodType.ARITHMETIC_LINKAGE) || 
-						   methodType.equals(MethodType.GEOMETRIC_LINKAGE) || 
-						   methodType.equals(MethodType.HARMONIC_LINKAGE) || 
-						   methodType.equals(MethodType.CENTROID) || 
+		if (isWeighted && (methodType.equals(MethodType.VERSATILE_LINKAGE) ||
+						   methodType.equals(MethodType.ARITHMETIC_LINKAGE) ||
+						   methodType.equals(MethodType.GEOMETRIC_LINKAGE) ||
+						   methodType.equals(MethodType.HARMONIC_LINKAGE) ||
+						   methodType.equals(MethodType.CENTROID) ||
 						   methodType.equals(MethodType.BETA_FLEXIBLE))) {
 			prefix += "w";
 		}
 		prefix += MethodName.toShortName(methodType);
-		if (methodType.equals(MethodType.VERSATILE_LINKAGE) || 
+		if (methodType.equals(MethodType.VERSATILE_LINKAGE) ||
 			methodType.equals(MethodType.BETA_FLEXIBLE)) {
 			prefix += methodParameter;
 		}
@@ -151,40 +144,39 @@ public class DirectClustering {
 
 	public void printMeasures() {
 		if (this.ultraMatrix == null) {
-			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), this.originType, 
+			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(),
+					this.externalData.getNames(), this.originType,
 					this.bandHeight);
 		}
 		if (this.dendroMeasures == null) {
 			this.dendroMeasures = new DendrogramMeasures(
-					this.externalData.getProximityMatrix(), 
+					this.externalData.getProximityMatrix(),
 					this.clustering.getRoot(), this.ultraMatrix.getMatrix());
 		}
-		System.out.println(DendrogramMeasures.TREE_BALANCE_LABEL 
-				+ "            : " + this.dendroMeasures.getTreeBalance());
-		System.out.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL 
-				+ " : " + this.dendroMeasures.getCopheneticCorrelation());
-		System.out.println(DendrogramMeasures.SQUARED_ERROR_LABEL + "      : " 
+		System.out.println(DendrogramMeasures.TREE_BALANCE_LABEL + "            : "
+		    + this.dendroMeasures.getTreeBalance());
+		System.out.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL + " : "
+		    + this.dendroMeasures.getCopheneticCorrelation());
+		System.out.println(DendrogramMeasures.SQUARED_ERROR_LABEL + "      : "
 				+ this.dendroMeasures.getSquaredError());
-		System.out.println(DendrogramMeasures.ABSOLUTE_ERROR_LABEL + "     : " 
+		System.out.println(DendrogramMeasures.ABSOLUTE_ERROR_LABEL + "     : "
 				+ this.dendroMeasures.getAbsoluteError());
-		System.out.println(DendrogramMeasures.SPACE_DISTORTION_LABEL 
-				+ "                   : " 
+		System.out.println(DendrogramMeasures.SPACE_DISTORTION_LABEL + "                   : "
 				+ this.dendroMeasures.getSpaceDistortion());
-//		System.out.println(DendrogramMeasures.DEGREE_CONNECTIVITY_LABEL 
-//				+ "             : " 
+//		System.out.println(DendrogramMeasures.DEGREE_CONNECTIVITY_LABEL
+//				+ "             : "
 //				+ this.dendroMeasures.getDegreeOfConnectivity());
 		System.out.println("---");
 	}
 
 	public void saveMeasures() {
 		if (this.ultraMatrix == null) {
-			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), this.originType, 
+			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(),
+					this.externalData.getNames(), this.originType,
 					this.bandHeight);
 		}
 		if (this.dendroMeasures == null) {
-			this.dendroMeasures = new DendrogramMeasures(this.externalData.getProximityMatrix(), 
+			this.dendroMeasures = new DendrogramMeasures(this.externalData.getProximityMatrix(),
 					this.clustering.getRoot(), this.ultraMatrix.getMatrix());
 		}
 		String filename = this.filePrefix + DirectClustering.MEASURES_SUFIX;
@@ -197,9 +189,8 @@ public class DirectClustering {
 
 	public void saveUltrametric() {
 		if (this.ultraMatrix == null) {
-			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), this.originType, 
-					this.bandHeight);
+			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(),
+					this.externalData.getNames(), this.originType, this.bandHeight);
 		}
 		String filename = this.filePrefix + DirectClustering.ULTRAMETRIC_SUFIX;
 		try {
@@ -211,15 +202,14 @@ public class DirectClustering {
 
 	public void saveGraph() {
 		if (this.ultraMatrix == null) {
-			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), this.originType, 
-					this.bandHeight);
+			this.ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(),
+					this.externalData.getNames(), this.originType, this.bandHeight);
 		}
 		String filename = this.filePrefix + DirectClustering.GRAPH_SUFIX;
-		ConnectedGraph connectedGraph = 
-				new ConnectedGraph(this.externalData.getProximityMatrix(), 
-				this.externalData.getNames(), this.proximityType, 
-				this.precision, this.ultraMatrix.getMatrix());
+		ConnectedGraph connectedGraph =
+				new ConnectedGraph(this.externalData.getProximityMatrix(),
+				    this.externalData.getNames(), this.proximityType,
+				    this.precision, this.ultraMatrix.getMatrix());
 		try {
 			connectedGraph.saveAsNet(filename);
 		} catch (IOException e) {
@@ -261,8 +251,8 @@ public class DirectClustering {
 		}
 	}
 
-	public static HierarchicalClustering newClustering(MethodType methodType, 
-			SymmetricMatrix proximityMatrix, String[] labels, ProximityType proximityType, 
+	public static HierarchicalClustering newClustering(MethodType methodType,
+			SymmetricMatrix proximityMatrix, String[] labels, ProximityType proximityType,
 			int precision, boolean isWeighted, double methodParameter) {
 		boolean isDistanceBased = proximityType.equals(ProximityType.DISTANCE) ? true : false;
 		double power;
@@ -313,8 +303,7 @@ public class DirectClustering {
 			return Double.POSITIVE_INFINITY;
 		} else {
 			double y1 = 0.1;	// 0 < y1 = sigmoid(1) < 1
-			return Math.log((1.0 + y) / (1.0 - y)) 
-				 / Math.log((1.0 + y1) / (1.0 - y1));
+			return Math.log((1.0 + y) / (1.0 - y)) / Math.log((1.0 + y1) / (1.0 - y1));
 		}
 	}
 

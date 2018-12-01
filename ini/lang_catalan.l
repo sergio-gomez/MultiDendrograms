@@ -132,3 +132,4 @@ disponible a
 La versió actual és
 Origen uniforme
 Equivalències entre algorismes de clustering
+Ward només disponible per Distància, no per Similitud

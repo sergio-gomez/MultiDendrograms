@@ -1,4 +1,4 @@
-MultiDendrograms 5.0.3
+MultiDendrograms 5.0.4
 
 Copyright (c) 2018 Sergio Gomez, Alberto Fernandez
 This program comes with ABSOLUTELY NO WARRANTY.

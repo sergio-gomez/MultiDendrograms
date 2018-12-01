@@ -132,3 +132,4 @@ verfügbar in
 Die actuelle Version
 Einheitlicher Ursprung
 Equivalenzen zwischen Clustering-Algorithmen
+Ward nur verfügbar für Abstand, nicht für Ähnlichkeit

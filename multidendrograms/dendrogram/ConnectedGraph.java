@@ -46,9 +46,8 @@ public class ConnectedGraph {
 	private int precision;
 	private SymmetricMatrix ultraMatrix;
 
-	public ConnectedGraph(SymmetricMatrix proximityMatrix, String[] labels, 
-			ProximityType proximityType, int precision, 
-			SymmetricMatrix ultrametricMatrix) {
+	public ConnectedGraph(SymmetricMatrix proximityMatrix, String[] labels, ProximityType proximityType,
+	    int precision, SymmetricMatrix ultrametricMatrix) {
 		this.proxiMatrix = proximityMatrix;
 		this.labels = labels;
 		this.proxiType = proximityType;
@@ -64,17 +63,14 @@ public class ConnectedGraph {
 		for (int i = 0; i < this.labels.length; i ++) {
 			printWriter.println((i + 1) + " " + this.labels[i]);
 		}
-		boolean isDistanceBased = 
-				this.proxiType.equals(ProximityType.DISTANCE) ? true : false;
+		boolean isDistanceBased = this.proxiType.equals(ProximityType.DISTANCE) ? true : false;
 		printWriter.println("*Edges");
 		for (int i = 0; i < this.proxiMatrix.numberOfRows(); i ++) {
 			for (int j = i + 1; j < this.proxiMatrix.numberOfRows(); j ++) {
 				double proxiIJ = this.proxiMatrix.getElement(i, j);
 				double ultraIJ = this.ultraMatrix.getElement(i, j);
-				if (( isDistanceBased && (proxiIJ <= ultraIJ)) || 
-					(!isDistanceBased && (proxiIJ >= ultraIJ))) {
-					printWriter.println((i + 1) + " " + (j + 1) + " " 
-							+ NumberUtils.format(proxiIJ, this.precision));
+				if (( isDistanceBased && (proxiIJ <= ultraIJ)) || (!isDistanceBased && (proxiIJ >= ultraIJ))) {
+					printWriter.println((i + 1) + " " + (j + 1) + " " + NumberUtils.format(proxiIJ, this.precision));
 				}
 			}
 		}

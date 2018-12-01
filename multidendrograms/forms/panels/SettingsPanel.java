@@ -31,6 +31,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
@@ -51,6 +52,7 @@ import multidendrograms.definitions.SettingsInfo;
 import multidendrograms.initial.InitialProperties;
 import multidendrograms.initial.Language;
 import multidendrograms.initial.LogManager;
+import multidendrograms.initial.MethodName;
 import multidendrograms.forms.children.FontSelection;
 import multidendrograms.forms.DendrogramParameters;
 import multidendrograms.types.DendrogramOrientation;
@@ -144,9 +146,9 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
         "Arithmetic Linkage",
         "Geometric Linkage",
         "Harmonic Linkage",
+        "Beta Flexible",
         "Centroid",
-        "Ward",
-        "Beta Flexible"
+        "Ward"
 			};
 		cbMethod = Formats.getFormattedComboBox(strMethod);
 		cbMethod.setMaximumRowCount(strMethod.length);
@@ -160,7 +162,10 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
         + "&nbsp;&nbsp;Versatile Linkage (param 0.0) = Geometric Linkage<br>"
         + "&nbsp;&nbsp;Versatile Linkage (param -0.1) = Harmonic Linkage<br>"
         + "&nbsp;&nbsp;Versatile Linkage (param -1.0) = Single Linkage<br>"
-        + "&nbsp;&nbsp;Beta Flexible (param 0.0) = Arithmetic Linkage</html>";
+        + "&nbsp;&nbsp;Beta Flexible (param 0.0) = Arithmetic Linkage<br>"
+        + "<br><b>"
+        + Language.getLabel(134)
+        + "</b></html>";
 		cbMethod.setToolTipText(strToolTip);
 
 		lblMethodParameter = Formats.getFormattedLabel(Language.getLabel(53) + " ");// Algorithm parameter
@@ -258,6 +263,8 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(1, 1, 1, 1);
+		rbDistances.setActionCommand("measure");
+		rbDistances.addActionListener(this);
 		add(rbDistances, c);
 		// opt similarities
 		c.gridx = 2;
@@ -266,6 +273,8 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(1, 1, 1, 3);
+		rbSimilarities.setActionCommand("measure");
+		rbSimilarities.addActionListener(this);
 		add(rbSimilarities, c);
 		gridy++;
 
@@ -1098,6 +1107,27 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		setLabelsDecimals(precision);
 	}
 
+	public static void adjustSettings(MethodType methodType) {
+		if (methodType == MethodType.WARD) {
+			rbDistances.setSelected(true);
+			rbSimilarities.setEnabled(false);
+		}
+		else if (rbSimilarities.isEnabled() == false) {
+			rbSimilarities.setEnabled(true);
+		}
+	}
+
+	public static void adjustWardLabel() {
+		String wardLabel = MethodName.toName(MethodType.WARD);
+		if (rbSimilarities.isSelected() == true &&
+				((DefaultComboBoxModel)cbMethod.getModel()).getIndexOf(wardLabel) != -1) {
+			cbMethod.removeItem(wardLabel);
+		} else if (rbDistances.isSelected() == true &&
+				((DefaultComboBoxModel)cbMethod.getModel()).getIndexOf(wardLabel) == -1) {
+			cbMethod.addItem(wardLabel);
+		}
+	}
+
 	// ACTION EVENTS
 
 	@Override
@@ -1105,6 +1135,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		if (evt.getActionCommand().equals("method")) {
 			MethodType methodType =
 					MethodType.values()[cbMethod.getSelectedIndex()];
+			adjustSettings(methodType);
 			setMethodParameter(methodType, 0.0);
 		} else if (evt.getActionCommand().equals("dendro_orientation")) {
 			pOrientationImg.setImage(
@@ -1125,6 +1156,8 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 			fontAxisLabels = f.getNewFont();
 		} else if (evt.getActionCommand().equals("color_label")) {
 			colorAxisLabels = this.changeColorFont(colorAxisLabels);
+		} else if (evt.getActionCommand().equals("measure")) {
+			adjustWardLabel();
 		} else {
 			LogManager.LOG.warning(Language.getLabel(47) + ": " + evt.toString());
 		}

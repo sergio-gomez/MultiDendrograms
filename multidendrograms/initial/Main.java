@@ -52,7 +52,7 @@ import multidendrograms.types.ProximityType;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "5.0.3";
+	public static final String VERSION = "5.0.4";
 	public static final String VERSION_SHORT = "5.0";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
@@ -250,10 +250,16 @@ public class Main {
 		checkVersion.start();
 
 		if (isDirect) {
+			// check Ward only for Distance, not for Similarity
+			if ((proximityType == ProximityType.SIMILARITY) && (methodType == MethodType.WARD)) {
+  			System.out.println("Error: " + Language.getLabel(134));
+  			showSyntax();
+				return;
+			}
+
 			try {
-				DirectClustering dirClus = new DirectClustering(fileName,
-						proximityType, precision, methodType, methodParameter,
-						isWeighted, originType, BandHeight.BAND_BOTTOM);
+				DirectClustering dirClus = new DirectClustering(fileName, proximityType, precision,
+				    methodType, methodParameter, isWeighted, originType, BandHeight.BAND_BOTTOM);
 				dirClus.printMeasures();
 				dirClus.saveMeasures();
 				dirClus.saveUltrametric();
@@ -339,11 +345,14 @@ public class Main {
 		System.out.println("    Versatile Linkage (param -1.0) = Single Linkage");
 		System.out.println("    Beta Flexible     (param  0.0) = Arithmetic Linkage");
 		System.out.println("");
+		System.out.println("WARD only available for DISTANCE, not for SIMILARITY");
+		System.out.println("");
 		System.out.println("");
 		System.out.println("Examples:");
 		System.out.println("    java -jar multidendrograms.jar");
 		System.out.println("    java -jar multidendrograms.jar -loglevel OFF");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt DISTANCES 3 Complete_Linkage");
+		System.out.println("    java -jar multidendrograms.jar -direct data.txt DISTANCES 3 Ward");
+		System.out.println("    java -jar multidendrograms.jar -direct data.txt SIMILARITIES 3 Complete_Linkage");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D CL");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 CL");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 Versatile_Linkage +1");

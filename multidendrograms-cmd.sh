@@ -12,14 +12,16 @@ if [ $VERSION ]
 then
 	if [ $VERSION -ge $REQUIRED_VERSION_NUM ]
 	then
-		echo MultiDendrograms 5.0.3
+		echo MultiDendrograms 5.0.4
 		echo Copyright \(c\) 2018 Sergio Gomez, Alberto Fernandez
 		echo This program comes with ABSOLUTELY NO WARRANTY.
 		echo This is free software, and you are welcome to redistribute it under certain conditions.
 		echo ---------
 		java -jar multidendrograms.jar  -help
 		echo ---------
-		java -jar multidendrograms.jar  -direct sample_files/data.txt distances 2 Complete_Linkage
+		java -jar multidendrograms.jar  -direct sample_files/data.txt distances 2 Ward
+		echo ---------
+		java -jar multidendrograms.jar  -direct sample_files/data.txt similarities 2 Complete_Linkage
 		echo ---------
 		java -jar multidendrograms.jar  -direct sample_files/air_distances.txt D AL
 		echo ---------

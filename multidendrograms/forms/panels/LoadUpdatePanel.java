@@ -197,9 +197,9 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addGroup(layout.createSequentialGroup().addComponent(btnLoad, 110, 110, 110).addGap(3, 3, 3)
 								.addComponent(btnUpdate, 110, 110, 110))
-						.addGroup(GroupLayout.Alignment.CENTER, 
+						.addGroup(GroupLayout.Alignment.CENTER,
 								layout.createSequentialGroup().addComponent(txtFileName, 223, 223, 223))
-						.addGroup(GroupLayout.Alignment.CENTER, 
+						.addGroup(GroupLayout.Alignment.CENTER,
 								layout.createSequentialGroup().addComponent(progressBar)))
 				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 				.addGap(6, 6, 6));
@@ -222,7 +222,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 	}
 
 	public static void enableUpdate() {
-		if (precisionCorrect && methodParameterCorrect && axisMinCorrect 
+		if (precisionCorrect && methodParameterCorrect && axisMinCorrect
 				&& axisMaxCorrect && axisSeparationCorrect && axisTicksCorrect
 				&& axisDecimalsCorrect) {
 			btnUpdate.setEnabled(true);
@@ -299,8 +299,8 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 				this.externalData = new ExternalData(dataFile);
 				SymmetricMatrix proximityMatrix = this.externalData.getProximityMatrix();
 				MethodType methodType = SettingsPanel.getMethod();
-				if ((proximityMatrix.minimumValue() < 0.0) && 
-						(methodType.equals(MethodType.VERSATILE_LINKAGE) || 
+				if ((proximityMatrix.minimumValue() < 0.0) &&
+						(methodType.equals(MethodType.VERSATILE_LINKAGE) ||
 						 methodType.equals(MethodType.GEOMETRIC_LINKAGE))) {
 					buttonClicked = false;
 					showError(Language.getLabel(80));
@@ -310,9 +310,9 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 					}
 					this.clustering = null;
 					try {
-						this.clustering = DirectClustering.newClustering(methodType, proximityMatrix, 
-								this.externalData.getNames(), SettingsPanel.getProximityType(), 
-								SettingsPanel.getPrecision(), SettingsPanel.isWeighted(), 
+						this.clustering = DirectClustering.newClustering(methodType, proximityMatrix,
+								this.externalData.getNames(), SettingsPanel.getProximityType(),
+								SettingsPanel.getPrecision(), SettingsPanel.isWeighted(),
 								SettingsPanel.getMethodParameter());
 						this.progressBar.setBorderPainted(true);
 						this.progressBar.setString(null);
@@ -379,7 +379,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			dendroFrame.getAssociatedButton().setText(title);
 			dendroFrame.getAssociatedButton().setToolTipText(title);
 			// Load the window to show the dendrogram
-			DendrogramPanel dendroPanel = 
+			DendrogramPanel dendroPanel =
 					new DendrogramPanel(this.principalDesk);
 			dendroFrame.add(dendroPanel);
 			// Call SettingsPanel -> internalFrameActivated()
@@ -389,12 +389,9 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 			}
 			this.principalDesk.setCurrentFrame(dendroFrame);
 			// Convert tree into figures
-			DendrogramPlot dendroPlot = 
-					new DendrogramPlot(this.clustering.getRoot(), cfg);
-			UltrametricMatrix ultraMatrix = 
-					new UltrametricMatrix(this.clustering.getRoot(), 
-					this.externalData.getNames(), settingsInfo.getOriginType(), 
-					BandHeight.BAND_BOTTOM);
+			DendrogramPlot dendroPlot = new DendrogramPlot(this.clustering.getRoot(), cfg);
+			UltrametricMatrix ultraMatrix = new UltrametricMatrix(this.clustering.getRoot(),
+					this.externalData.getNames(), settingsInfo.getOriginType(), BandHeight.BAND_BOTTOM);
 			dendroParams.setUltrametricMatrix(ultraMatrix);
 			// Pass figures to the window
 			dendroPanel.setNodesList(dendroPlot.getNodesList());
@@ -429,7 +426,7 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 	}
 
 	private void showError(String message) {
-		JOptionPane.showMessageDialog(null, message, Language.getLabel(7), 
+		JOptionPane.showMessageDialog(null, message, Language.getLabel(7),
 				JOptionPane.ERROR_MESSAGE);
 	}
 
