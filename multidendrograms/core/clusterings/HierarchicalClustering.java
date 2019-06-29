@@ -125,9 +125,11 @@ public abstract class HierarchicalClustering {
 						// Both roots have group identifiers
 						if (groups[i] != groups[j]) {
 							// Merge the two roots in the same group
+							int minGroupId = Math.min(groups[i], groups[j]);
+							int maxGroupId = Math.max(groups[i], groups[j]);
 							for (int k = 0; k < numRoots; k ++) {
-								if (groups[k] == groups[j]) {
-									groups[k] = groups[i];
+								if (groups[k] == maxGroupId) {
+									groups[k] = minGroupId;
 								}
 							}
 						}

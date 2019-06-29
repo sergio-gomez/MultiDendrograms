@@ -42,7 +42,8 @@ public class DendrogramFrame extends BaseInternalFrame {
 
 	public DendrogramFrame(MethodType method, boolean isUpdate) {
 
-		super("", true, // resizable
+		super("",
+				true, // resizable
 				true, // closable
 				true, // maximizable
 				true);// iconifiable

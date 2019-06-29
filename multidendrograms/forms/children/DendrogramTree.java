@@ -27,8 +27,10 @@ import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
+import javax.swing.Icon;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import multidendrograms.initial.Language;
@@ -38,6 +40,7 @@ import multidendrograms.initial.InitialProperties;
 import multidendrograms.core.definitions.Dendrogram;
 import multidendrograms.core.utils.MathUtils;
 import multidendrograms.definitions.Config;
+import multidendrograms.definitions.Formats;
 
 /**
  * <p>
@@ -57,9 +60,9 @@ public class DendrogramTree extends JDialog {
 	private final JTextArea txt;
 	private final DefaultMutableTreeNode root;
 	private final int precision;
-	private String leafPrefix, leafPostfix;
-	private String numPrefix, numPostfix;
-	private String bandPrefix, bandPostfix;
+	private String leafPrefix, leafSufix;
+	private String numPrefix, numSufix;
+	private String bandPrefix, bandSufix;
 
 	public DendrogramTree(Config cfg) throws Exception {
 		super();
@@ -99,6 +102,16 @@ public class DendrogramTree extends JDialog {
 			throw new Exception(errMsg);
 		}
 
+		DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
+		Icon ic;
+		ic = renderer.getLeafIcon();
+		renderer.setLeafIcon(Formats.scaleIcon(ic));
+		ic = renderer.getOpenIcon();
+		renderer.setOpenIcon(Formats.scaleIcon(ic));
+		ic = renderer.getClosedIcon();
+		renderer.setClosedIcon(Formats.scaleIcon(ic));
+		tree.setCellRenderer(renderer);
+
 		final int frmWidth = InitialProperties.getWidthDendroWindow();
 		final int frmHeight = InitialProperties.getHeightDendroWindow();
 
@@ -117,7 +130,7 @@ public class DendrogramTree extends JDialog {
 	private void showBranch(final Dendrogram cluster, final DefaultMutableTreeNode branch) throws Exception {
 		DefaultMutableTreeNode full;
 		if (cluster.numberOfSubclusters() == 1) {
-			full = new DefaultMutableTreeNode("<html>" + leafPrefix + cluster.getLabel() + leafPostfix + "</html>");
+			full = new DefaultMutableTreeNode("<html>" + leafPrefix + cluster.getLabel() + leafSufix + "</html>");
 		} else {
 			double pmin = cluster.getRootBottomHeight();
 			double pmax = cluster.getRootTopHeight();
@@ -132,11 +145,11 @@ public class DendrogramTree extends JDialog {
 			String spmax = NumberUtils.format(pmax, precision);
 			full = new DefaultMutableTreeNode(
 					"<html>"
-					+ numPrefix + cluster.numberOfSubclusters() + numPostfix
+					+ numPrefix + cluster.numberOfSubclusters() + numSufix
 					+ " &nbsp;&nbsp; "
-					+ bandPrefix + " [" + spmin + ", " + spmax + "] " + bandPostfix
+					+ bandPrefix + " [" + spmin + ", " + spmax + "] " + bandSufix
 					+ " &nbsp;&nbsp; "
-					+ numPrefix + " <i>" + cluster.numberOfLeaves() + "</i> " + numPostfix
+					+ numPrefix + " <i>" + cluster.numberOfLeaves() + "</i> " + numSufix
 					+ "</html>");
 		}
 		branch.add(full);
@@ -155,48 +168,48 @@ public class DendrogramTree extends JDialog {
 		c = InitialProperties.getColorTreeLeaf();
 		if (f.isBold() && f.isItalic()) {
 			leafPrefix = "<b color='" + colorToString(c) + "'><i>";
-			leafPostfix = "</i></b>";
+			leafSufix = "</i></b>";
 		} else if (f.isBold()) {
 			leafPrefix = "<b color='" + colorToString(c) + "'>";
-			leafPostfix = "</b>";
+			leafSufix = "</b>";
 		} else if (f.isItalic()) {
 			leafPrefix = "<i color='" + colorToString(c) + "'>";
-			leafPostfix = "</i>";
+			leafSufix = "</i>";
 		} else {
 			leafPrefix = "<font color='" + colorToString(c) + "'>";
-			leafPostfix = "</font>";
+			leafSufix = "</font>";
 		}
 
 		f = InitialProperties.getFontTreeNum();
 		c = InitialProperties.getColorTreeNum();
 		if (f.isBold() && f.isItalic()) {
 			numPrefix = "<b color='" + colorToString(c) + "'><i>";
-			numPostfix = "</i></b>";
+			numSufix = "</i></b>";
 		} else if (f.isBold()) {
 			numPrefix = "<b color='" + colorToString(c) + "'>";
-			numPostfix = "</b>";
+			numSufix = "</b>";
 		} else if (f.isItalic()) {
 			numPrefix = "<i color='" + colorToString(c) + "'>";
-			numPostfix = "</i>";
+			numSufix = "</i>";
 		} else {
 			numPrefix = "<font color='" + colorToString(c) + "'>";
-			numPostfix = "</font>";
+			numSufix = "</font>";
 		}
 
 		f = InitialProperties.getFontTreeBand();
 		c = InitialProperties.getColorTreeBand();
 		if (f.isBold() && f.isItalic()) {
 			bandPrefix = "<b color='" + colorToString(c) + "'><i>";
-			bandPostfix = "</i></b>";
+			bandSufix = "</i></b>";
 		} else if (f.isBold()) {
 			bandPrefix = "<b color='" + colorToString(c) + "'>";
-			bandPostfix = "</b>";
+			bandSufix = "</b>";
 		} else if (f.isItalic()) {
 			bandPrefix = "<i color='" + colorToString(c) + "'>";
-			bandPostfix = "</i>";
+			bandSufix = "</i>";
 		} else {
 			bandPrefix = "<font color='" + colorToString(c) + "'>";
-			bandPostfix = "</font>";
+			bandSufix = "</font>";
 		}
 	}
 

@@ -21,12 +21,14 @@ package multidendrograms.forms.panels;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.SwingConstants;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle;
-import multidendrograms.initial.Language;
 
+import multidendrograms.initial.Language;
+import multidendrograms.initial.InitialProperties;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.children.AboutBox;
 import multidendrograms.definitions.Formats;
@@ -48,7 +50,7 @@ public class InfoExitPanel extends JPanel implements ActionListener {
 	private final PrincipalDesk fr;
 	private String sInfo, sExit;
 
-	private void CarregaIdioma() {
+	private void loadLanguage() {
 		sInfo = Language.getLabel(52); // Info
 		sExit = Language.getLabel(46); // exit
 	}
@@ -56,7 +58,7 @@ public class InfoExitPanel extends JPanel implements ActionListener {
 	public InfoExitPanel(final PrincipalDesk fr) {
 		super();
 		this.fr = fr;
-		this.CarregaIdioma();
+		this.loadLanguage();
 		this.getPanel();
 		this.setVisible(true);
 	}
@@ -71,6 +73,9 @@ public class InfoExitPanel extends JPanel implements ActionListener {
 		btnExit = Formats.getFormattedBoldButton(sExit); // Exit
 		btnExit.addActionListener(this);
 
+		// Width
+		int width = InitialProperties.scaleSize(100);
+
 		// layout
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -79,11 +84,13 @@ public class InfoExitPanel extends JPanel implements ActionListener {
 				layout.createSequentialGroup()
 						.addGap(5, 5, 5)
 						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(btnInfo, 110, 110, 110)
+						.addComponent(btnInfo, width, width, 2 * width)
 						.addGap(3, 3, 3)
-						.addComponent(btnExit, 110, 110, 110)
+						.addComponent(btnExit, width, width, 2 * width)
 						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 						.addGap(5, 5, 5));
+
+		layout.linkSize(SwingConstants.HORIZONTAL, btnInfo, btnExit);
 
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
@@ -93,7 +100,6 @@ public class InfoExitPanel extends JPanel implements ActionListener {
 										.addComponent(btnInfo)
 										.addComponent(btnExit))
 						.addGap(8, 8, 8));
-
 }
 
 	@Override

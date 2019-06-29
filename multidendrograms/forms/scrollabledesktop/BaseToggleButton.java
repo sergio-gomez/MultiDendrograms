@@ -29,10 +29,10 @@ public class BaseToggleButton extends JToggleButton implements DesktopConstants,
 		super(title);
 
 		setButtonFormat();
+
 		setToolTipText(title);
 
 		defaultColor = getForeground();
-
 	}
 
 	private void setButtonFormat() {

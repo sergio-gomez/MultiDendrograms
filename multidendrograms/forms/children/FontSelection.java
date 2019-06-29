@@ -58,20 +58,20 @@ public class FontSelection extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private Font font;
 	private final Font initFont;
-	private JComboBox cbSizes, cbFonts;
+	private JComboBox<String> cbSizes, cbFonts;
 	private JCheckBox chkBold, chkItalic;
 	private final JButton btnAccept, btnCancel;
 	private JLabel lblSelectedFont;
 
 	private void initialize() {
 		final String[] sizes = { "6", "7", "8", "9", "10", "11", "12", "14", "16", "18", "20"};
-		cbSizes = new JComboBox(sizes);
+		cbSizes = new JComboBox<String>(sizes);
 		cbSizes.setEditable(true);
 		cbSizes.setSelectedItem(String.valueOf(font.getSize()));
 		cbSizes.setFont(FontUtils.addStyle(InitialProperties.getFontLabel(), Font.BOLD));
 
 		final String[] fonts = FontSelection.getSystemFonts();
-		cbFonts = new JComboBox(fonts);
+		cbFonts = new JComboBox<String>(fonts);
 		cbFonts.setSelectedItem(font.getName());
 		cbFonts.setFont(FontUtils.addStyle(InitialProperties.getFontLabel(), Font.BOLD));
 

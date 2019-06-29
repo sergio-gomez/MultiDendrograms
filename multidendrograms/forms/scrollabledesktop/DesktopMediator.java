@@ -106,6 +106,8 @@ public class DesktopMediator implements DesktopConstants {
 
 	/**
 	 * creates the associated frame components (ie: toggle and menu items)
+	 *
+	 * @param frame the base internal frame of class
 	 */
 	private void createFrameAssociates(BaseInternalFrame frame) {
 

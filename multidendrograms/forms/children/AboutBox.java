@@ -23,8 +23,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
@@ -32,9 +36,12 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.LayoutStyle;
+import javax.imageio.ImageIO;
 
+import multidendrograms.initial.LogManager;
 import multidendrograms.initial.Language;
 import multidendrograms.initial.Main;
+import multidendrograms.initial.InitialProperties;
 import multidendrograms.utils.URLLabel;
 import multidendrograms.utils.FontUtils;
 import multidendrograms.definitions.Formats;
@@ -58,6 +65,7 @@ public class AboutBox extends JDialog implements ActionListener {
 	private final String appTitle = Main.PROGRAM;
 	private final String affiliation = Main.AFFILIATION;
 	private final String version = Main.VERSION;
+	private final String jreVersion = Main.JRE_VERSION;
 	private final String authors = Main.AUTHORS;
 	private final String advisors = Main.ADVISORS;
 	private final String homepage = Main.HOMEPAGE_URL;
@@ -70,6 +78,8 @@ public class AboutBox extends JDialog implements ActionListener {
 	private JLabel urvLabel;
 	private JLabel versionLabel;
 	private JLabel appVersionLabel;
+	private JLabel jreVersionLabel;
+	private JLabel appJreVersionLabel;
 	private JLabel authorsLabel;
 	private JLabel appAuthorsLabel;
 	private JLabel advisorsLabel;
@@ -85,10 +95,9 @@ public class AboutBox extends JDialog implements ActionListener {
 		initComponents();
 		getRootPane().setDefaultButton(closeButton);
 
-		Dimension pantalla = Toolkit.getDefaultToolkit().getScreenSize();
-		Dimension ventana = getSize();
-		setLocation((pantalla.width - ventana.width) / 2,
-				(pantalla.height - ventana.height) / 2);
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension window = getSize();
+		setLocation((screen.width - window.width) / 2, (screen.height - window.height) / 2);
 	}
 
 	private void initComponents() {
@@ -103,8 +112,19 @@ public class AboutBox extends JDialog implements ActionListener {
 		closeButton.addActionListener(this);
 
 		imageLabel = new JLabel();
-		imageLabel.setIcon(new ImageIcon(logo));
 		imageLabel.setName("imageLabel");
+
+		try {
+  		BufferedImage imgOri = ImageIO.read(new File(logo));
+			int w = InitialProperties.scaleSize(imgOri.getWidth());
+			int h = InitialProperties.scaleSize(imgOri.getHeight());
+			Image img = imgOri.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+			imageLabel.setIcon(new ImageIcon(img));
+		} catch (final IOException e) {
+			LogManager.LOG.throwing("AboutBox.java", "initComponents", e);
+		} catch (Exception e) {
+			LogManager.LOG.throwing("AboutBox.java", "initComponents", e);
+		}
 
 		appTitleLabel = Formats.getFormattedBoldLabel(appTitle);
 		appTitleLabel.setFont(FontUtils.addStyleIncSize(appTitleLabel.getFont(), Font.BOLD, 4));
@@ -118,6 +138,12 @@ public class AboutBox extends JDialog implements ActionListener {
 
 		appVersionLabel = Formats.getFormattedLabel(version);
 		appVersionLabel.setName("appVersionLabel");
+
+		jreVersionLabel = Formats.getFormattedBoldLabel(Language.getLabel(135));
+		jreVersionLabel.setName("jreVersionLabel");
+
+		appJreVersionLabel = Formats.getFormattedLabel(jreVersion);
+		appJreVersionLabel.setName("appJreVersionLabel");
 
 		authorsLabel = Formats.getFormattedBoldLabel(Language.getLabel(119));
 		authorsLabel.setName("authorsLabel");
@@ -148,8 +174,9 @@ public class AboutBox extends JDialog implements ActionListener {
 
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(layout
-				.createParallelGroup(GroupLayout.Alignment.LEADING)
+
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(
 						layout.createSequentialGroup()
 								.addComponent(imageLabel)
@@ -158,21 +185,18 @@ public class AboutBox extends JDialog implements ActionListener {
 												GroupLayout.Alignment.TRAILING)
 												.addGroup(
 														layout.createSequentialGroup()
-																.addGap(36, 36,
-																		36)
+																.addGap(36, 36, 36)
 																.addGroup(
 																		layout.createParallelGroup(
 																				GroupLayout.Alignment.LEADING)
 																				.addGroup(
 																						GroupLayout.Alignment.TRAILING,
 																						layout.createSequentialGroup()
-																								.addPreferredGap(
-																										LayoutStyle.ComponentPlacement.RELATED)
+																								.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 																								.addGroup(
 																										layout.createParallelGroup(
 																												GroupLayout.Alignment.LEADING)
-																												.addComponent(
-																														appTitleLabel)
+																												.addComponent(appTitleLabel)
 																												.addComponent(
 																														urvLabel,
 																														GroupLayout.DEFAULT_SIZE,
@@ -180,8 +204,8 @@ public class AboutBox extends JDialog implements ActionListener {
 																														Short.MAX_VALUE)
 																												.addGroup(
 																														layout.createSequentialGroup()
-																																.addComponent(
-																																		jLabel5)
+																																.addComponent(jLabel5)
+																																.addGap(28, 28, 28)
 																																.addPreferredGap(
 																																		LayoutStyle.ComponentPlacement.RELATED,
 																																		GroupLayout.DEFAULT_SIZE,
@@ -189,63 +213,38 @@ public class AboutBox extends JDialog implements ActionListener {
 																																.addGroup(
 																																		layout.createParallelGroup(
 																																				GroupLayout.Alignment.LEADING)
-																																				.addComponent(
-																																						versionLabel)
-																																				.addComponent(
-																																						authorsLabel)
-																																				.addComponent(
-																																						advisorsLabel)
-																																				.addComponent(
-																																						homepageLabel))
-																																.addGap(27,
-																																		27,
-																																		27)
+																																				.addComponent(versionLabel)
+																																				.addComponent(jreVersionLabel)
+																																				.addComponent(authorsLabel)
+																																				.addComponent(advisorsLabel)
+																																				.addComponent(homepageLabel)
+																																				.addComponent(manualLabel))
+																																.addGap(27, 27, 27)
 																																.addGroup(
 																																		layout.createParallelGroup(
 																																				GroupLayout.Alignment.LEADING)
-																																				.addComponent(
-																																						appHomepageLabel)
+																																				.addComponent(appHomepageLabel)
 																																				.addGroup(
 																																						layout.createSequentialGroup()
 																																								.addGroup(
 																																										layout.createParallelGroup(
 																																												GroupLayout.Alignment.LEADING)
-																																												.addComponent(
-																																														appAdvisorsLabel)
-																																												.addComponent(
-																																														appVersionLabel)
-																																												.addComponent(
-																																														appAuthorsLabel))
-																																								.addGap(53,
-																																										53,
-																																										53)))
-																																.addGap(86,
-																																		86,
-																																		86))))
-																				.addGroup(
-																						layout.createSequentialGroup()
-																								.addGap(66,
-																										66,
-																										66)
-																								.addComponent(
-																										manualLabel)
-																								.addGap(107,
-																										107,
-																										107)
-																								.addComponent(
-																										licenseLabel))))
+																																												.addComponent(appAdvisorsLabel)
+																																												.addComponent(appVersionLabel)
+																																												.addComponent(appJreVersionLabel)
+																																												.addComponent(appAuthorsLabel)
+																																												.addComponent(licenseLabel))
+																																								.addGap(40, 40, 40)))
+																																.addGap(25, 25, 25))))))
 												.addGroup(
 														layout.createSequentialGroup()
-																.addPreferredGap(
-																		LayoutStyle.ComponentPlacement.RELATED)
-																.addComponent(
-																		closeButton)))
+																.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+																.addComponent(closeButton)))
 								.addContainerGap()));
+
 		layout.setVerticalGroup(layout
 				.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addComponent(imageLabel,
-						GroupLayout.PREFERRED_SIZE, 225,
-						Short.MAX_VALUE)
+				.addComponent(imageLabel, GroupLayout.PREFERRED_SIZE, InitialProperties.scaleSize(237), Short.MAX_VALUE)
 				.addGroup(
 						layout.createSequentialGroup()
 								.addGroup(
@@ -254,67 +253,59 @@ public class AboutBox extends JDialog implements ActionListener {
 												.addGroup(
 														layout.createSequentialGroup()
 																.addContainerGap()
-																.addComponent(
-																		appTitleLabel)
-																.addPreferredGap(
-																		LayoutStyle.ComponentPlacement.RELATED)
-																.addComponent(
-																		urvLabel))
+																.addComponent(appTitleLabel)
+																.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+																.addComponent(urvLabel))
 												.addGroup(
 														layout.createSequentialGroup()
-																.addGap(68, 68,
-																		68)
+																.addGap(InitialProperties.scaleSize(63),
+																				InitialProperties.scaleSize(63),
+																				InitialProperties.scaleSize(63))
 																.addGroup(
 																		layout.createParallelGroup(
 																				GroupLayout.Alignment.BASELINE)
-																				.addComponent(
-																						appVersionLabel)
-																				.addComponent(
-																						versionLabel))
-																.addPreferredGap(
-																		LayoutStyle.ComponentPlacement.RELATED)
-																.addGroup(
-																		layout.createParallelGroup(
-																				GroupLayout.Alignment.BASELINE)
-																				.addComponent(
-																						appAuthorsLabel)
-																				.addComponent(
-																						authorsLabel))
-																.addGap(8, 8, 8)
-																.addGroup(
-																		layout.createParallelGroup(
-																				GroupLayout.Alignment.BASELINE)
-																				.addComponent(
-																						advisorsLabel)
-																				.addComponent(
-																						appAdvisorsLabel))
+																				.addComponent(appVersionLabel)
+																				.addComponent(versionLabel))
 																.addGap(7, 7, 7)
 																.addGroup(
 																		layout.createParallelGroup(
 																				GroupLayout.Alignment.BASELINE)
-																				.addComponent(
-																						homepageLabel)
-																				.addComponent(
-																						appHomepageLabel))))
-								.addGap(18, 18, 18)
+																				.addComponent(appJreVersionLabel)
+																				.addComponent(jreVersionLabel))
+																.addGap(7, 7, 7)
+																.addGroup(
+																		layout.createParallelGroup(
+																				GroupLayout.Alignment.BASELINE)
+																				.addComponent(appAuthorsLabel)
+																				.addComponent(authorsLabel))
+																.addGap(7, 7, 7)
+																.addGroup(
+																		layout.createParallelGroup(
+																				GroupLayout.Alignment.BASELINE)
+																				.addComponent(advisorsLabel)
+																				.addComponent(appAdvisorsLabel))
+																.addGap(7, 7, 7)
+																.addGroup(
+																		layout.createParallelGroup(
+																				GroupLayout.Alignment.BASELINE)
+																				.addComponent(homepageLabel)
+																				.addComponent(appHomepageLabel))
+																.addGap(InitialProperties.scaleSize(14),
+																				InitialProperties.scaleSize(14),
+																				InitialProperties.scaleSize(14))
+																.addGroup(
+																		layout.createParallelGroup(
+																				GroupLayout.Alignment.BASELINE)
+																				.addComponent(manualLabel)
+																				.addComponent(licenseLabel))))
+								.addGap(InitialProperties.scaleSize(14),
+												InitialProperties.scaleSize(14),
+												InitialProperties.scaleSize(14))
 								.addGroup(
 										layout.createParallelGroup(
 												GroupLayout.Alignment.LEADING)
-												.addComponent(manualLabel)
-												.addGroup(
-														layout.createParallelGroup(
-																GroupLayout.Alignment.TRAILING)
-																.addComponent(
-																		closeButton)
-																.addGroup(
-																		layout.createSequentialGroup()
-																				.addComponent(
-																						licenseLabel)
-																				.addGap(37,
-																						37,
-																						37)
-																				.addComponent(
-																						jLabel5))))
+												.addComponent(closeButton)
+												.addComponent(jLabel5))
 								.addContainerGap(
 										GroupLayout.DEFAULT_SIZE,
 										Short.MAX_VALUE)));

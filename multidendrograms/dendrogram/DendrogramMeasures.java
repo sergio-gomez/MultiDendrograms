@@ -41,17 +41,17 @@ import multidendrograms.core.definitions.SymmetricMatrix;
  */
 public class DendrogramMeasures {
 
-	public static final String TREE_BALANCE_LABEL = "Normalized Tree Balance";
 	public static final String COPHENETIC_CORRELATION_LABEL = "Cophenetic Correlation Coefficient";
 	public static final String SQUARED_ERROR_LABEL = "Normalized Mean Squared Error";
 	public static final String ABSOLUTE_ERROR_LABEL = "Normalized Mean Absolute Error";
+	public static final String TREE_BALANCE_LABEL = "Normalized Tree Balance";
 	public static final String SPACE_DISTORTION_LABEL = "Space Distortion";
 	public static final String DEGREE_CONNECTIVITY_LABEL = "Degree of Connectivity";
 
-	private String treeBalance;
 	private String copheneticCorrelation;
 	private String squaredError;
 	private String absoluteError;
+	private String treeBalance;
 	private String spaceDistortion;
 	private String degreeConnectivity;
 
@@ -60,17 +60,13 @@ public class DendrogramMeasures {
 		nf.setMinimumFractionDigits(6);
 		nf.setMaximumFractionDigits(6);
 		nf.setGroupingUsed(false);
-		this.treeBalance = nf.format(root.normalizedTreeBalance());
 		double ccc = copheneticCorrelationCoefficient(proxMatrix, ultraMatrix);
 		this.copheneticCorrelation = Double.isNaN(ccc)? "NaN" : nf.format(ccc);
 		this.squaredError = nf.format(normalizedMeanError(2, proxMatrix, ultraMatrix));
 		this.absoluteError = nf.format(normalizedMeanError(1, proxMatrix, ultraMatrix));
+		this.treeBalance = nf.format(root.normalizedTreeBalance());
 		this.spaceDistortion = nf.format(spaceDistortion(proxMatrix, ultraMatrix));
 		this.degreeConnectivity = nf.format(degreeOfConnectivity(proxMatrix, root.isDistanceBased, ultraMatrix));
-	}
-
-	public String getTreeBalance() {
-		return this.treeBalance;
 	}
 
 	public String getCopheneticCorrelation() {
@@ -85,6 +81,10 @@ public class DendrogramMeasures {
 		return this.absoluteError;
 	}
 
+	public String getTreeBalance() {
+		return this.treeBalance;
+	}
+
 	public String getSpaceDistortion() {
 		return this.spaceDistortion;
 	}
@@ -97,10 +97,10 @@ public class DendrogramMeasures {
 		File file = new File(path);
 		FileWriter fileWriter = new FileWriter(file);
 		PrintWriter printWriter = new PrintWriter(fileWriter);
-		printWriter.println(DendrogramMeasures.TREE_BALANCE_LABEL + "            : " + this.treeBalance);
 		printWriter.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL + " : " + this.copheneticCorrelation);
 		printWriter.println(DendrogramMeasures.SQUARED_ERROR_LABEL + "      : " + this.squaredError);
 		printWriter.println(DendrogramMeasures.ABSOLUTE_ERROR_LABEL + "     : " + this.absoluteError);
+		printWriter.println(DendrogramMeasures.TREE_BALANCE_LABEL + "            : " + this.treeBalance);
 		printWriter.println(DendrogramMeasures.SPACE_DISTORTION_LABEL + "                   : " + this.spaceDistortion);
 		printWriter.close();
 	}

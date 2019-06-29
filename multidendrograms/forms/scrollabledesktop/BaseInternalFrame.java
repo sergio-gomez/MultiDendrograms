@@ -73,6 +73,8 @@ public class BaseInternalFrame extends JInternalFrame {
 	}
 	/**
 	 * constructor provided for compatibility with JInternalFrame
+	 *
+	 * @param title the string displayed in the title bar of the internal frame
 	 */
 	public BaseInternalFrame(String title) {
 		super(title);
@@ -80,6 +82,9 @@ public class BaseInternalFrame extends JInternalFrame {
 	}
 	/**
 	 * constructor provided for compatibility with JInternalFrame
+	 *
+	 * @param title the string displayed in the title bar of the internal frame
+	 * @param resizable determines whether the frame is resizable
 	 */
 	public BaseInternalFrame(String title, boolean resizable) {
 		super(title, resizable);
@@ -87,6 +92,10 @@ public class BaseInternalFrame extends JInternalFrame {
 	}
 	/**
 	 * constructor provided for compatibility with JInternalFrame
+	 *
+	 * @param title the string displayed in the title bar of the internal frame
+	 * @param resizable determines whether the frame is resizable
+	 * @param closable determines whether the frame is closable
 	 */
 	public BaseInternalFrame(String title, boolean resizable, boolean closable) {
 		super(title, resizable, closable);
@@ -94,6 +103,11 @@ public class BaseInternalFrame extends JInternalFrame {
 	}
 	/**
 	 * constructor provided for compatibility with JInternalFrame
+	 *
+	 * @param title the string displayed in the title bar of the internal frame
+	 * @param resizable determines whether the frame is resizable
+	 * @param closable determines whether the frame is closable
+	 * @param maximizable determines whether the frame is maximizable
 	 */
 	public BaseInternalFrame(String title, boolean resizable, boolean closable,
 			boolean maximizable) {
@@ -102,6 +116,12 @@ public class BaseInternalFrame extends JInternalFrame {
 	}
 	/**
 	 * constructor provided for compatibility with JInternalFrame
+	 *
+	 * @param title the string displayed in the title bar of the internal frame
+	 * @param resizable determines whether the frame is resizable
+	 * @param closable determines whether the frame is closable
+	 * @param maximizable determines whether the frame is maximizable
+	 * @param iconifiable determines whether the frame is iconifiable
 	 */
 	public BaseInternalFrame(String title, boolean resizable, boolean closable,
 			boolean maximizable, boolean iconifiable) {

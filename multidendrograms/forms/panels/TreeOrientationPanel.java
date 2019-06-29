@@ -18,16 +18,19 @@
 
 package multidendrograms.forms.panels;
 
+import java.awt.Image;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+import javax.swing.ImageIcon;
 
 import multidendrograms.initial.LogManager;
+import multidendrograms.initial.InitialProperties;
 import multidendrograms.types.DendrogramOrientation;
 
 /**
@@ -45,66 +48,69 @@ public class TreeOrientationPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	File f;
+	private final String s_N = "img/Tree_N.png";
+	private final String s_S = "img/Tree_S.png";
+	private final String s_E = "img/Tree_E.png";
+	private final String s_W = "img/Tree_W.png";
 
-	int or = 0;
+	private ImageIcon img_N;
+	private ImageIcon img_S;
+	private ImageIcon img_E;
+	private ImageIcon img_W;
+
+	private ImageIcon curImg;
 
 	public TreeOrientationPanel() {
 		super();
-		final String s = "img/Tree_N.jpg";
-		f = new File(s);
+		img_N = prepareImage(s_N);
+		img_S = prepareImage(s_S);
+		img_E = prepareImage(s_E);
+		img_W = prepareImage(s_W);
+		curImg = img_N;
+		int w = curImg.getIconWidth();
+		int h = curImg.getIconHeight();
+		Dimension dim = new Dimension(w, h);
+		setMinimumSize(dim);
+		setPreferredSize(dim);
 	}
 
-	public void setImage(final DendrogramOrientation i) {
-		final String s1 = "img/Tree_N.jpg";
-		final String s2 = "img/Tree_S.jpg";
-		final String s3 = "img/Tree_E.jpg";
-		final String s4 = "img/Tree_W.jpg";
-		switch (i) {
+	public void setImage(final DendrogramOrientation orientation) {
+		switch (orientation) {
 		case NORTH:
-			f = new File(s1);
-			or = 0;
+			curImg = img_N;
 			break;
 		case SOUTH:
-			f = new File(s2);
-			or = 0;
+			curImg = img_S;
 			break;
 		case EAST:
-			f = new File(s3);
-			or = 1;
+			curImg = img_E;
 			break;
 		case WEST:
-			f = new File(s4);
-			or = 1;
+			curImg = img_W;
 			break;
 		}
 		this.repaint();
 	}
 
 	@Override
-	public void paint(final Graphics arg0) {
-		int x, y, w, h;
+	public void paint(final Graphics g) {
+		super.paint(g);
+		curImg.paintIcon(this, g, 0, 0);
+	}
 
-		super.paint(arg0);
-		final Graphics2D g2 = (Graphics2D) arg0;
-		BufferedImage img = null;
+	private ImageIcon prepareImage(final String s) {
+  	BufferedImage imgOri;
+  	ImageIcon img = null;
 		try {
-			img = ImageIO.read(f);
-			if (or == 0) {
-				w = 50;
-				h = 47;
-			} else {
-				w = 47;
-				h = 50;
-			}
-			x = (this.getWidth() - w) / 2;
-			y = (this.getHeight() - h) / 2;
-			g2.drawImage(img, x, y, w, h, null);
+			imgOri = ImageIO.read(new File(s));
+			int w = InitialProperties.scaleSize(imgOri.getWidth());
+			int h = InitialProperties.scaleSize(imgOri.getHeight());
+			img = new ImageIcon(imgOri.getScaledInstance(w, h, Image.SCALE_SMOOTH));
 		} catch (final IOException e) {
 			LogManager.LOG.throwing("TreeOrientationPanel.java", "paint", e);
 		} catch (Exception e) {
 			LogManager.LOG.throwing("TreeOrientationPanel.java", "paint", e);
 		}
+		return img;
 	}
-
 }

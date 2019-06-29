@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.SwingConstants;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -53,6 +54,7 @@ import multidendrograms.forms.DendrogramParameters;
 import multidendrograms.forms.PrincipalDesk;
 import multidendrograms.forms.scrollabledesktop.DesktopConstants;
 import multidendrograms.initial.Language;
+import multidendrograms.initial.InitialProperties;
 import multidendrograms.types.BandHeight;
 import multidendrograms.types.DendrogramOrientation;
 import multidendrograms.types.MethodType;
@@ -172,11 +174,14 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 		btnUpdate.addActionListener(this);
 		btnUpdate.setEnabled(false);
 
+		// Width
+		int btnWidth = InitialProperties.scaleSize(100);
+		int lblWidth = 2 * btnWidth + 3;
+
 		// file name
 		txtFileName = Formats.getFormattedTextField();
 		txtFileName.addActionListener(this);
 		txtFileName.setEditable(false);
-		// txtFileName.setColumns(24);
 		txtFileName.setHorizontalAlignment(JTextField.LEFT);
 		setFileName(Language.getLabel(112)); // No file loaded
 
@@ -195,15 +200,18 @@ public class LoadUpdatePanel extends JPanel implements ActionListener,
 				.addGap(6, 6, 6)
 				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addGroup(layout.createSequentialGroup().addComponent(btnLoad, 110, 110, 110).addGap(3, 3, 3)
-								.addComponent(btnUpdate, 110, 110, 110))
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(btnLoad, btnWidth, btnWidth, 2 * btnWidth)
+								.addGap(3, 3, 3)
+								.addComponent(btnUpdate, btnWidth, btnWidth, 2 * btnWidth))
 						.addGroup(GroupLayout.Alignment.CENTER,
-								layout.createSequentialGroup().addComponent(txtFileName, 223, 223, 223))
+								layout.createSequentialGroup().addComponent(txtFileName, lblWidth, lblWidth, 2 * lblWidth))
 						.addGroup(GroupLayout.Alignment.CENTER,
 								layout.createSequentialGroup().addComponent(progressBar)))
 				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 				.addGap(6, 6, 6));
 
+		layout.linkSize(SwingConstants.HORIZONTAL, btnLoad, btnUpdate);
 		layout.linkSize(SwingConstants.HORIZONTAL, txtFileName, progressBar);
 
 		layout.setVerticalGroup(

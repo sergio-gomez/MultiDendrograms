@@ -34,6 +34,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.UIManager;
 
 import multidendrograms.definitions.Config;
 import multidendrograms.definitions.SettingsInfo;
@@ -116,6 +117,13 @@ public class PrincipalDesk extends JFrame {
 		JFrame.setDefaultLookAndFeelDecorated(true);
 		setMinimumSize(new Dimension(minFrmWidth, minFrmHeight));
 		setSize(frmWidth, frmHeight);
+
+		UIManager.put("InternalFrame.titleFont", InitialProperties.getFontTitle());
+		UIManager.put("ToolTip.font", InitialProperties.getFontLabel());
+		UIManager.put("ToggleButton.font", InitialProperties.getFontLabel());
+		UIManager.put("OptionPane.buttonFont", InitialProperties.getFontTitle());
+		UIManager.put("OptionPane.messageFont", InitialProperties.getFontLabel());
+		UIManager.put("ColorChooser.font", InitialProperties.getFontLabel());
 
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

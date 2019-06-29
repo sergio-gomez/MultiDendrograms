@@ -2,8 +2,9 @@
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
 <record>
-  <date>2018-12-01T14:35:52</date>
-  <millis>1543671352919</millis>
+  <date>2019-06-29T16:51:20.993542800Z</date>
+  <millis>1561827080993</millis>
+  <nanos>542800</nanos>
   <sequence>0</sequence>
   <logger>Dendro</logger>
   <level>CONFIG</level>

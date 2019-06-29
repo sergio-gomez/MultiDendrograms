@@ -19,7 +19,11 @@
 package multidendrograms.initial;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
+
+import multidendrograms.initial.Main;
 
 /**
  * <p>
@@ -40,6 +44,9 @@ public class InitialProperties {
 
 	// Data
 	private static double missingValue = 0.0;
+
+  // Scaling factor
+	private static float scalingFactor = 1.0f;
 
 	// Windows
 	private static int heightMainWindow = 800;
@@ -111,8 +118,8 @@ public class InitialProperties {
 	public InitialProperties() {
 		LogManager.LOG.info("Initializing InitialProperties");
 		setProperties();
+		setScaling();
 	}
-
 
 	public static String getLanguage() {
 		return InitialProperties.language;
@@ -120,6 +127,15 @@ public class InitialProperties {
 
 	public static void setLanguage(final String language) {
 		InitialProperties.language = language;
+	}
+
+
+	public static float getScalingFactor() {
+		return InitialProperties.scalingFactor;
+	}
+
+	public static void setScalingFactor(final float scalingFactor) {
+		InitialProperties.scalingFactor = scalingFactor;
 	}
 
 
@@ -443,6 +459,9 @@ public class InitialProperties {
 		// Data
 		InitialProperties.missingValue = getDouble("missingValue", InitialProperties.missingValue);
 
+		// Scaling
+		InitialProperties.scalingFactor = getFloat("scalingFactor", InitialProperties.scalingFactor);
+
 		// Windows
 		InitialProperties.heightMainWindow = getInteger("heightMainWindow", InitialProperties.heightMainWindow);
 		InitialProperties.widthMainWindow = getInteger("widthMainWindow", InitialProperties.widthMainWindow);
@@ -510,6 +529,7 @@ public class InitialProperties {
 		InitialProperties.colorTreeBand = getColor("colorTreeBand", InitialProperties.colorTreeBand);
 	}
 
+
 	private String getString(final String label, String defaultString) {
 		String s = defaultString;
 
@@ -536,6 +556,22 @@ public class InitialProperties {
 			LogManager.LOG.warning("Unable to assign integer from label '" + label + "', using the default value");
 		}
 		return i;
+	}
+
+	private float getFloat(final String label, float defaultFloat) {
+		String s_float;
+		float f = defaultFloat;
+
+		try {
+			s_float = MainProperties.getProperty(label);
+			if (s_float != null) {
+				f = Float.parseFloat(s_float);
+			}
+		} catch (final Exception e) {
+			f = defaultFloat;
+			LogManager.LOG.warning("Unable to assign float from label '" + label + "', using the default value");
+		}
+		return f;
 	}
 
 	private double getDouble(final String label, double defaultDouble) {
@@ -592,7 +628,7 @@ public class InitialProperties {
 			}
 		} catch (final Exception e) {
 			f = defaultFont;
-			LogManager.LOG.warning("Unable to assign font from label '" + label + "', using the default font");
+			LogManager.LOG.warning("Unable to assign font for label '" + label + "', using the default font");
 		}
 		return f;
 	}
@@ -626,5 +662,67 @@ public class InitialProperties {
 		;
 		return c;
 	}
+
+
+	private void setScaling() {
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+		double jre_version = Double.parseDouble(Main.JRE_VERSION);
+
+		if ((jre_version <= 1.8) && (screenSize.getWidth() > 2 * InitialProperties.widthMainWindow)) {
+  		scalingFactor *= ((float) screenSize.getWidth()) / (2.0 * InitialProperties.widthMainWindow);
+		}
+
+		if (scalingFactor != 1.0f) {
+			InitialProperties.widthMainWindow = scaleSize(InitialProperties.widthMainWindow);
+			InitialProperties.heightMainWindow = scaleSize(InitialProperties.heightMainWindow);
+			InitialProperties.heightDendroWindow = scaleSize(InitialProperties.heightDendroWindow);
+			InitialProperties.widthDendroWindow = scaleSize(InitialProperties.widthDendroWindow);
+
+			InitialProperties.fontDendroNames = scaleFont(InitialProperties.fontDendroNames);
+			InitialProperties.fontDendroLabels = scaleFont(InitialProperties.fontDendroLabels);
+			InitialProperties.sizeDendroMargin = scaleDoubleSize(InitialProperties.sizeDendroMargin);
+
+			InitialProperties.fontLabel = scaleFont(InitialProperties.fontLabel);
+
+			InitialProperties.fontTitle = scaleFont(InitialProperties.fontTitle);
+
+			InitialProperties.fontTextField = scaleFont(InitialProperties.fontTextField);
+
+			InitialProperties.fontMenuItem = scaleFont(InitialProperties.fontMenuItem);
+
+			InitialProperties.fontButton = scaleFont(InitialProperties.fontButton);
+
+			InitialProperties.fontComboBox = scaleFont(InitialProperties.fontComboBox);
+
+			InitialProperties.fontCheckBox = scaleFont(InitialProperties.fontCheckBox);
+
+			InitialProperties.fontRadioButton = scaleFont(InitialProperties.fontRadioButton);
+
+			InitialProperties.fontTreeLeaf = scaleFont(InitialProperties.fontTreeLeaf);
+			InitialProperties.fontTreeNum = scaleFont(InitialProperties.fontTreeNum);
+			InitialProperties.fontTreeBand = scaleFont(InitialProperties.fontTreeBand);
+		}
+	}
+
+  public static boolean hasScaling() {
+    return scalingFactor != 1.0f;
+  }
+
+  public static int scaleSize(int size) {
+    return (int) (scalingFactor * size);
+  }
+
+  public static double scaleDoubleSize(double size) {
+    return scalingFactor * size;
+  }
+
+  public static Font scaleFont(Font f) {
+    return f.deriveFont(f.getSize() * scalingFactor);
+  }
+
+  public static Dimension scaleDimension(Dimension d) {
+    return new Dimension(scaleSize(d.width), scaleSize(d.height));
+  }
 
 }

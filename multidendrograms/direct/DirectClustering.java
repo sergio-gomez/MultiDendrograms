@@ -153,14 +153,14 @@ public class DirectClustering {
 					this.externalData.getProximityMatrix(),
 					this.clustering.getRoot(), this.ultraMatrix.getMatrix());
 		}
-		System.out.println(DendrogramMeasures.TREE_BALANCE_LABEL + "            : "
-		    + this.dendroMeasures.getTreeBalance());
 		System.out.println(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL + " : "
 		    + this.dendroMeasures.getCopheneticCorrelation());
 		System.out.println(DendrogramMeasures.SQUARED_ERROR_LABEL + "      : "
 				+ this.dendroMeasures.getSquaredError());
 		System.out.println(DendrogramMeasures.ABSOLUTE_ERROR_LABEL + "     : "
 				+ this.dendroMeasures.getAbsoluteError());
+		System.out.println(DendrogramMeasures.TREE_BALANCE_LABEL + "            : "
+		    + this.dendroMeasures.getTreeBalance());
 		System.out.println(DendrogramMeasures.SPACE_DISTORTION_LABEL + "                   : "
 				+ this.dendroMeasures.getSpaceDistortion());
 //		System.out.println(DendrogramMeasures.DEGREE_CONNECTIVITY_LABEL

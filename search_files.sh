@@ -1,5 +1,5 @@
 for i in  */*/*.java */*/*/*.java */*.l */*.ini */*.mf *.sh *.bat *.txt ; do
   echo $i
-  grep -i "5.0.3" $i
+  grep -i "Ward" $i
   echo "--------"
 done

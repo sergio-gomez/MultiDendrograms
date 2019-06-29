@@ -52,8 +52,8 @@ import multidendrograms.types.ProximityType;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "5.0.4";
-	public static final String VERSION_SHORT = "5.0";
+	public static final String VERSION = "5.1.0";
+	public static final String VERSION_SHORT = "5.1";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
 	public static final String AFFILIATION = "Universitat Rovira i Virgili, Tarragona (Spain)";
@@ -62,6 +62,7 @@ public class Main {
 	public static final String MANUAL_URL = "http://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-" + VERSION_SHORT + "-manual.pdf";
 	public static final String LAST_VERSION_URL = "http://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-last.txt";
 	public static final String LOGO_IMAGE = "img/logo.png";
+	public static final String JRE_VERSION = System.getProperty("java.specification.version");
 
 	private static final LogType LOG_XML = LogType.XML;
 	private static final String LOG_FILE = "logs/md_log.xml";
@@ -247,11 +248,12 @@ public class Main {
 				}
 			}
 		};
-		checkVersion.start();
+		//checkVersion.start();
 
 		if (isDirect) {
-			// check Ward only for Distance, not for Similarity
-			if ((proximityType == ProximityType.SIMILARITY) && (methodType == MethodType.WARD)) {
+			// check Centroid and Ward only for Distance, not for Similarity
+			if ((proximityType == ProximityType.SIMILARITY) &&
+			    ((methodType == MethodType.CENTROID) || (methodType == MethodType.WARD))) {
   			System.out.println("Error: " + Language.getLabel(134));
   			showSyntax();
 				return;
@@ -345,7 +347,7 @@ public class Main {
 		System.out.println("    Versatile Linkage (param -1.0) = Single Linkage");
 		System.out.println("    Beta Flexible     (param  0.0) = Arithmetic Linkage");
 		System.out.println("");
-		System.out.println("WARD only available for DISTANCE, not for SIMILARITY");
+		System.out.println("CENTROID and WARD only available for DISTANCE, not for SIMILARITY");
 		System.out.println("");
 		System.out.println("");
 		System.out.println("Examples:");

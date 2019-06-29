@@ -66,34 +66,34 @@ public class DendrogramMeasuresBox extends JDialog implements ActionListener {
 		setModal(false);
 		setName("DendrogramCharacteristicsBox");
 		setResizable(false);
-		
-		JLabel nameLabel = Formats.getFormattedTitleItalicsLabel(cfg.getDataFile().getName() 
+
+		JLabel nameLabel = Formats.getFormattedTitleItalicsLabel(cfg.getDataFile().getName()
 				+ " - " + MethodName.toName(cfg.getMethod()));
 		JLabel blankLabel = Formats.getFormattedLabel("");
-		
+
 		JLabel tbLabel = Formats.getFormattedBoldLabel(DendrogramMeasures.TREE_BALANCE_LABEL);
 		JLabel ccLabel = Formats.getFormattedBoldLabel(DendrogramMeasures.COPHENETIC_CORRELATION_LABEL);
 		JLabel seLabel = Formats.getFormattedBoldLabel(DendrogramMeasures.SQUARED_ERROR_LABEL);
 		JLabel aeLabel = Formats.getFormattedBoldLabel(DendrogramMeasures.ABSOLUTE_ERROR_LABEL);
 		JLabel sdLabel = Formats.getFormattedBoldLabel(DendrogramMeasures.SPACE_DISTORTION_LABEL);
-		
-		DendrogramMeasures dendroMeasures = 
-				new DendrogramMeasures(cfg.getExternalData().getProximityMatrix(), cfg.getRoot(), 
+
+		DendrogramMeasures dendroMeasures =
+				new DendrogramMeasures(cfg.getExternalData().getProximityMatrix(), cfg.getRoot(),
 						ultrametricMatrix.getMatrix());
 		JLabel tbValue = Formats.getFormattedLabel(dendroMeasures.getTreeBalance());
 		JLabel ccValue = Formats.getFormattedLabel(dendroMeasures.getCopheneticCorrelation());
 		JLabel seValue = Formats.getFormattedLabel(dendroMeasures.getSquaredError());
 		JLabel aeValue = Formats.getFormattedLabel(dendroMeasures.getAbsoluteError());
 		JLabel sdValue = Formats.getFormattedLabel(dendroMeasures.getSpaceDistortion());
-		
+
 		JButton okButton = Formats.getFormattedButton(Language.getLabel(60));
 		okButton.addActionListener(this);
-		
+
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(
 			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addGroup(GroupLayout.Alignment.LEADING, 
+				.addGroup(GroupLayout.Alignment.LEADING,
 					layout.createSequentialGroup()
 						.addContainerGap()
 						.addComponent(nameLabel)
@@ -103,25 +103,26 @@ public class DendrogramMeasuresBox extends JDialog implements ActionListener {
 						.addContainerGap()
 						.addGroup(
 							layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-								.addComponent(tbLabel)
-								.addComponent(blankLabel)
 								.addComponent(ccLabel)
 								.addComponent(seLabel)
 								.addComponent(aeLabel)
+								.addComponent(blankLabel)
+								.addComponent(tbLabel)
 								.addComponent(sdLabel))
 						.addGap(20, 20, 20)
 						.addGroup(
 							layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-								.addComponent(tbValue)
-								.addComponent(blankLabel)
 								.addComponent(ccValue)
 								.addComponent(seValue)
 								.addComponent(aeValue)
+								.addComponent(blankLabel)
+								.addComponent(tbValue)
 								.addComponent(sdValue))
 						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 				.addGroup(GroupLayout.Alignment.CENTER,
 					layout.createSequentialGroup()
 						.addComponent(okButton)));
+
 		layout.setVerticalGroup(
 			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(layout.createSequentialGroup()
@@ -132,33 +133,34 @@ public class DendrogramMeasuresBox extends JDialog implements ActionListener {
 						layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 							.addGroup(
 								layout.createSequentialGroup()
-									.addComponent(tbValue)
-									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-									.addComponent(blankLabel)
-									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 									.addComponent(ccValue)
 									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 									.addComponent(seValue)
 									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 									.addComponent(aeValue)
 									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+									.addComponent(blankLabel)
+									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+									.addComponent(tbValue)
+									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 									.addComponent(sdValue))
 							.addGroup(
 								layout.createSequentialGroup()
-									.addComponent(tbLabel)
-									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-									.addComponent(blankLabel)
-									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 									.addComponent(ccLabel)
 									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 									.addComponent(seLabel)
 									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 									.addComponent(aeLabel)
 									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+									.addComponent(blankLabel)
+									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+									.addComponent(tbLabel)
+									.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 									.addComponent(sdLabel)))
 					.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
-					.addComponent(okButton).addContainerGap()));
-		
+					.addComponent(okButton)
+					.addContainerGap()));
+
 		pack();
 	}
 

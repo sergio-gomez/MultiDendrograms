@@ -28,6 +28,7 @@ public class EmptyDesktopIconUI extends DesktopIconUI {
 	 * creates the EmptyDesktopIconUI object
 	 *
 	 * @param c the reference to the JComponent object required by createUI
+	 * @return the component UI
 	 */
 	public static ComponentUI createUI (JComponent c) {
 		if (desktopIconUI == null) {

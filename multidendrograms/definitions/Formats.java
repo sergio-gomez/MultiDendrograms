@@ -19,6 +19,11 @@
 package multidendrograms.definitions;
 
 import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Component;
+import java.awt.Image;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.util.Locale;
 import javax.swing.border.TitledBorder;
 import javax.swing.BorderFactory;
@@ -29,6 +34,9 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.UIManager;
 
 import multidendrograms.initial.InitialProperties;
 import multidendrograms.utils.FontUtils;
@@ -57,11 +65,12 @@ public class Formats {
 		final JCheckBox chk = new JCheckBox(caption);
 		chk.setFont(InitialProperties.getFontCheckBox());
 		chk.setForeground(InitialProperties.getColorCheckBox());
+		scaleCheckBoxIcon(chk);
 		return chk;
 	}
 
-	public static JComboBox getFormattedComboBox(final String[] s) {
-		final JComboBox cb = new JComboBox(s);
+	public static JComboBox<String> getFormattedComboBox(final String[] s) {
+		final JComboBox<String> cb = new JComboBox<String>(s);
 		cb.setFont(InitialProperties.getFontComboBox());
 		cb.setForeground(InitialProperties.getColorComboBox());
 		cb.setBackground(InitialProperties.getColorComboBoxBackground());
@@ -137,6 +146,7 @@ public class Formats {
 		final JRadioButton opt = new JRadioButton(caption, selec);
 		opt.setFont(InitialProperties.getFontRadioButton());
 		opt.setForeground(InitialProperties.getColorRadioButton());
+		scaleRadioButtonIcon(opt);
 		return opt;
 	}
 
@@ -155,5 +165,63 @@ public class Formats {
 		txt.setForeground(InitialProperties.getColorTextField());
 		return txt;
 	}
+
+	public static Icon scaleIcon(Icon ic) {
+  	return scaleIcon(ic, null);
+	}
+
+	public static Icon scaleIcon(Icon ic, Component comp) {
+		if (InitialProperties.hasScaling()) {
+			BufferedImage img = new BufferedImage(ic.getIconWidth(), ic.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+			Graphics graphics = img.createGraphics();
+			try {
+				if (comp == null) {
+					ic.paintIcon(new JLabel(), graphics, 0, 0);
+				} else {
+  				ic.paintIcon(comp, graphics, 0, 0);
+				}
+			} finally {
+				graphics.dispose();
+			}
+			ImageIcon newImg = new ImageIcon(img);
+			int width = InitialProperties.scaleSize(img.getWidth());
+			int height = InitialProperties.scaleSize(img.getHeight());
+			return new ImageIcon(newImg.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+		} else {
+  		return ic;
+		}
+	}
+
+  public static void scaleCheckBoxIcon(JCheckBox checkbox) {
+		if (InitialProperties.hasScaling()) {
+			boolean previousState = checkbox.isSelected();
+
+			checkbox.setSelected(false);
+			Icon boxIcon = UIManager.getIcon("CheckBox.icon");
+			checkbox.setIcon(scaleIcon(boxIcon, checkbox));
+
+			checkbox.setSelected(true);
+			Icon checkedBoxIcon = UIManager.getIcon("CheckBox.icon");
+			checkbox.setSelectedIcon(scaleIcon(checkedBoxIcon, checkbox));
+
+			checkbox.setSelected(previousState);
+		}
+  }
+
+  public static void scaleRadioButtonIcon(JRadioButton radioButton) {
+		if (InitialProperties.hasScaling()) {
+			boolean previousState = radioButton.isSelected();
+
+			radioButton.setSelected(false);
+			Icon radioIcon = UIManager.getIcon("RadioButton.icon");
+			radioButton.setIcon(scaleIcon(radioIcon, radioButton));
+
+			radioButton.setSelected(true);
+			Icon selectedRadioIcon = UIManager.getIcon("RadioButton.icon");
+			radioButton.setSelectedIcon(scaleIcon(selectedRadioIcon, radioButton));
+
+			radioButton.setSelected(previousState);
+		}
+  }
 
 }

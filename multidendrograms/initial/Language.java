@@ -219,7 +219,8 @@ public class Language {
 			"Current version is",//131
 			"Uniform origin",//132
 			"Equivalences between clustering algorithms",//133
-			"Ward only available for Distance, not for Similarity"//134
+			"Centroid and Ward only available for Distance, not for Similarity",//134
+			"Java runtime"//135
 		};
 
 		Language.labels = new Vector<String>();

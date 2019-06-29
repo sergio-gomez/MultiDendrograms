@@ -26,7 +26,7 @@ import multidendrograms.core.definitions.SymmetricMatrix;
  * <b>MultiDendrograms</b>
  * </p>
  *
- * Abstract class for Lance & Williams' agglomerative hierarchical clustering
+ * Abstract class for Lance &amp; Williams' agglomerative hierarchical clustering
  *
  * @author Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres
  *
@@ -34,7 +34,7 @@ import multidendrograms.core.definitions.SymmetricMatrix;
  ******************************************************************************/
 public abstract class LanceWilliams extends HierarchicalClustering {
 
-	public LanceWilliams(SymmetricMatrix proximityMatrix, String[] labels, 
+	public LanceWilliams(SymmetricMatrix proximityMatrix, String[] labels,
 			boolean isDistanceBased, int precision) {
 		super(proximityMatrix, labels, isDistanceBased, precision);
 	}
@@ -58,7 +58,7 @@ public abstract class LanceWilliams extends HierarchicalClustering {
 		return proximity;
 	}
 
-	protected abstract double getAlpha(Dendrogram cI, Dendrogram subcI, 
+	protected abstract double getAlpha(Dendrogram cI, Dendrogram subcI,
 			Dendrogram cJ, Dendrogram subcJ);
 
 	private double betaTerm(Dendrogram cI, Dendrogram cJ) {
@@ -75,7 +75,7 @@ public abstract class LanceWilliams extends HierarchicalClustering {
 		return proximity;
 	}
 
-	protected abstract double getBeta(Dendrogram cI, Dendrogram subcI, 
+	protected abstract double getBeta(Dendrogram cI, Dendrogram subcI,
 			Dendrogram subcK, Dendrogram cJ);
 
 }

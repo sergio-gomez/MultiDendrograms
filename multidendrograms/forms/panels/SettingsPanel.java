@@ -91,19 +91,19 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 	private static JTextField txtPrecision;
 
 	// Clustering algorithm
-	private static JComboBox cbMethod;
+	private static JComboBox<String> cbMethod;
 
 	// Text box for the method parameter
 	private static JTextField txtMethodParameter;
 
 	// Orientation of the tree
-	private static JComboBox cbTreeOrientation;
+	private static JComboBox<String> cbTreeOrientation;
 
 	// Radius for the nodes
-	private static JComboBox cbNodesSize;
+	private static JComboBox<String> cbNodesSize;
 
 	// Orientation of the labels of nodes
-	private static JComboBox cbNodesOrientation;
+	private static JComboBox<String> cbNodesOrientation;
 
 	// To decide the visibility of components
 	private static JCheckBox chkBands, chkNodesLabels, chkAxis, chkAxisLabels;
@@ -241,6 +241,8 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		setBorder(Formats.getFormattedTitledBorder(Language.getLabel(23))); // Settings
 		final GridBagConstraints c = new GridBagConstraints();
 		int gridy = 0;
+		int lo = InitialProperties.scaleSize(1);
+		int hi = InitialProperties.scaleSize(3);
 
 		// group options
 		ButtonGroup optSimType;
@@ -254,7 +256,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblTypeMeasure, c);
 		// opt distances
 		c.gridx = 1;
@@ -262,7 +264,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		rbDistances.setActionCommand("measure");
 		rbDistances.addActionListener(this);
 		add(rbDistances, c);
@@ -272,7 +274,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 3);
+		c.insets = new Insets(lo, lo, lo, hi);
 		rbSimilarities.setActionCommand("measure");
 		rbSimilarities.addActionListener(this);
 		add(rbSimilarities, c);
@@ -284,7 +286,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblPrecision, c);
 		// txt precision
 		c.gridx = 1;
@@ -292,7 +294,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 3);
+		c.insets = new Insets(lo, lo, lo, hi);
 		txtPrecision.setName("precision");
 		txtPrecision.addFocusListener(this);
 		add(txtPrecision, c);
@@ -304,7 +306,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblMethod, c);
 		// cb method
 		c.gridx = 1;
@@ -312,7 +314,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 3);
+		c.insets = new Insets(lo, lo, lo, hi);
 		cbMethod.setActionCommand("method");
 		cbMethod.addActionListener(this);
 		add(cbMethod, c);
@@ -324,7 +326,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblMethodParameter, c);
 		// txt method parameter
 		c.gridx = 1;
@@ -332,7 +334,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 3);
+		c.insets = new Insets(lo, lo, lo, hi);
 		txtMethodParameter.setName("method_parameter");
 		txtMethodParameter.addFocusListener(this);
 		add(txtMethodParameter, c);
@@ -342,7 +344,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(chkWeighted, c);
 		gridy++;
 
@@ -352,7 +354,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(new JLabel(" "), c);
 		gridy++;
 
@@ -364,7 +366,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 3);
+		c.insets = new Insets(lo, hi, lo, hi);
 		add(lblTreeTitle, c);
 		gridy++;
 
@@ -374,7 +376,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblTreeOrientation, c);
 		// cb tree orientation
 		c.gridx = 1;
@@ -382,7 +384,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		cbTreeOrientation.setActionCommand("dendro_orientation");
 		cbTreeOrientation.addActionListener(this);
 		add(cbTreeOrientation, c);
@@ -390,9 +392,9 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridx = 2;
 		c.gridy = gridy;
 		c.gridwidth = GridBagConstraints.REMAINDER;
-		c.gridheight = 2;
+		c.gridheight = 3;
 		c.fill = GridBagConstraints.BOTH;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		pOrientationImg = new TreeOrientationPanel();
 		add(pOrientationImg, c);
 		gridy++;
@@ -403,7 +405,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(chkBands, c);
 		// color bands
 		c.gridx = 1;
@@ -411,7 +413,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		btnColorBands = Formats.getFormattedButton(Language.getLabel(35));// Color (bands)
 		btnColorBands.setActionCommand("color_bands");
 		btnColorBands.addActionListener(this);
@@ -424,7 +426,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(new JLabel(" "), c);
 		gridy++;
 
@@ -436,7 +438,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 3);
+		c.insets = new Insets(lo, hi, lo, hi);
 		add(lblNodesTitle, c);
 		gridy++;
 
@@ -446,7 +448,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblNodesSize, c);
 		// cb nodes size
 		c.gridx = 1;
@@ -454,7 +456,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(cbNodesSize, c);
 		gridy++;
 
@@ -464,7 +466,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(chkNodesLabels, c);
 		// btn font nodes
 		c.gridx = 1;
@@ -472,7 +474,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		btnFontNodes = Formats.getFormattedButton(Language.getLabel(34));// Font (nodes)
 		btnFontNodes.setActionCommand("font_nodes");
 		btnFontNodes.addActionListener(this);
@@ -483,7 +485,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 3);
+		c.insets = new Insets(lo, lo, lo, hi);
 		btnColorNodes = Formats.getFormattedButton(Language.getLabel(35));// Color (nodes)
 		btnColorNodes.setActionCommand("color_nodes");
 		btnColorNodes.addActionListener(this);
@@ -496,7 +498,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblNodesOrientation, c);
 		// cb nodes orientation
 		c.gridx = 1;
@@ -504,7 +506,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(cbNodesOrientation, c);
 		gridy++;
 
@@ -514,7 +516,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(chkUniformOrigin, c);
 		gridy++;
 
@@ -524,7 +526,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(new JLabel(" "), c);
 		gridy++;
 
@@ -536,7 +538,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 3);
+		c.insets = new Insets(lo, hi, lo, hi);
 		add(lblAxisTitle, c);
 		gridy++;
 
@@ -546,7 +548,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(chkAxis, c);
 		// btn color axis
 		c.gridx = 1;
@@ -554,7 +556,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		btnColorAxis = Formats.getFormattedButton(Language.getLabel(38));// Color (axis)
 		btnColorAxis.setActionCommand("color_axis");
 		btnColorAxis.addActionListener(this);
@@ -567,7 +569,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblAxisMin, c);
 		// txt axis min
 		c.gridx = 1;
@@ -575,7 +577,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		txtAxisMin.setName("axis_min");
 		txtAxisMin.addFocusListener(this);
 		add(txtAxisMin, c);
@@ -587,7 +589,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblAxisMax, c);
 		// txt axis max
 		c.gridx = 1;
@@ -595,7 +597,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		txtAxisMax.setName("axis_max");
 		txtAxisMax.addFocusListener(this);
 		add(txtAxisMax, c);
@@ -607,7 +609,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblAxisSeparation, c);
 		// txt axis ticks separation
 		c.gridx = 1;
@@ -615,7 +617,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		txtAxisSeparation.setName("axis_separation");
 		txtAxisSeparation.addFocusListener(this);
 		add(txtAxisSeparation, c);
@@ -627,7 +629,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(chkAxisLabels, c);
 		// btn font axis labels
 		c.gridx = 1;
@@ -635,7 +637,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		btnFontAxisLabels = Formats.getFormattedButton(Language.getLabel(45));// Font (axis labels)
 		btnFontAxisLabels.setActionCommand("font_axis");
 		btnFontAxisLabels.addActionListener(this);
@@ -646,7 +648,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 3);
+		c.insets = new Insets(lo, lo, lo, hi);
 		btnColorAxisLabels = Formats.getFormattedButton(Language.getLabel(40));// Color (axis labels)
 		btnColorAxisLabels.setActionCommand("color_label");
 		btnColorAxisLabels.addActionListener(this);
@@ -659,7 +661,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblAxisEvery, c);
 		// txt axis labels every
 		c.gridx = 1;
@@ -667,7 +669,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		txtAxisEvery.setName("axis_every");
 		txtAxisEvery.addFocusListener(this);
 		add(txtAxisEvery, c);
@@ -677,7 +679,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		add(lblAxisTicks, c);
 		gridy++;
 
@@ -687,7 +689,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 3, 1, 1);
+		c.insets = new Insets(lo, hi, lo, lo);
 		add(lblAxisDecimals, c);
 		// txt axis decimals
 		c.gridx = 1;
@@ -695,7 +697,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(1, 1, 1, 1);
+		c.insets = new Insets(lo, lo, lo, lo);
 		txtAxisDecimals.setName("axis_decimals");
 		txtAxisDecimals.addFocusListener(this);
 		add(txtAxisDecimals, c);
@@ -711,7 +713,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 	}
 
 	private Color changeColorFont(Color c) {
-		Color color = JColorChooser.showDialog(null, Language.getLabel(1), c);// Color selection
+		Color color = JColorChooser.showDialog(null, Language.getLabel(1), c); // Color selection
 		if (color == null) {
 			color = c;
 		}
@@ -1108,12 +1110,23 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 	}
 
 	public static void adjustSettings(MethodType methodType) {
-		if (methodType == MethodType.WARD) {
+		if ((methodType == MethodType.CENTROID) || (methodType == MethodType.WARD)) {
 			rbDistances.setSelected(true);
 			rbSimilarities.setEnabled(false);
 		}
 		else if (rbSimilarities.isEnabled() == false) {
 			rbSimilarities.setEnabled(true);
+		}
+	}
+
+	public static void adjustCentroidLabel() {
+		String centroidLabel = MethodName.toName(MethodType.CENTROID);
+		if (rbSimilarities.isSelected() == true &&
+				((DefaultComboBoxModel)cbMethod.getModel()).getIndexOf(centroidLabel) != -1) {
+			cbMethod.removeItem(centroidLabel);
+		} else if (rbDistances.isSelected() == true &&
+				((DefaultComboBoxModel)cbMethod.getModel()).getIndexOf(centroidLabel) == -1) {
+			cbMethod.addItem(centroidLabel);
 		}
 	}
 
@@ -1157,6 +1170,7 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		} else if (evt.getActionCommand().equals("color_label")) {
 			colorAxisLabels = this.changeColorFont(colorAxisLabels);
 		} else if (evt.getActionCommand().equals("measure")) {
+			adjustCentroidLabel();
 			adjustWardLabel();
 		} else {
 			LogManager.LOG.warning(Language.getLabel(47) + ": " + evt.toString());

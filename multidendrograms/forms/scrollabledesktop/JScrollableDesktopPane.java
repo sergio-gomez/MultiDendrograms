@@ -42,7 +42,7 @@ import java.awt.*;
  * <BR><BR>
  * An example usage follows:
  * <BR><BR>
- * <code><pre>
+ * <pre><code>
  *    JFrame f = new JFrame("Scrollable Desktop");
  *    f.setSize(300,300);
  *    // prepare the menuBar
@@ -61,7 +61,7 @@ import java.awt.*;
  *          new JLabel("Hello and welcome to JScrollableDesktopPane."));
  *
  *    scrollableDesktop.add(frameContents);
- * </pre></code>
+ * </code></pre>
  *
  * JScrollableDesktopPane has been tested under Java 2 JDK versions
  * 1.3.1-b24 on Linux and jdk1.3.0_02 on Windows and Intel Solaris.

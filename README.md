@@ -33,7 +33,7 @@ The variable-group algorithms group more than two clusters at the same time when
 
 - In the multidendrogram representation for the results one can explicitly observe the occurrence of ties during the agglomerative process. Furthermore, the height of any fusion interval (the bands in the program) indicates the degree of heterogeneity inside the corresponding cluster.
 
-**MultiDendrograms** also introduces a new parameterized type of hierarchical clustering algorithm called Versatile Linkage, which includes Singles Linkage, Complete Linkage and Arithmetic Linkage as particular cases, and which naturally defines two new algorithms, Geometric Linkage and Harmonic Linkage (hence the convenience to rename UPGMA as Arithmetic Linkage, to emphasize the existence of different types of averages).
+**MultiDendrograms** also introduces a new parameterized type of hierarchical clustering algorithm called Versatile Linkage [2], which includes Singles Linkage, Complete Linkage and Arithmetic Linkage as particular cases, and which naturally defines two new algorithms, Geometric Linkage and Harmonic Linkage (hence the convenience to rename UPGMA as Arithmetic Linkage, to emphasize the existence of different types of averages).
 
 
 ## Comparison with other applications
@@ -70,9 +70,11 @@ You may use the *Hierarchical_Clustering* program in [**Radatools**](http://deim
 The last version of the *Manual* is always available at the [*Download*](http://deim.urv.cat/~sergio.gomez/multidendrograms.php#download) section of **MultiDendrograms** [home page](http://deim.urv.cat/~sergio.gomez/multidendrograms.php)
 
 
-## Reference
+## References
 
-[1] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Solving Non-uniqueness in Agglomerative Hierarchical Clustering Using Multidendrograms, *Journal of Classification* **25** (2008) 43-65 ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Solving_non-uniqueness_in_AHC_using_multidendrograms.pdf)) ([doi](http://dx.doi.org/10.1007/s00357-008-9004-x)) ([Springer](http://www.springerlink.com/content/c8795u6232184423))
+[1] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Solving Non-uniqueness in Agglomerative Hierarchical Clustering Using Multidendrograms, *Journal of Classification* **25** (2008) 43-65 ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Solving_non-uniqueness_in_AHC_using_multidendrograms.pdf)) ([doi](https://doi.org/10.1007/s00357-008-9004-x)) ([Springer](http://www.springerlink.com/content/c8795u6232184423))
+
+[2] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Versatile linkage: a family of space-conserving strategies for agglomerative hierarchical clustering, *Journal of Classification* (2019) in press ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Versatile_linkage-A_family_of_space-conserving_strategies_for_AHC.pdf)) ([arXiv](https://arxiv.org/abs/1906.09222))
 
 
 ## Webs
