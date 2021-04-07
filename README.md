@@ -72,9 +72,9 @@ The last version of the *Manual* is always available at the [*Download*](http://
 
 ## References
 
-[1] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Solving Non-uniqueness in Agglomerative Hierarchical Clustering Using Multidendrograms, *Journal of Classification* **25** (2008) 43-65 ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Solving_non-uniqueness_in_AHC_using_multidendrograms.pdf)) ([doi](https://doi.org/10.1007/s00357-008-9004-x)) ([Springer](http://www.springerlink.com/content/c8795u6232184423))
+[1] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Solving Non-uniqueness in Agglomerative Hierarchical Clustering Using Multidendrograms, *Journal of Classification* **25** (2008) 43-65 ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Solving_non-uniqueness_in_AHC_using_multidendrograms.pdf)) ([doi](https://doi.org/10.1007/s00357-008-9004-x)) ([Springer](https://link.springer.com/article/10.1007/s00357-008-9004-x))
 
-[2] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Versatile linkage: a family of space-conserving strategies for agglomerative hierarchical clustering, *Journal of Classification* (2019) in press ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Versatile_linkage-A_family_of_space-conserving_strategies_for_AHC.pdf)) ([arXiv](https://arxiv.org/abs/1906.09222))
+[2] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Versatile linkage: a family of space-conserving strategies for agglomerative hierarchical clustering, *Journal of Classification* **37** (2020) 584-597 ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Versatile_linkage-A_family_of_space-conserving_strategies_for_AHC.pdf)) ([doi](https://doi.org/10.1007/s00357-019-09339-z)) ([Springer](https://link.springer.com/article/10.1007/s00357-019-09339-z))
 
 
 ## Webs
