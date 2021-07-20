@@ -23,7 +23,7 @@ A hierarchical clustering tool.
 
 - Command-line: available direct calculation of hierarchical clustering from the command-line, without the need to use the graphical interface.
 
-**MultiDendrograms** implements the variable-group algorithms in [1] to solve the non-uniqueness problem found in the standard pair-group algorithms and implementations. This problem arises when two or more minimum distances between different clusters are equal during the amalgamation process. The standard approach consists in choosing a pair, breaking the ties between distances, and proceeds in the same way until the final hierarchical classification is obtained. However, different clusterings are possible depending on the criterion used to break the ties (usually a pair is just chosen at random!), and the user is unaware of this problem.
+**MultiDendrograms** implements the variable-group algorithms in [[1](#references)] to solve the non-uniqueness problem found in the standard pair-group algorithms and implementations. This problem arises when two or more minimum distances between different clusters are equal during the amalgamation process. The standard approach consists in choosing a pair, breaking the ties between distances, and proceeds in the same way until the final hierarchical classification is obtained. However, different clusterings are possible depending on the criterion used to break the ties (usually a pair is just chosen at random!), and the user is unaware of this problem.
 
 The variable-group algorithms group more than two clusters at the same time when ties occur, given rise to a graphical representation called multidendrogram. Their main properties are:
 
@@ -33,7 +33,7 @@ The variable-group algorithms group more than two clusters at the same time when
 
 - In the multidendrogram representation for the results one can explicitly observe the occurrence of ties during the agglomerative process. Furthermore, the height of any fusion interval (the bands in the program) indicates the degree of heterogeneity inside the corresponding cluster.
 
-**MultiDendrograms** also introduces a new parameterized type of hierarchical clustering algorithm called Versatile Linkage [2], which includes Singles Linkage, Complete Linkage and Arithmetic Linkage as particular cases, and which naturally defines two new algorithms, Geometric Linkage and Harmonic Linkage (hence the convenience to rename UPGMA as Arithmetic Linkage, to emphasize the existence of different types of averages).
+**MultiDendrograms** also introduces a new parameterized type of hierarchical clustering algorithm called Versatile Linkage [[2](#references)], which includes Singles Linkage, Complete Linkage and Arithmetic Linkage as particular cases, and which naturally defines two new algorithms, Geometric Linkage and Harmonic Linkage (hence the convenience to rename UPGMA as Arithmetic Linkage, to emphasize the existence of different types of averages).
 
 Similar functionality can also be obtained using package [**mdendro**](http://deim.urv.cat/~sergio.gomez/mdendro.php) for the R language.
 
