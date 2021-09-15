@@ -163,9 +163,6 @@ public class DirectClustering {
 		    + this.dendroMeasures.getTreeBalance());
 		System.out.println(DendrogramMeasures.SPACE_DISTORTION_LABEL + "                   : "
 				+ this.dendroMeasures.getSpaceDistortion());
-//		System.out.println(DendrogramMeasures.DEGREE_CONNECTIVITY_LABEL
-//				+ "             : "
-//				+ this.dendroMeasures.getDegreeOfConnectivity());
 		System.out.println("---");
 	}
 
@@ -259,7 +256,7 @@ public class DirectClustering {
 		HierarchicalClustering clustering;
 		switch (methodType) {
 		case VERSATILE_LINKAGE:
-			power = inverseSigmoid(methodParameter);
+			power = methodParameter;
 			clustering = new VersatileLinkage(proximityMatrix, labels, isDistanceBased, precision, isWeighted, power);
 			break;
 		case SINGLE_LINKAGE:
@@ -287,24 +284,14 @@ public class DirectClustering {
 			clustering = new Ward(proximityMatrix, labels, isDistanceBased, precision);
 			break;
 		case BETA_FLEXIBLE:
-			clustering = new BetaFlexible(proximityMatrix, labels, isDistanceBased, precision, isWeighted, methodParameter);
+			double beta = methodParameter;
+			clustering = new BetaFlexible(proximityMatrix, labels, isDistanceBased, precision, isWeighted, beta);
 			break;
 		default:
 			clustering = null;
 			break;
 		}
 		return clustering;
-	}
-
-	private static double inverseSigmoid(double y) {
-		if (y <= -1.0) {
-			return Double.NEGATIVE_INFINITY;
-		} else if (y >= +1.0) {
-			return Double.POSITIVE_INFINITY;
-		} else {
-			double y1 = 0.1;	// 0 < y1 = sigmoid(1) < 1
-			return Math.log((1.0 + y) / (1.0 - y)) / Math.log((1.0 + y1) / (1.0 - y1));
-		}
 	}
 
 }

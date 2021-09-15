@@ -41,19 +41,11 @@ public class SingleLinkage extends HierarchicalClustering {
 
 	@Override
 	protected double calculateProximity(Dendrogram cI, Dendrogram cJ) {
-		if (this.isDistanceBased) {
-			return minimumProximity(cI, cJ);
-		} else {
-			return maximumProximity(cI, cJ);
-		}
+		return minimumProximity(cI, cJ);
 	}
 
 	protected double calculateInternalProximity(Dendrogram c) {
-		if (this.isDistanceBased) {
-			return minimumInternalProximity(c);
-		} else {
-			return maximumInternalProximity(c);
-		}
+		return minimumInternalProximity(c);
 	}
 
 }

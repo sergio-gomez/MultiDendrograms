@@ -52,8 +52,8 @@ import multidendrograms.types.ProximityType;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "5.1.0";
-	public static final String VERSION_SHORT = "5.1";
+	public static final String VERSION = "5.2.0";
+	public static final String VERSION_SHORT = "5.2";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
 	public static final String AFFILIATION = "Universitat Rovira i Virgili, Tarragona (Spain)";
@@ -165,7 +165,8 @@ public class Main {
 					if (i < args.length) {
 						try {
 							methodParameter = Double.parseDouble(args[i]);
-							if ((methodParameter < -1.0) || (+1.0 < methodParameter)) {
+							if ((methodType == MethodType.BETA_FLEXIBLE) &&
+									((methodParameter < -1.0) || (+1.0 < methodParameter))) {
 								System.out.println(Language.getLabel(68));
 								showSyntax();
 								return;
@@ -324,9 +325,9 @@ public class Main {
 		System.out.println("                      CD, CENTROID");
 		System.out.println("                      WD, WARD");
 		System.out.println("                      BF, BETA_FLEXIBLE");
-		System.out.println("        METHOD_P  : method parameter, between -1 and +1, necessary for");
+		System.out.println("        METHOD_P  : method parameter necessary for");
 		System.out.println("                      VL, VERSATILE_LINKAGE");
-		System.out.println("                      BF, BETA_FLEXIBLE");
+		System.out.println("                      BF, BETA_FLEXIBLE, between -1 and +1");
 		System.out.println("                      Default value for METHOD_P: 0");
 		System.out.println("        WEIGHTED  : weighted method, one of");
 		System.out.println("                      W, WEIGHTED");
@@ -339,13 +340,11 @@ public class Main {
 		System.out.println("");
 		System.out.println("");
 		System.out.println("Equivalences between clustering algorithms:");
-		System.out.println("    Arithmetic Linkage Unweighted  = UPGMA = unweighted average");
-		System.out.println("    Versatile Linkage (param  1.0) = Complete Linkage");
-		System.out.println("    Versatile Linkage (param  0.1) = Arithmetic Linkage");
-		System.out.println("    Versatile Linkage (param  0.0) = Geometric Linkage");
-		System.out.println("    Versatile Linkage (param -0.1) = Harmonic Linkage");
-		System.out.println("    Versatile Linkage (param -1.0) = Single Linkage");
-		System.out.println("    Beta Flexible     (param  0.0) = Arithmetic Linkage");
+		System.out.println("    Arithmetic Linkage Unweighted = UPGMA = unweighted average");
+		System.out.println("    Versatile Linkage (param  1)  = Arithmetic Linkage");
+		System.out.println("    Versatile Linkage (param  0)  = Geometric Linkage");
+		System.out.println("    Versatile Linkage (param -1)  = Harmonic Linkage");
+		System.out.println("    Beta Flexible     (param  0)  = Arithmetic Linkage");
 		System.out.println("");
 		System.out.println("CENTROID and WARD only available for DISTANCE, not for SIMILARITY");
 		System.out.println("");
@@ -357,8 +356,8 @@ public class Main {
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt SIMILARITIES 3 Complete_Linkage");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D CL");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 CL");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 Versatile_Linkage +1");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 VL 0.1 W");
+		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 Versatile_Linkage +2");
+		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 VL -1 W");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D CL UO");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 CL NUO");
 	}

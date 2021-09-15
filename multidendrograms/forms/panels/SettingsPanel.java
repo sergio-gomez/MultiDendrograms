@@ -157,12 +157,10 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
         "<html><b>"
         + Language.getLabel(133)
         + ":</b><br>&nbsp;&nbsp;Arithmetic Linkage Unweighted = UPGMA = unweighted average<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param 1.0) = Complete Linkage<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param 0.1) = Arithmetic Linkage<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param 0.0) = Geometric Linkage<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param -0.1) = Harmonic Linkage<br>"
-        + "&nbsp;&nbsp;Versatile Linkage (param -1.0) = Single Linkage<br>"
-        + "&nbsp;&nbsp;Beta Flexible (param 0.0) = Arithmetic Linkage<br>"
+        + "&nbsp;&nbsp;Versatile Linkage (param 1) = Arithmetic Linkage<br>"
+        + "&nbsp;&nbsp;Versatile Linkage (param 0) = Geometric Linkage<br>"
+        + "&nbsp;&nbsp;Versatile Linkage (param -1) = Harmonic Linkage<br>"
+        + "&nbsp;&nbsp;Beta Flexible (param 0) = Arithmetic Linkage<br>"
         + "<br><b>"
         + Language.getLabel(134)
         + "</b></html>";
@@ -759,11 +757,6 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		if (!str.equals("")) {
 			try {
 				methodParameter = Double.parseDouble(str);
-				if (methodParameter < -1.0) {
-					methodParameter = -1.0;
-				} else if (methodParameter > +1.0) {
-					methodParameter = +1.0;
-				}
 			} catch (NumberFormatException e) {
 				methodParameter = 0.0;
 			}
@@ -1235,7 +1228,10 @@ public class SettingsPanel extends JPanel implements ActionListener, FocusListen
 		} else {
 			try {
 				double methodParameter = Double.parseDouble(str);
-				if ((methodParameter < -1.0) || (+1.0 < methodParameter)) {
+				MethodType methodType =
+						MethodType.values()[cbMethod.getSelectedIndex()];
+				if (methodType.equals(MethodType.BETA_FLEXIBLE) && 
+						((methodParameter < -1.0) || (+1.0 < methodParameter))) {
 					correct = false;
 					showError(Language.getLabel(68));
 				}

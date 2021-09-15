@@ -1,5 +1,5 @@
-VER_OLD=5.0.4
-VER_NEW=5.1.0
+VER_OLD=5.1.0
+VER_NEW=5.2.0
 
 FN_OUT=search_diffs.txt
 

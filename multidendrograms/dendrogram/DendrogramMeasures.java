@@ -46,14 +46,12 @@ public class DendrogramMeasures {
 	public static final String ABSOLUTE_ERROR_LABEL = "Normalized Mean Absolute Error";
 	public static final String TREE_BALANCE_LABEL = "Normalized Tree Balance";
 	public static final String SPACE_DISTORTION_LABEL = "Space Distortion";
-	public static final String DEGREE_CONNECTIVITY_LABEL = "Degree of Connectivity";
 
 	private String copheneticCorrelation;
 	private String squaredError;
 	private String absoluteError;
 	private String treeBalance;
 	private String spaceDistortion;
-	private String degreeConnectivity;
 
 	public DendrogramMeasures(SymmetricMatrix proxMatrix, Dendrogram root, SymmetricMatrix ultraMatrix) {
 		NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
@@ -66,7 +64,6 @@ public class DendrogramMeasures {
 		this.absoluteError = nf.format(normalizedMeanError(1, proxMatrix, ultraMatrix));
 		this.treeBalance = nf.format(root.normalizedTreeBalance());
 		this.spaceDistortion = nf.format(spaceDistortion(proxMatrix, ultraMatrix));
-		this.degreeConnectivity = nf.format(degreeOfConnectivity(proxMatrix, root.isDistanceBased, ultraMatrix));
 	}
 
 	public String getCopheneticCorrelation() {
@@ -87,10 +84,6 @@ public class DendrogramMeasures {
 
 	public String getSpaceDistortion() {
 		return this.spaceDistortion;
-	}
-
-	public String getDegreeOfConnectivity() {
-		return this.degreeConnectivity;
 	}
 
 	public void save(String path) throws IOException {
@@ -161,23 +154,6 @@ public class DendrogramMeasures {
 	private double spaceDistortion(SymmetricMatrix proxMatrix, SymmetricMatrix ultraMatrix) {
 		return (ultraMatrix.maximumValue() - ultraMatrix.minimumValue()) /
 				(proxMatrix.maximumValue() - proxMatrix.minimumValue());
-	}
-
-	private double degreeOfConnectivity(SymmetricMatrix proxMatrix, boolean isDistanceBased,
-	    SymmetricMatrix ultraMatrix) {
-		int maxEdges = 0;
-		int numEdges = 0;
-		for (int i = 0; i < proxMatrix.numberOfRows(); i ++) {
-			for (int j = i + 1; j < proxMatrix.numberOfRows(); j ++) {
-				maxEdges ++;
-				double proxIJ = proxMatrix.getElement(i, j);
-				double ultraIJ = ultraMatrix.getElement(i, j);
-				if (( isDistanceBased && (proxIJ <= ultraIJ)) || (!isDistanceBased && (proxIJ >= ultraIJ))) {
-					numEdges ++;
-				}
-			}
-		}
-		return (double)numEdges / (double)maxEdges;
 	}
 
 }

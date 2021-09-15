@@ -1,7 +1,7 @@
 @echo off
 
-echo MultiDendrograms 5.1.0
-echo Copyright (c) 2019 Sergio Gomez, Alberto Fernandez
+echo MultiDendrograms 5.2.0
+echo Copyright (c) 2021 Sergio Gomez, Alberto Fernandez
 echo ---
 echo This program comes with ABSOLUTELY NO WARRANTY.
 echo This is free software, and you are welcome to redistribute it under certain conditions.
@@ -17,7 +17,9 @@ java -jar multidendrograms.jar  -direct sample_files/data.txt similarities 2 Com
 echo ---------
 java -jar multidendrograms.jar  -direct sample_files/air_distances.txt D AL
 echo ---------
-java -jar multidendrograms.jar  -direct sample_files/air_distances.txt D VL 0.1
+java -jar multidendrograms.jar  -direct sample_files/air_distances.txt D VL 1
+echo ---------
+java -jar multidendrograms.jar  -direct sample_files/air_distances.txt D VL -3.5
 echo ---------
 java -jar multidendrograms.jar  -direct sample_files/air_distances.txt D WD weighted
 echo ---------

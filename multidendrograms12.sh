@@ -5,8 +5,8 @@
 JavaPath=/cygdrive/c/usrlocal/jdk-12.0.1/bin
 export PATH=$JavaPath:$PATH
 
-echo MultiDendrograms 5.1.0
-echo Copyright \(c\) 2019 Sergio Gomez, Alberto Fernandez
+echo MultiDendrograms 5.2.0
+echo Copyright \(c\) 2021 Sergio Gomez, Alberto Fernandez
 echo
 echo This program comes with ABSOLUTELY NO WARRANTY.
 echo This is free software, and you are welcome to redistribute it under certain conditions.

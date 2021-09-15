@@ -41,19 +41,11 @@ public class CompleteLinkage extends HierarchicalClustering {
 
 	@Override
 	protected double calculateProximity(Dendrogram cI, Dendrogram cJ) {
-		if (this.isDistanceBased) {
-			return maximumProximity(cI, cJ);
-		} else {
-			return minimumProximity(cI, cJ);
-		}
+		return maximumProximity(cI, cJ);
 	}
 
 	protected double calculateInternalProximity(Dendrogram c) {
-		if (this.isDistanceBased) {
-			return maximumInternalProximity(c);
-		} else {
-			return minimumInternalProximity(c);
-		}
+		return maximumInternalProximity(c);
 	}
 
 }

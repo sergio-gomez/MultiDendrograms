@@ -132,5 +132,5 @@ available at
 Current version is
 Uniform origin
 Equivalences between clustering algorithms
-Centroid and Ward only available for Distance, not for Similarity
+Centroid and Ward only for Distance, not for Similarity
 Java runtime
