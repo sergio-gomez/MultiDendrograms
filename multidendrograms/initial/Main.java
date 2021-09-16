@@ -57,10 +57,10 @@ public class Main {
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
 	public static final String AFFILIATION = "Universitat Rovira i Virgili, Tarragona (Spain)";
-	public static final String HOMEPAGE_URL = "http://deim.urv.cat/~sergio.gomez/multidendrograms.php";
-	public static final String LICENSE_URL = "http://www.gnu.org/licenses/lgpl.html";
-	public static final String MANUAL_URL = "http://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-" + VERSION_SHORT + "-manual.pdf";
-	public static final String LAST_VERSION_URL = "http://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-last.txt";
+	public static final String HOMEPAGE_URL = "https://deim.urv.cat/~sergio.gomez/multidendrograms.php";
+	public static final String LICENSE_URL = "https://www.gnu.org/licenses/lgpl.html";
+	public static final String MANUAL_URL = "https://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-" + VERSION_SHORT + "-manual.pdf";
+	public static final String LAST_VERSION_URL = "https://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-last.txt";
 	public static final String LOGO_IMAGE = "img/logo.png";
 	public static final String JRE_VERSION = System.getProperty("java.specification.version");
 
@@ -70,6 +70,7 @@ public class Main {
 	private static final int TOOLTIP_DISMISS_DELAY = 20000;
 
 	private static VersionNumber vn, vnWeb;
+	private static Boolean isHelp = false;
 	private static Boolean isDirect = false;
 
 	public Main() {
@@ -97,8 +98,8 @@ public class Main {
 		while (i < args.length) {
 			String arg = args[i].toUpperCase();
 			if (arg.equals("-H") || arg.equals("-HELP")) {
-				showSyntax();
-				return;
+				isHelp = true;
+				isDirect = true;
 			} else if (arg.equals("-LOGLEVEL")) {
 				try {
 					i++;
@@ -249,7 +250,14 @@ public class Main {
 				}
 			}
 		};
-		//checkVersion.start();
+
+		if (isHelp) {
+			showSyntax();
+			checkVersion.start();
+			return;
+		} else {
+			checkVersion.start();
+		}
 
 		if (isDirect) {
 			// check Centroid and Ward only for Distance, not for Similarity
@@ -357,9 +365,10 @@ public class Main {
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D CL");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 CL");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 Versatile_Linkage +2");
-		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 VL -1 W");
+		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 VL -3.5 W");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D CL UO");
 		System.out.println("    java -jar multidendrograms.jar -direct data.txt D 3 CL NUO");
+		System.out.println("");
 	}
 
 	private static boolean hasUpgrade() {
