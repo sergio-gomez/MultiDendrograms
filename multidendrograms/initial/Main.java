@@ -52,15 +52,15 @@ import multidendrograms.types.ProximityType;
 public class Main {
 
 	public static final String PROGRAM = "MultiDendrograms";
-	public static final String VERSION = "5.2.0";
+	public static final String VERSION = "5.2.1";
 	public static final String VERSION_SHORT = "5.2";
 	public static final String AUTHORS = "Sergio Gomez, Alberto Fernandez, Justo Montiel, David Torres";
 	public static final String ADVISORS = "Sergio Gomez, Alberto Fernandez";
 	public static final String AFFILIATION = "Universitat Rovira i Virgili, Tarragona (Spain)";
-	public static final String HOMEPAGE_URL = "https://deim.urv.cat/~sergio.gomez/multidendrograms.php";
+	public static final String HOMEPAGE_URL = "https://webs-deim.urv.cat/~sergio.gomez/multidendrograms.php";
 	public static final String LICENSE_URL = "https://www.gnu.org/licenses/lgpl.html";
-	public static final String MANUAL_URL = "https://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-" + VERSION_SHORT + "-manual.pdf";
-	public static final String LAST_VERSION_URL = "https://deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-last.txt";
+	public static final String MANUAL_URL = "https://webs-deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-" + VERSION_SHORT + "-manual.pdf";
+	public static final String LAST_VERSION_URL = "https://webs-deim.urv.cat/~sergio.gomez/download.php?f=multidendrograms-last.txt";
 	public static final String LOGO_IMAGE = "img/logo.png";
 	public static final String JRE_VERSION = System.getProperty("java.specification.version");
 

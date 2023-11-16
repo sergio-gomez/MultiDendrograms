@@ -35,7 +35,7 @@ The variable-group algorithms group more than two clusters at the same time when
 
 **MultiDendrograms** also introduces a new parameterized type of hierarchical clustering algorithm called Versatile Linkage [[2](#references)], which includes Singles Linkage, Complete Linkage and Arithmetic Linkage as particular cases, and which naturally defines two new algorithms, Geometric Linkage and Harmonic Linkage (hence the convenience to rename UPGMA as Arithmetic Linkage, to emphasize the existence of different types of averages).
 
-Similar functionality can also be obtained using package [**mdendro**](http://deim.urv.cat/~sergio.gomez/mdendro.php) for the R language.
+Similar functionality can also be obtained using package [**mdendro**](https://webs-deim.urv.cat/~sergio.gomez/mdendro.php) for the R language.
 
 
 ## Comparison with other applications
@@ -64,31 +64,31 @@ How many binary dendrograms may correspond to one *MultiDendrogram*?
 
 - 760590880 binary dendrograms in Almadanim et al, Vitis 46 (2007) 116-119.
 
-You may use the *Hierarchical_Clustering* program in [**Radatools**](http://deim.urv.cat/~sergio.gomez/radatools.php) to count how many binary dendrograms correspond to your data.
+You may use the *Hierarchical_Clustering* program in [**Radatools**](https://webs-deim.urv.cat/~sergio.gomez/radatools.php) to count how many binary dendrograms correspond to your data.
 
 
 ## Documentation
 
-The last version of the *Manual* is always available at the [*Download*](http://deim.urv.cat/~sergio.gomez/multidendrograms.php#download) section of **MultiDendrograms** [home page](http://deim.urv.cat/~sergio.gomez/multidendrograms.php)
+The last version of the *Manual* is always available at the [*Download*](https://webs-deim.urv.cat/~sergio.gomez/multidendrograms.php#download) section of **MultiDendrograms** [home page](https://webs-deim.urv.cat/~sergio.gomez/multidendrograms.php)
 
 
 ## References
 
-[1] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Solving Non-uniqueness in Agglomerative Hierarchical Clustering Using Multidendrograms, *Journal of Classification* **25** (2008) 43-65 ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Solving_non-uniqueness_in_AHC_using_multidendrograms.pdf)) ([doi](https://doi.org/10.1007/s00357-008-9004-x)) ([Springer](https://link.springer.com/article/10.1007/s00357-008-9004-x))
+[1] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Solving Non-uniqueness in Agglomerative Hierarchical Clustering Using Multidendrograms, *Journal of Classification* **25** (2008) 43-65 ([pdf](https://webs-deim.urv.cat/~sergio.gomez/papers/Fernandez-Solving_non-uniqueness_in_AHC_using_multidendrograms.pdf)) ([doi](https://doi.org/10.1007/s00357-008-9004-x)) ([Springer](https://link.springer.com/article/10.1007/s00357-008-9004-x))
 
-[2] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Versatile linkage: a family of space-conserving strategies for agglomerative hierarchical clustering, *Journal of Classification* **37** (2020) 584-597 ([pdf](http://deim.urv.cat/~sergio.gomez/papers/Fernandez-Versatile_linkage-A_family_of_space-conserving_strategies_for_AHC.pdf)) ([doi](https://doi.org/10.1007/s00357-019-09339-z)) ([Springer](https://link.springer.com/article/10.1007/s00357-019-09339-z))
+[2] Alberto Fern&aacute;ndez and Sergio G&oacute;mez: Versatile linkage: a family of space-conserving strategies for agglomerative hierarchical clustering, *Journal of Classification* **37** (2020) 584-597 ([pdf](https://webs-deim.urv.cat/~sergio.gomez/papers/Fernandez-Versatile_linkage-A_family_of_space-conserving_strategies_for_AHC.pdf)) ([doi](https://doi.org/10.1007/s00357-019-09339-z)) ([Springer](https://link.springer.com/article/10.1007/s00357-019-09339-z))
 
 
 ## Webs
 
-- **MultiDendrograms** home: http://deim.urv.cat/~sergio.gomez/multidendrograms.php and [GitHub](https://github.com/sergio-gomez/MultiDendrograms)
-- **mdendro** home: http://deim.urv.cat/~sergio.gomez/mdendro.php and [GitHub](https://github.com/sergio-gomez/mdendro)
-- **Radatools** home: http://deim.urv.cat/~sergio.gomez/radatools.php, with source code as [**Radalib**](http://deim.urv.cat/~sergio.gomez/radalib.php) at [GitHub](https://github.com/sergio-gomez/Radalib)
+- **MultiDendrograms** home: https://webs-deim.urv.cat/~sergio.gomez/multidendrograms.php and [GitHub](https://github.com/sergio-gomez/MultiDendrograms)
+- **mdendro** home: https://webs-deim.urv.cat/~sergio.gomez/mdendro.php and [GitHub](https://github.com/sergio-gomez/mdendro)
+- **Radatools** home: https://webs-deim.urv.cat/~sergio.gomez/radatools.php, with source code as [**Radalib**](https://webs-deim.urv.cat/~sergio.gomez/radalib.php) at [GitHub](https://github.com/sergio-gomez/Radalib)
 
 
 ## Authors
 
 - **Alberto Fern&aacute;ndez**: Dept. Enginyeria Qu&iacute;mica, Universitat Rovira i Virgili, Tarragona (Spain). ([email](mailto:alberto.fernandez@urv.cat?subject=[mdendro])) ([ORCID](https://orcid.org/0000-0002-1241-1646)) ([Google Scholar](https://scholar.google.es/citations?user=AbH4r0IAAAAJ)) ([GitHub](https://github.com/albyfs))
 
-- **Sergio G&oacute;mez**: Dept. Enginyeria Inform&agrave;tica i Matem&agrave;tiques, Universitat Rovira i Virgili, Tarragona (Spain). ([web](https://deim.urv.cat/~sergio.gomez/)) ([email](mailto:sergio.gomez@urv.cat?subject=[mdendro])) ([ORCID](http://orcid.org/0000-0003-1820-0062)) ([Google Scholar](https://scholar.google.es/citations?user=ETrjkSIAAAAJ)) ([GitHub](https://github.com/sergio-gomez)) ([Twitter](https://twitter.com/SergioGomezJ))
+- **Sergio G&oacute;mez**: Dept. Enginyeria Inform&agrave;tica i Matem&agrave;tiques, Universitat Rovira i Virgili, Tarragona (Spain). ([web](https://webs-deim.urv.cat/~sergio.gomez/)) ([email](mailto:sergio.gomez@urv.cat?subject=[mdendro])) ([ORCID](http://orcid.org/0000-0003-1820-0062)) ([Google Scholar](https://scholar.google.es/citations?user=ETrjkSIAAAAJ)) ([GitHub](https://github.com/sergio-gomez)) ([Twitter](https://twitter.com/SergioGomezJ))
 

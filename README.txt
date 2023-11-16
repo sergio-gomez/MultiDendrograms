@@ -1,6 +1,6 @@
-MultiDendrograms 5.2.0
+MultiDendrograms 5.2.1
 
-Copyright (c) 2021 Sergio Gomez, Alberto Fernandez
+Copyright (c) 2023 Sergio Gomez, Alberto Fernandez
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.
 
